@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrisForge Ultra Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0f0f1e;
+            background-image: radial-gradient(at 20% 30%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 80% 70%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            max-width: 950px;
+            width: 100%;
+            padding: 48px;
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #a78bfa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .section h3 {
+            color: #a78bfa;
+            margin-bottom: 16px;
+            font-size: 1.1em;
+        }
+
+        label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-size: 15px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a78bfa' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        select option { background: #1a1a2e; }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .mb { margin-bottom: 20px; }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.test { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+
+        .status {
+            text-align: center;
+            padding: 16px 24px;
+            margin: 24px 0;
+            border-radius: 12px;
+            font-weight: 500;
+            display: none;
+            border: 1px solid;
+        }
+
+        .status.show { display: block; }
+        .status.loading { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); }
+        .status.error { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+        .status.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); }
+
+        .progress {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 24px 0;
+            display: none;
+            height: 36px;
+        }
+
+        .progress.show { display: block; }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .result {
+            margin-top: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .result img {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .result img.show {
+            display: block;
+            animation: fadeIn 0.6s;
+            margin: 0 auto;
+        }
+
+        .floating-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .floating-icons.show {
+            display: flex;
+        }
+
+        .floating-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: white;
+            font-size: 20px;
+        }
+
+        .floating-icon:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 4px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 IrisForge Ultra Pro</h1>
+        
+        <div style="text-align: center;">
+            <span class="badge">✨ Multi-Pass Face Enhancement • 100% Vanilla Nodes</span>
+        </div>
+        
+        <div class="section">
+            <h3>Configuration API</h3>
+            <div class="mb">
+                <label>URL ComfyUI</label>
+                <input type="text" id="apiUrl" placeholder="https://votre-pod.runpod.net" value="https://i4xaqsc8nanzab-8188.proxy.runpod.net">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="mb">
+                <label>✨ Votre Prompt</label>
+                <textarea id="prompt" placeholder="Ex: beautiful blonde woman in leather pants, high heels">beautiful blonde woman with perfect eyes, detailed face, leather pants, high heels</textarea>
+            </div>
+            
+            <div class="mb">
+                <label>Type de génération</label>
+                <select id="mode">
+                    <option value="portrait">👤 Portrait (focus visage intense)</option>
+                    <option value="fullbody" selected>🚶 Corps entier (équilibré)</option>
+                    <option value="universal">🌍 Universel</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🖥️ Configuration GPU</h3>
+            
+            <div class="mb">
+                <label>Preset GPU</label>
+                <select id="gpu" onchange="applyPreset()">
+                    <option value="rtx4090">🚀 RTX 4090 (24GB) - Maximum</option>
+                    <option value="a4500" selected>⚡ RTX A4500 (16GB) - Équilibré</option>
+                    <option value="budget">💰 RTX 3060 (12GB) - Économique</option>
+                </select>
+            </div>
+
+            <div class="info" id="info">⚡ A4500: 3-Pass • 60+30+25 steps • ~6 min</div>
+
+            <div class="grid">
+                <div class="mb">
+                    <label>Steps Base</label>
+                    <input type="number" id="steps" value="60" min="20" max="150">
+                </div>
+                <div class="mb">
+                    <label>CFG Scale</label>
+                    <input type="number" id="cfg" value="7.5" min="5" max="12" step="0.5">
+                </div>
+            </div>
+
+            <div class="mb">
+                <label>Mode de qualité</label>
+                <select id="quality">
+                    <option value="fast">🚀 Rapide (1-Pass simple)</option>
+                    <option value="high">⚡ Haute (2-Pass upscale)</option>
+                    <option value="ultra" selected>🔥 Ultra (3-Pass face focus)</option>
+                </select>
+            </div>
+
+
+        </div>
+
+        <button class="test" onclick="testAPI()">🔍 Tester connexion</button>
+        <button onclick="generate()">✨ Générer</button>
+
+        <div id="status" class="status"></div>
+        <div id="progress" class="progress"><div id="bar" class="progress-bar">0%</div></div>
+
+        <div class="result">
+            <div class="floating-icons" id="floatingIcons">
+                <a href="#" class="floating-icon" onclick="downloadImage(event)" title="Télécharger">📥</a>
+                <a href="video.html" class="floating-icon" title="Vidéo">🎬</a>
+                <a href="editor.html" class="floating-icon" title="Édition">✏️</a>
+            </div>
+            <img id="result" alt="Image générée">
+        </div>
+    </div>
+
+    <script>
+        const clientId = Math.random().toString(36).substring(7);
+        let generating = false;
+
+        const presets = {
+            rtx4090: { 
+                steps: 90, 
+                cfg: 7.5, 
+                faceSteps: 35,
+                upscaleSteps: 40,
+                desc: "🚀 Maximum: 90+40+35 steps • ~8 min" 
+            },
+            a4500: { 
+                steps: 60, 
+                cfg: 7.5, 
+                faceSteps: 25,
+                upscaleSteps: 30,
+                desc: "⚡ Équilibré: 60+30+25 steps • ~6 min" 
+            },
+            budget: { 
+                steps: 40, 
+                cfg: 7.0, 
+                faceSteps: 20,
+                upscaleSteps: 20,
+                desc: "💰 Économique: 40+20+20 steps • ~4 min" 
+            }
+        };
+
+        const prompts = {
+            portrait: {
+                pos: "professional portrait photography, close-up headshot, studio lighting, PERFECT EYES, (crystal clear eyes:1.4), (sharp detailed iris:1.3), (realistic pupils:1.2), (symmetrical eyes:1.3), catchlight in eyes, realistic eyelashes, well-defined eyebrows, natural eye reflections, flawless skin, natural skin texture, skin pores, subsurface scattering, professional makeup, (white teeth:1.3), (bright smile:1.2), pearl white teeth, dental perfection, beauty lighting, soft box lighting, rim lighting, sharp focus, depth of field, bokeh background, (face focus:1.3), detailed facial features, high cheekbones, defined jawline, natural lips, photorealistic, ultra detailed, 8k uhd, raw photo, dslr, masterpiece, best quality",
+                neg: "full body, distant shot, wide angle, blurry, BAD EYES, (deformed eyes:1.4), (asymmetrical eyes:1.3), cross-eyed, misaligned eyes, floating eyes, distorted pupils, irregular pupils, lazy eye, wall-eyed, different sized eyes, glossy plastic eyes, doll eyes, dead eyes, glowing eyes, red eyes, anime eyes, cartoon eyes, (yellow teeth:1.4), (stained teeth:1.3), discolored teeth, crooked teeth, missing teeth, bad teeth, low quality, worst quality, plastic skin, waxy skin, oversaturated, 3d render, cgi, digital art, illustration"
+            },
+            fullbody: {
+                pos: "full body shot, full length portrait, head to toe visible, professional fashion photography, natural body proportions, anatomically correct, elegant pose, confident stance, professional studio lighting, beauty lighting, three point lighting, (perfect eyes:1.3), (detailed iris:1.2), sharp pupils, symmetrical eyes, catchlights, realistic eyelashes, detailed facial features, natural skin texture, skin pores, (white teeth:1.2), bright smile, pearl teeth, realistic clothing texture, fabric details, depth of field, sharp focus on face, soft background blur, professional color grading, photorealistic, ultra detailed, high resolution, 8k uhd, raw photo, masterpiece, best quality",
+                neg: "cropped, cut off, close-up only, headshot, bust shot, zoomed in, bad anatomy, deformed body, bad proportions, (bad eyes:1.3), asymmetrical eyes, cross-eyed, distorted pupils, (yellow teeth:1.3), stained teeth, discolored teeth, bad teeth, plastic skin, doll-like, low quality, worst quality, blurry, grainy, 3d render, cgi, cartoon, anime"
+            },
+            universal: {
+                pos: "professional photography, high quality, detailed, sharp focus, realistic lighting, natural colors, proper exposure, balanced composition, depth of field, bokeh, photorealistic, ultra detailed, high resolution, 8k uhd, raw photo, dslr, masterpiece, best quality",
+                neg: "blurry, low quality, noisy, grainy, poor focus, low detail, oversaturated, undersaturated, overexposed, underexposed, harsh lighting, flat lighting, amateur photo, plastic, artificial, 3d render, cgi, cartoon, anime, drawing, painting, worst quality"
+            }
+        };
+
+        function applyPreset() {
+            const p = presets[document.getElementById('gpu').value];
+            document.getElementById('steps').value = p.steps;
+            document.getElementById('cfg').value = p.cfg;
+            document.getElementById('info').textContent = p.desc;
+        }
+
+        function show(id, cls, txt) {
+            const el = document.getElementById(id);
+            el.className = cls.includes('status') ? 'status show ' + cls.split(' ')[1] : cls + ' show';
+            if (txt) el.textContent = txt;
+        }
+
+        function hide(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function updateProgress(pct, txt) {
+            const bar = document.getElementById('bar');
+            bar.style.width = pct + '%';
+            bar.textContent = txt || pct + '%';
+            show('progress', 'progress');
+        }
+
+        function downloadImage(e) {
+            e.preventDefault();
+            const img = document.getElementById('result');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = 'irisforge_' + Date.now() + '.png';
+            link.click();
+        }
+
+        async function testAPI() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) return show('status', 'status error', 'Entrez une URL');
+
+            show('status', 'status loading', 'Test...');
+            
+            try {
+                const r = await fetch(`${url}/system_stats`);
+                show('status', 'status ' + (r.ok ? 'success' : 'error'), r.ok ? '✅ Connexion OK' : '⚠️ Erreur ' + r.status);
+            } catch (e) {
+                show('status', 'status error', '❌ ' + e.message);
+            }
+        }
+
+        async function generate() {
+            if (generating) return;
+
+            const url = document.getElementById('apiUrl').value.trim();
+            const userPrompt = document.getElementById('prompt').value.trim();
+            const mode = document.getElementById('mode').value;
+            const quality = document.getElementById('quality').value;
+            const gpuPreset = document.getElementById('gpu').value;
+            const steps = parseInt(document.getElementById('steps').value);
+            const cfg = parseFloat(document.getElementById('cfg').value);
+
+            if (!url || !userPrompt) return show('status', 'status error', 'Remplissez les champs');
+
+            generating = true;
+            document.querySelector('button:last-of-type').disabled = true;
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('floatingIcons').classList.remove('show');
+            
+            show('status', 'status loading', 'Préparation...');
+            updateProgress(5, 'Init...');
+
+            try {
+                const seed = Math.floor(Math.random() * 1e9);
+                const { pos, neg } = prompts[mode];
+                const preset = presets[gpuPreset];
+                
+                // Dimensions adaptatives
+                let [w, h] = mode === 'portrait' ? [832, 1216] : [768, 1344];
+
+                // STRATÉGIE ULTRA 3-PASS
+                const workflow = {
+                    // === CHECKPOINT ===
+                    "1": { 
+                        inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" }, 
+                        class_type: "CheckpointLoaderSimple" 
+                    },
+                    
+                    // === PROMPTS ===
+                    "2": { inputs: { text: pos, clip: ["1", 1] }, class_type: "CLIPTextEncode" },
+                    "3": { inputs: { text: userPrompt, clip: ["1", 1] }, class_type: "CLIPTextEncode" },
+                    "4": { inputs: { conditioning_1: ["2", 0], conditioning_2: ["3", 0] }, class_type: "ConditioningCombine" },
+                    "5": { inputs: { text: neg, clip: ["1", 1] }, class_type: "CLIPTextEncode" },
+                    
+                    // === PASS 1: BASE HAUTE RÉSOLUTION ===
+                    "6": { inputs: { width: w, height: h, batch_size: 1 }, class_type: "EmptyLatentImage" },
+                    "7": { 
+                        inputs: { 
+                            seed, 
+                            steps, 
+                            cfg, 
+                            sampler_name: "dpmpp_2m_sde_gpu", 
+                            scheduler: "karras", 
+                            denoise: 1.0, 
+                            model: ["1", 0], 
+                            positive: ["4", 0], 
+                            negative: ["5", 0], 
+                            latent_image: ["6", 0] 
+                        }, 
+                        class_type: "KSampler" 
+                    },
+                    "8": { inputs: { samples: ["7", 0], vae: ["1", 2] }, class_type: "VAEDecode" }
+                };
+
+                let finalNode = "8";
+
+                if (quality !== 'fast') {
+                    // === PASS 2: UPSCALE 2X + REFINEMENT GLOBAL ===
+                    workflow["9"] = { 
+                        inputs: { 
+                            upscale_method: "nearest-exact", 
+                            width: w * 2, 
+                            height: h * 2, 
+                            crop: "disabled", 
+                            image: ["8", 0] 
+                        }, 
+                        class_type: "ImageScale" 
+                    };
+                    workflow["10"] = { inputs: { pixels: ["9", 0], vae: ["1", 2] }, class_type: "VAEEncode" };
+                    workflow["11"] = { 
+                        inputs: { 
+                            seed: seed + 1, 
+                            steps: preset.upscaleSteps, 
+                            cfg: cfg - 0.5, 
+                            sampler_name: "dpmpp_2m_sde_gpu", 
+                            scheduler: "karras", 
+                            denoise: 0.30, 
+                            model: ["1", 0], 
+                            positive: ["4", 0], 
+                            negative: ["5", 0], 
+                            latent_image: ["10", 0] 
+                        }, 
+                        class_type: "KSampler" 
+                    };
+                    workflow["12"] = { inputs: { samples: ["11", 0], vae: ["1", 2] }, class_type: "VAEDecode" };
+                    finalNode = "12";
+
+                    if (quality === 'ultra') {
+                        // === PASS 3: REFINEMENT COMPLET AVEC DENOISE BAS ===
+                        // Au lieu de crop, on fait un 3ème pass complet avec denoise très faible
+                        // Cela raffine les détails fins (yeux, peau) sans créer de lignes
+                        
+                        workflow["20"] = { inputs: { pixels: ["12", 0], vae: ["1", 2] }, class_type: "VAEEncode" };
+                        
+                        // Super-refinement global avec denoise très bas mais focus détails
+                        workflow["21"] = { 
+                            inputs: { 
+                                seed: seed + 2, 
+                                steps: preset.faceSteps, 
+                                cfg: 8.0, 
+                                sampler_name: "dpmpp_2m_sde_gpu", 
+                                scheduler: "karras", 
+                                denoise: 0.22,  // Denoise BAS = garde la cohérence, raffine les détails
+                                model: ["1", 0], 
+                                positive: ["4", 0], 
+                                negative: ["5", 0], 
+                                latent_image: ["20", 0] 
+                            }, 
+                            class_type: "KSampler" 
+                        };
+                        
+                        workflow["22"] = { inputs: { samples: ["21", 0], vae: ["1", 2] }, class_type: "VAEDecode" };
+                        
+                        finalNode = "22";
+                    }
+                }
+
+                workflow["99"] = { 
+                    inputs: { 
+                        filename_prefix: quality === 'ultra' ? "UltraPro_" : quality === 'high' ? "High_" : "Fast_", 
+                        images: [finalNode, 0] 
+                    }, 
+                    class_type: "SaveImage" 
+                };
+
+                updateProgress(15, 'Envoi workflow...');
+
+                const pr = await fetch(`${url}/prompt`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: workflow, client_id: clientId })
+                });
+
+                if (!pr.ok) throw new Error(`HTTP ${pr.status}`);
+
+                const { prompt_id } = await pr.json();
+                updateProgress(20, 'Pass 1: Base...');
+                
+                const passLabels = quality === 'ultra' 
+                    ? ['Pass 1: Base...', 'Pass 2: Upscale...', 'Pass 3: Face...']
+                    : quality === 'high'
+                    ? ['Pass 1: Base...', 'Pass 2: Upscale...']
+                    : ['Génération...'];
+                
+                let passIndex = 0;
+                show('status', 'status loading', passLabels[0]);
+
+                // Attendre completion avec feedback multi-pass
+                let done = false;
+                let attempts = 0;
+                const maxAttempts = 400;
+                
+                while (!done && attempts < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    attempts++;
+                    
+                    const hr = await fetch(`${url}/history/${prompt_id}`);
+                    const hd = await hr.json();
+                    
+                    if (hd[prompt_id]?.status?.completed) done = true;
+                    
+                    const progress = Math.min(20 + attempts * 0.18, 90);
+                    updateProgress(progress, `${Math.round(progress)}%`);
+                    
+                    // Changer le label selon la progression
+                    if (quality === 'ultra') {
+                        if (progress > 60 && passIndex < 2) {
+                            passIndex = 2;
+                            show('status', 'status loading', passLabels[2]);
+                        } else if (progress > 40 && passIndex < 1) {
+                            passIndex = 1;
+                            show('status', 'status loading', passLabels[1]);
+                        }
+                    } else if (quality === 'high' && progress > 50 && passIndex < 1) {
+                        passIndex = 1;
+                        show('status', 'status loading', passLabels[1]);
+                    }
+                }
+
+                if (!done) throw new Error('Timeout');
+
+                updateProgress(95, 'Récupération...');
+
+                const hr = await fetch(`${url}/history/${prompt_id}`);
+                const hd = await hr.json();
+                const img = hd[prompt_id].outputs["99"].images[0];
+                const imgUrl = `${url}/view?filename=${img.filename}&subfolder=${img.subfolder || ''}&type=${img.type}`;
+
+                updateProgress(100, 'Terminé !');
+                
+                const result = document.getElementById('result');
+                result.src = imgUrl;
+                result.classList.add('show');
+                document.getElementById('floatingIcons').classList.add('show');
+
+                const finalRes = quality === 'fast' ? `${w}x${h}` : `${w*2}x${h*2}`;
+                const techInfo = quality === 'ultra' 
+                    ? `3-Pass: ${steps}+${preset.upscaleSteps}+${preset.faceSteps} steps`
+                    : quality === 'high'
+                    ? `2-Pass: ${steps}+${preset.upscaleSteps} steps`
+                    : `${steps} steps`;
+                
+                show('status', 'status success', `✅ Générée ! ${finalRes} • ${techInfo} • CFG ${cfg}`);
+
+                setTimeout(() => hide('progress'), 2000);
+
+            } catch (e) {
+                show('status', 'status error', '❌ ' + e.message);
+                hide('progress');
+            } finally {
+                generating = false;
+                document.querySelector('button:last-of-type').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
