@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IrisForge - Éditeur d'Images</title>
+    <title>IrisForge Editor</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background: #0f0f1e;
-            background-image: 
-                radial-gradient(at 20% 30%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
-                radial-gradient(at 80% 70%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            background-image: radial-gradient(at 20% 30%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 80% 70%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
 
@@ -29,129 +21,659 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
-            padding: 60px 40px;
-            text-align: center;
-            max-width: 600px;
-            animation: fadeIn 0.6s ease;
+            max-width: 1400px;
+            padding: 48px;
+            margin: 0 auto;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .icon {
-            font-size: 120px;
-            margin-bottom: 30px;
-            animation: spin 3s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
         }
 
         h1 {
             color: #fff;
             font-size: 2.5em;
-            margin-bottom: 20px;
             background: linear-gradient(135deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.2em;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .emoji {
-            font-size: 1.5em;
-        }
-
         .back-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            font-size: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a78bfa;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
             font-weight: 600;
-            border-radius: 14px;
-            cursor: pointer;
-            margin-top: 30px;
             transition: all 0.3s;
         }
 
         .back-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #a78bfa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        .preview-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 600px;
+            position: relative;
+        }
+
+        .image-container {
+            max-width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .paint-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .paint-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(167, 139, 250, 0.3);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon { font-size: 64px; margin-bottom: 16px; }
+        .upload-text { color: rgba(255, 255, 255, 0.8); font-size: 16px; margin-bottom: 8px; }
+        .upload-hint { color: rgba(255, 255, 255, 0.5); font-size: 14px; }
+
+        .controls-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: #a78bfa;
+            margin-bottom: 16px;
+            font-size: 1.1em;
+        }
+
+        label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 14px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        input[type="file"] { display: none; }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a78bfa' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        select option { background: #1a1a2e; }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        textarea { resize: vertical; min-height: 80px; }
+        .mb { margin-bottom: 16px; }
+
+        .slider-container { margin-bottom: 20px; }
+
+        .slider-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-value span { color: #a78bfa; font-weight: 600; }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 100%);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 100%);
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
         }
 
-        .construction {
-            background: rgba(236, 72, 153, 0.1);
-            border: 1px solid rgba(236, 72, 153, 0.3);
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status {
+            text-align: center;
+            padding: 14px 20px;
+            margin: 20px 0;
             border-radius: 12px;
-            padding: 20px;
-            margin-top: 30px;
-            color: #ec4899;
-            font-size: 0.9em;
+            font-weight: 500;
+            display: none;
+            border: 1px solid;
+            font-size: 14px;
         }
 
-        .features {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.95em;
-            text-align: left;
+        .status.show { display: block; }
+        .status.loading { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); }
+        .status.error { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+        .status.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); }
+
+        .progress {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+            height: 32px;
         }
 
-        .features h3 {
-            color: #a78bfa;
-            margin-bottom: 10px;
+        .progress.show { display: block; }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
         }
 
-        .features ul {
-            list-style: none;
-            padding-left: 0;
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
         }
 
-        .features li {
-            padding: 5px 0;
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
         }
 
-        .features li::before {
-            content: "✨ ";
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
+
+        .fade-in { animation: fadeIn 0.4s; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">✏️</div>
-        <h1>Oups ! Trop tôt !</h1>
-        <p>L'éditeur d'images n'est pas encore prêt...</p>
-        <p class="emoji">Mais promis, ça arrive ! 🎨</p>
-        
-        <div class="features">
-            <h3>🔮 Fonctionnalités à venir :</h3>
-            <ul>
-                <li>Inpainting intelligent</li>
-                <li>Correction des yeux & visages</li>
-                <li>Upscale sélectif</li>
-                <li>Retouches locales</li>
-                <li>Et bien plus...</li>
-            </ul>
+        <div class="header">
+            <div>
+                <h1>✏️ IrisForge Editor</h1>
+                <span class="badge">🎨 Image-to-Image • Modifications précises</span>
+            </div>
+            <a href="index.html" class="back-btn">← Retour</a>
         </div>
 
-        <div class="construction">
-            🔜 <strong>En développement, patience c'est bientôt là !</strong>
-        </div>
+        <div class="main-grid">
+            <div class="preview-section">
+                <div id="uploadZone" class="upload-zone">
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">Glissez une image ici ou cliquez pour charger</div>
+                    <div class="upload-hint">PNG, JPG jusqu'à 20MB</div>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+                <div id="imageContainer" class="image-container" style="display: none;">
+                    <img id="preview" alt="Image à éditer">
+                    <button class="paint-btn" onclick="openInpainting()">
+                        🖌️ Inpainting
+                    </button>
+                </div>
+            </div>
 
-        <button class="back-btn" onclick="window.close()">← Retour à la génération</button>
+            <div class="controls-section">
+                <div class="section">
+                    <h3>Configuration API</h3>
+                    <div class="mb">
+                        <label>URL ComfyUI</label>
+                        <input type="text" id="apiUrl" placeholder="https://votre-pod.runpod.net" value="https://i4xaqsc8nanzab-8188.proxy.runpod.net">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Mode d'édition</h3>
+                    <div class="mb">
+                        <select id="editMode" onchange="updateModeInfo()">
+                            <option value="enhance">✨ Enhancement (améliorer)</option>
+                            <option value="modify">🔄 Modify (changer vêtement/style)</option>
+                            <option value="upscale">🔍 Upscale 2x</option>
+                        </select>
+                    </div>
+                    <div class="info" id="modeInfo">Améliore la qualité sans changer la composition</div>
+                </div>
+
+                <div class="section">
+                    <h3>Instructions</h3>
+                    <div class="mb">
+                        <label>Prompt (ce que vous voulez)</label>
+                        <textarea id="prompt" placeholder="Ex: wearing white t-shirt, red dress, casual outfit">professional look, enhanced details</textarea>
+                    </div>
+                    <div class="mb">
+                        <label>Negative Prompt</label>
+                        <textarea id="negPrompt" placeholder="Ce que vous ne voulez pas">blurry, low quality, distorted</textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Paramètres</h3>
+                    
+                    <div class="slider-container">
+                        <div class="slider-value">
+                            <label>Denoise (force)</label>
+                            <span id="denoiseValue">0.35</span>
+                        </div>
+                        <input type="range" id="denoise" min="0.2" max="0.95" step="0.05" value="0.35" oninput="updateSlider('denoise')">
+                    </div>
+
+                    <div class="slider-container">
+                        <div class="slider-value">
+                            <label>Steps</label>
+                            <span id="stepsValue">30</span>
+                        </div>
+                        <input type="range" id="steps" min="20" max="60" step="5" value="30" oninput="updateSlider('steps')">
+                    </div>
+
+                    <div class="slider-container">
+                        <div class="slider-value">
+                            <label>CFG Scale</label>
+                            <span id="cfgValue">7.5</span>
+                        </div>
+                        <input type="range" id="cfg" min="5" max="12" step="0.5" value="7.5" oninput="updateSlider('cfg')">
+                    </div>
+                </div>
+
+                <button onclick="processImage()">🚀 Traiter l'image</button>
+                <button class="secondary" onclick="downloadResult()">📥 Télécharger</button>
+
+                <div id="status" class="status"></div>
+                <div id="progress" class="progress">
+                    <div id="bar" class="progress-bar">0%</div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        const clientId = Math.random().toString(36).substring(7);
+        let currentImage = null;
+        let processing = false;
+
+        const configs = {
+            enhance: { denoise: 0.35, steps: 25, cfg: 7.0, desc: "Améliore la qualité sans changer la composition" },
+            modify: { denoise: 0.75, steps: 40, cfg: 8.5, desc: "Modifie l'image selon votre prompt (denoise élevé = plus de changements)" },
+            upscale: { denoise: 0.30, steps: 30, cfg: 7.0, desc: "Double la résolution avec amélioration qualité" }
+        };
+
+        // Load image from URL parameter
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const imgUrl = params.get('img');
+            if (imgUrl) loadImageFromUrl(decodeURIComponent(imgUrl));
+        });
+
+        async function loadImageFromUrl(url) {
+            try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                handleFile(new File([blob], 'image.png', { type: blob.type }));
+            } catch (e) {
+                console.error('Erreur:', e);
+            }
+        }
+
+        // File upload handlers
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.onclick = () => fileInput.click();
+        uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); };
+        uploadZone.ondragleave = () => uploadZone.classList.remove('dragover');
+        uploadZone.ondrop = (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file?.type.startsWith('image/')) handleFile(file);
+        };
+        fileInput.onchange = (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); };
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = file;
+                const preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.classList.add('fade-in');
+                uploadZone.style.display = 'none';
+                document.getElementById('imageContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openInpainting() {
+            if (!currentImage) return;
+            
+            // Store image data in sessionStorage
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = {
+                    imageData: e.target.result,
+                    apiUrl: document.getElementById('apiUrl').value,
+                    prompt: document.getElementById('prompt').value,
+                    negPrompt: document.getElementById('negPrompt').value
+                };
+                sessionStorage.setItem('inpaintData', JSON.stringify(data));
+                window.location.href = 'painting.html';
+            };
+            reader.readAsDataURL(currentImage);
+        }
+
+        function updateModeInfo() {
+            const mode = document.getElementById('editMode').value;
+            const cfg = configs[mode];
+            document.getElementById('modeInfo').textContent = cfg.desc;
+            document.getElementById('denoise').value = cfg.denoise;
+            document.getElementById('steps').value = cfg.steps;
+            document.getElementById('cfg').value = cfg.cfg;
+            ['denoise', 'steps', 'cfg'].forEach(updateSlider);
+        }
+
+        function updateSlider(id) {
+            document.getElementById(id + 'Value').textContent = document.getElementById(id).value;
+        }
+
+        function show(id, cls, txt) {
+            const el = document.getElementById(id);
+            el.className = cls.includes('status') ? 'status show ' + cls.split(' ')[1] : cls + ' show';
+            if (txt) el.textContent = txt;
+        }
+
+        function hide(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function updateProgress(pct, txt) {
+            const bar = document.getElementById('bar');
+            bar.style.width = pct + '%';
+            bar.textContent = txt || pct + '%';
+            show('progress', 'progress');
+        }
+
+        async function processImage() {
+            if (processing || !currentImage) {
+                if (!currentImage) show('status', 'status error', 'Chargez une image d\'abord');
+                return;
+            }
+
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) return show('status', 'status error', 'Entrez l\'URL API');
+
+            const mode = document.getElementById('editMode').value;
+            const prompt = document.getElementById('prompt').value.trim();
+            const negPrompt = document.getElementById('negPrompt').value.trim();
+            const denoise = parseFloat(document.getElementById('denoise').value);
+            const steps = parseInt(document.getElementById('steps').value);
+            const cfg = parseFloat(document.getElementById('cfg').value);
+
+            processing = true;
+            show('status', 'status loading', 'Upload...');
+            updateProgress(10, 'Upload...');
+
+            try {
+                // Upload image
+                const fd = new FormData();
+                fd.append('image', currentImage);
+                const ur = await fetch(`${url}/upload/image`, { method: 'POST', body: fd });
+                if (!ur.ok) throw new Error('Upload failed');
+                
+                const { name: imgName } = await ur.json();
+
+                // Build prompt
+                let posPrompt = mode === 'enhance' ? "professional photography, enhanced details, sharp focus, natural lighting, high quality" :
+                                mode === 'upscale' ? "ultra high resolution, extremely detailed, sharp focus, crisp details" :
+                                prompt || "high quality, detailed";
+
+                const negPrompt2 = (negPrompt || "") + ", blurry, low quality, distorted, jpeg artifacts";
+
+                // Build workflow
+                const wf = {
+                    "1": { inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" }, class_type: "CheckpointLoaderSimple" },
+                    "2": { inputs: { image: imgName }, class_type: "LoadImage" },
+                    "3": { inputs: { text: posPrompt, clip: ["1", 1] }, class_type: "CLIPTextEncode" },
+                    "4": { inputs: { text: negPrompt2, clip: ["1", 1] }, class_type: "CLIPTextEncode" },
+                    "5": { inputs: { pixels: ["2", 0], vae: ["1", 2] }, class_type: "VAEEncode" },
+                    "6": {
+                        inputs: {
+                            seed: Math.floor(Math.random() * 1e9),
+                            steps, cfg,
+                            sampler_name: "dpmpp_2m_sde_gpu",
+                            scheduler: "karras",
+                            denoise,
+                            model: ["1", 0],
+                            positive: ["3", 0],
+                            negative: ["4", 0],
+                            latent_image: ["5", 0]
+                        },
+                        class_type: "KSampler"
+                    },
+                    "7": { inputs: { samples: ["6", 0], vae: ["1", 2] }, class_type: "VAEDecode" }
+                };
+
+                if (mode === 'upscale') {
+                    const img = document.getElementById('preview');
+                    wf["8"] = {
+                        inputs: {
+                            upscale_method: "lanczos",
+                            width: Math.round(img.naturalWidth * 2),
+                            height: Math.round(img.naturalHeight * 2),
+                            crop: "disabled",
+                            image: ["7", 0]
+                        },
+                        class_type: "ImageScale"
+                    };
+                    wf["99"] = { inputs: { filename_prefix: "IrisForge_", images: ["8", 0] }, class_type: "SaveImage" };
+                } else {
+                    wf["99"] = { inputs: { filename_prefix: "IrisForge_", images: ["7", 0] }, class_type: "SaveImage" };
+                }
+
+                updateProgress(15, 'Envoi...');
+
+                const res = await fetch(`${url}/prompt`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: wf, client_id: clientId })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const { prompt_id } = await res.json();
+                updateProgress(20, 'Traitement...');
+                show('status', 'status loading', 'Traitement...');
+
+                // Poll for completion
+                let done = false, attempts = 0;
+                while (!done && attempts < 300) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    attempts++;
+                    const hr = await fetch(`${url}/history/${prompt_id}`);
+                    const hd = await hr.json();
+                    if (hd[prompt_id]?.status?.completed) done = true;
+                    updateProgress(Math.min(20 + attempts * 0.23, 90), `${Math.round(20 + attempts * 0.23)}%`);
+                }
+
+                if (!done) throw new Error('Timeout');
+
+                updateProgress(95, 'Récupération...');
+                const hr = await fetch(`${url}/history/${prompt_id}`);
+                const hd = await hr.json();
+                const img = hd[prompt_id].outputs["99"].images[0];
+                const imgUrl = `${url}/view?filename=${img.filename}&subfolder=${img.subfolder || ''}&type=${img.type}`;
+
+                updateProgress(100, 'Terminé !');
+
+                const preview = document.getElementById('preview');
+                preview.src = imgUrl;
+                preview.classList.add('fade-in');
+
+                const blob = await (await fetch(imgUrl)).blob();
+                currentImage = new File([blob], 'edited.png', { type: blob.type });
+
+                show('status', 'status success', '✅ Terminé !');
+                setTimeout(() => hide('progress'), 2000);
+
+            } catch (e) {
+                show('status', 'status error', '❌ ' + e.message);
+                hide('progress');
+            } finally {
+                processing = false;
+            }
+        }
+
+        function downloadResult() {
+            if (!currentImage) return show('status', 'status error', 'Aucune image');
+            const link = document.createElement('a');
+            link.href = document.getElementById('preview').src;
+            link.download = 'irisforge_' + Date.now() + '.png';
+            link.click();
+        }
+    </script>
 </body>
 </html>
