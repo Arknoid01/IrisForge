@@ -589,10 +589,11 @@ if (isInpainting) {
     workflow["13"] = { inputs: { samples: ["12", 0], vae: ["1", 2] }, class_type: "VAEDecode" };
     workflow["9"] = { inputs: { filename_prefix: "IrisForge_High_", images: ["13", 0] }, class_type: "SaveImage" };
 }
-
-                    if (qualityMode === 'ultra' && enableFaceRestore) {
-                        workflow["20"] = { inputs: { threshold: 0.5, dilation: 10, crop_factor: 3.0, drop_size: 10, labels: "face", image: ["13", 0] }, class_type: "UltralyticsDetectorProvider" };
-                        workflow["21"] = {
+if (qualityMode === 'ultra' && enableFaceRestore) {
+    workflow["20"] = { ... };
+    workflow["21"] = { ... };
+    workflow["9"] = { ... };
+}
                             inputs: {
                                 guide_size: gpuConfig.faceGuideSize,
                                 guide_size_for: true,
