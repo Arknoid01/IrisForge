@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrisForge Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0f0f1e;
+            background-image: radial-gradient(at 20% 30%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 80% 70%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 950px;
+            width: 100%;
+            padding: 48px;
+        }
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .quality-badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #a78bfa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+        .config-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        .config-section:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(102, 126, 234, 0.3); }
+        .config-section h3 { color: #a78bfa; margin-bottom: 16px; font-size: 1.1em; font-weight: 600; }
+        label { display: block; color: rgba(255, 255, 255, 0.8); font-weight: 500; margin-bottom: 10px; font-size: 0.95em; }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            color: #fff;
+        }
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a78bfa' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+        select option { background: #1a1a2e; color: #fff; }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        ::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .form-group { margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        button.primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4); }
+        button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.test { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        button.danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .status {
+            text-align: center;
+            padding: 16px 24px;
+            margin: 24px 0;
+            border-radius: 12px;
+            font-weight: 500;
+            display: none;
+            white-space: pre-line;
+            border: 1px solid;
+        }
+        .status.loading { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); display: block; }
+        .status.error { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); display: block; }
+        .status.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); display: block; }
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 24px 0;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .progress-container.show { display: block; }
+        .progress-bar {
+            height: 36px;
+            background: linear-gradient(90deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .result { margin-top: 40px; text-align: center; position: relative; }
+        .result-container { position: relative; display: inline-block; max-width: 100%; }
+        .result img {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+            transition: transform 0.3s ease;
+        }
+        .result img:hover { transform: scale(1.02); }
+        .result img.show { display: block; animation: fadeIn 0.6s; margin: 0 auto; }
+        .floating-actions {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+        .floating-actions.show { display: flex; animation: slideIn 0.4s; }
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            font-size: 20px;
+        }
+        .action-btn:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transform: scale(1.1); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .user-prompt-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 28px;
+            border-radius: 18px;
+            margin-bottom: 28px;
+            transition: all 0.3s ease;
+        }
+        .user-prompt-section:hover { border-color: rgba(102, 126, 234, 0.5); }
+        .user-prompt-section label { color: #a78bfa; font-size: 18px; font-weight: 600; margin-bottom: 14px; }
+        .mask-preview { max-width: 100%; border-radius: 12px; margin: 12px 0; border: 2px solid rgba(102, 126, 234, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 IrisForge Ultra</h1>
+        <div style="text-align: center;">
+            <span class="quality-badge">✨ Qualité optimale • Inpainting • Génération rapide</span>
+        </div>
+        
+        <div class="config-section">
+            <h3>Configuration API</h3>
+            <div class="form-group">
+                <label for="apiUrl">URL de l'API ComfyUI</label>
+                <input type="text" id="apiUrl" placeholder="https://votre-pod.runpod.net" value="https://i4xaqsc8nanzab-8188.proxy.runpod.net">
+            </div>
+        </div>
+
+        <div class="user-prompt-section">
+            <div class="form-group">
+                <label for="userPrompt">✨ Prompt Principal</label>
+                <textarea id="userPrompt" placeholder="Décrivez votre image..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="promptMode">Type de génération</label>
+                <select id="promptMode">
+                    <option value="portrait">👤 Portrait (focus visage & yeux)</option>
+                    <option value="fullbody" selected>🚶 Corps entier</option>
+                    <option value="universal">🌍 Universel</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="config-section" id="maskSection" style="display: none;">
+            <h3>🎭 Masque d'inpainting détecté</h3>
+            <div class="info">✅ Un masque est chargé. L'image sera régénérée uniquement dans les zones blanches.</div>
+            <img id="maskPreview" class="mask-preview" alt="Masque">
+            <button class="primary danger" onclick="removeMask()">🗑️ Retirer le masque</button>
+        </div>
+
+<div class="config-section">
+            <h3>⚙️ Paramètres</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="imageSteps">Steps</label>
+                    <input type="number" id="imageSteps" value="80" min="20" max="150">
+                </div>
+                <div class="form-group">
+                    <label for="imageCfg">CFG Scale</label>
+                    <input type="number" id="imageCfg" value="8.0" min="5" max="12" step="0.5">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="enableUpscale">🚀 Upscale haute qualité (x2)</label>
+                <select id="enableUpscale">
+                    <option value="true" selected>✅ Activé (qualité maximale)</option>
+                    <option value="false">❌ Désactivé (rapide)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="primary test" onclick="testConnection()">🔍 Tester connexion</button>
+        <button class="primary" onclick="generateImage()">✨ Générer</button>
+
+        <div id="imageStatus" class="status"></div>
+        <div id="progressContainer" class="progress-container">
+            <div id="progressBar" class="progress-bar">0%</div>
+        </div>
+
+        <div class="result">
+            <div class="result-container">
+                <img id="imageResult" alt="Image générée">
+                <div class="floating-actions" id="floatingActions">
+                    <div class="action-btn" onclick="downloadImage()" title="Télécharger"><span>💾</span></div>
+                    <div class="action-btn" onclick="window.open('video.html')" title="Vidéo"><span>🎬</span></div>
+                    <div class="action-btn" onclick="useForInpainting()" title="Modifier"><span>✏️</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let clientId = Math.random().toString(36).substring(7);
+        let isGenerating = false;
+
+        async function testConnection() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            if (!apiUrl) { showStatus('Entrez une URL', 'error'); return; }
+            showStatus('Test...', 'loading');
+            try {
+                const r = await fetch(`${apiUrl}/system_stats`);
+                showStatus(r.ok ? '✅ OK' : '⚠️ Erreur ' + r.status, r.ok ? 'success' : 'error');
+            } catch (e) { showStatus('❌ ' + e.message, 'error'); }
+        }
+
+        function showStatus(msg, type) {
+            const s = document.getElementById('imageStatus');
+            s.textContent = msg;
+            s.className = 'status ' + type;
+        }
+
+        function updateProgress(pct, txt) {
+            document.getElementById('progressContainer').classList.add('show');
+            const bar = document.getElementById('progressBar');
+            bar.style.width = pct + '%';
+            bar.textContent = txt || pct + '%';
+        }
+
+        function hideProgress() { 
+            document.getElementById('progressContainer').classList.remove('show'); 
+        }
+
+        function checkMask() {
+            const maskData = localStorage.getItem('inpaintingMask');
+            const sourceData = localStorage.getItem('inpaintingSource');
+            if (maskData && sourceData) {
+                document.getElementById('maskPreview').src = maskData;
+                document.getElementById('maskSection').style.display = 'block';
+            }
+        }
+
+        function removeMask() {
+            localStorage.removeItem('inpaintingMask');
+            localStorage.removeItem('inpaintingSource');
+            document.getElementById('maskSection').style.display = 'none';
+            showStatus('Masque supprimé', 'success');
+        }
+
+        function useForInpainting() {
+            const img = document.getElementById('imageResult');
+            if (img.src) {
+                localStorage.setItem('inpaintingSource', img.src);
+                window.location.href = 'editor.html';
+            }
+        }
+
+        async function dataURLtoFile(dataURL, filename) {
+            const res = await fetch(dataURL);
+            const blob = await res.blob();
+            return new File([blob], filename, { type: 'image/png' });
+        }
+
+        async function uploadToComfy(url, file, filename) {
+            const formData = new FormData();
+            formData.append('image', file, filename);
+            formData.append('overwrite', 'true');
+            
+            const res = await fetch(`${url}/upload/image`, { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error('Upload échoué: ' + errorText);
+            }
+            
+            const result = await res.json();
+            console.log('Upload result:', result);
+            
+            return {
+                name: result.name || result.filename || filename,
+                subfolder: result.subfolder || '',
+                type: result.type || 'input'
+            };
+        }
+
+        async function generateImage() {
+            if (isGenerating) return;
+            
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const userPrompt = document.getElementById('userPrompt').value.trim();
+            const width = 896;
+            const height = 1152;
+            const steps = parseInt(document.getElementById('imageSteps').value);
+            const cfg = parseFloat(document.getElementById('imageCfg').value);
+            const enableUpscale = document.getElementById('enableUpscale').value === 'true';
+            const resultImage = document.getElementById('imageResult');
+            const generateBtn = document.querySelector('button.primary:not(.test)');
+
+            if (!apiUrl || !userPrompt) {
+                showStatus('Veuillez remplir les champs', 'error');
+                return;
+            }
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            resultImage.classList.remove('show');
+            document.getElementById('floatingActions').classList.remove('show');
+            showStatus('Préparation...', 'loading');
+            updateProgress(5, 'Init...');
+
+            try {
+                const seed = Math.floor(Math.random() * 1000000000);
+                const promptMode = document.getElementById('promptMode').value;
+
+                let technicalPositive, technicalNegative;
+
+                if (promptMode === 'portrait') {
+                    technicalPositive = "professional portrait photography, close-up, headshot, studio lighting, PERFECT EYES, crystal clear eyes, sharp eyes focus, highly detailed iris texture, realistic pupils with accurate light reflection, perfectly symmetrical eyes, bright sparkling eyes, direct eye contact, photorealistic eyes rendering, pinpoint sharp focus on eyes, natural catch lights in eyes, detailed natural eyelashes, well-defined eyebrows, PERFECT WHITE TEETH, natural teeth, realistic dental anatomy, healthy smile, flawless skin, natural skin texture with visible pores, professional makeup, ultra sharp focus, micro details, 8k uhd, dslr, Hasselblad quality, soft studio lighting, rim lighting, high quality, subtle film grain, Fujifilm XT3, award winning photography, masterpiece, best quality";
+                    technicalNegative = "full body, distant shot, wide angle, blurry, low quality, BAD EYES, deformed eyes, uneven eyes, cross-eyed, lazy eye, asymmetrical eyes, misaligned eyes, floating eyes, uncanny eyes, weird eyes, dead eyes, soulless eyes, blurry eyes, out of focus eyes, distorted pupils, irregular pupils, glowing eyes, red eyes, BAD TEETH, missing teeth, crooked teeth, yellow teeth, gap teeth, broken teeth, vampire teeth, fangs, unrealistic mouth, worst quality, plastic skin, waxy skin, mannequin, 3d render, cgi, fake, oversaturated, cartoon, anime, illustration";
+                } else if (promptMode === 'fullbody') {
+                    technicalPositive = "full body shot, full length portrait, head to toe visible, entire body in frame, natural human proportions, anatomically correct, professional studio photography, soft studio lighting, cinematic depth of field, ultra sharp focus, PERFECT EYES, crystal clear eyes, highly detailed iris, sharp pupils with light reflection, perfectly symmetrical eyes, natural eye contact, bright expressive eyes, detailed eyelashes, PERFECT WHITE TEETH, natural smile, realistic dental details, healthy teeth, flawless facial features, natural skin texture with pores visible, detailed clothing texture and fabric, environmental lighting, ultra-detailed, high resolution, 8k uhd, dslr, medium format camera quality, subtle film grain, award winning full body photography, masterpiece, best quality";
+                    technicalNegative = "cropped body, cut off, close-up only, headshot, bust shot, zoomed in, cropped feet, cropped legs, bad anatomy, deformed body, mutated, extra limbs, bad proportions, BAD EYES, deformed eyes, cross-eyed, asymmetrical eyes, misaligned eyes, floating eyes, uncanny eyes, distorted pupils, blurry eyes, BAD TEETH, missing teeth, deformed teeth, crooked teeth, unrealistic smile, plastic skin, doll-like, mannequin skin, 3d render, cgi, fake, worst quality, low quality, oversaturated, cartoon, anime, illustration";
+                } else {
+                    technicalPositive = "professional photography, award winning composition, high quality, highly detailed, razor sharp focus, realistic studio lighting, natural accurate colors, photorealistic rendering, ultra-detailed texture, high resolution, 8k uhd, dslr, medium format quality, subtle film grain, cinematic composition, professional depth of field, expert color grading, masterpiece, best quality";
+                    technicalNegative = "blurry, out of focus, low quality, noisy, grainy, poor focus, oversaturated, underexposed, overexposed, harsh lighting, amateur photo, plastic looking, artificial, 3d render, cgi, cartoon, anime, illustration, drawing, worst quality";
+                }
+
+                const finalPositive = userPrompt + ", " + technicalPositive;
+                const finalNegative = technicalNegative;
+
+                updateProgress(10, 'Workflow...');
+
+                const maskData = localStorage.getItem('inpaintingMask');
+                const sourceData = localStorage.getItem('inpaintingSource');
+                const isInpainting = !!(maskData && sourceData);
+
+                let uploadedImage, uploadedMask;
+
+                if (isInpainting) {
+                    showStatus('Upload image + masque...', 'loading');
+                    updateProgress(12, 'Upload...');
+                    
+                    const imgFile = await dataURLtoFile(sourceData, 'inpaint_source.png');
+                    const maskFile = await dataURLtoFile(maskData, 'inpaint_mask.png');
+                    
+                    uploadedImage = await uploadToComfy(apiUrl, imgFile, 'inpaint_source.png');
+                    uploadedMask = await uploadToComfy(apiUrl, maskFile, 'inpaint_mask.png');
+                    
+                    console.log('Uploaded files:', uploadedImage, uploadedMask);
+                    updateProgress(15, 'Workflow inpainting...');
+                }
+
+                let workflow;
+
+                if (isInpainting) {
+                    console.log('Building inpainting workflow with:', uploadedImage.name, uploadedMask.name);
+                    
+                    workflow = {
+                        "4": { 
+                            inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" }, 
+                            class_type: "CheckpointLoaderSimple"
+                        },
+                        "6": { 
+                            inputs: { text: finalPositive, clip: ["4", 1] }, 
+                            class_type: "CLIPTextEncode"
+                        },
+                        "7": { 
+                            inputs: { text: finalNegative, clip: ["4", 1] }, 
+                            class_type: "CLIPTextEncode"
+                        },
+                        "50": { 
+                            inputs: { image: uploadedImage.name, upload: "image" }, 
+                            class_type: "LoadImage"
+                        },
+                        "51": { 
+                            inputs: { image: uploadedMask.name, upload: "image" }, 
+                            class_type: "LoadImage"
+                        },
+                        "29": { 
+                            inputs: { 
+                                channel: "red", 
+                                image: ["51", 0] 
+                            }, 
+                            class_type: "ImageToMask"
+                        },
+                        "52": { 
+                            inputs: { 
+                                positive: ["6", 0], 
+                                negative: ["7", 0], 
+                                vae: ["4", 2], 
+                                pixels: ["50", 0], 
+                                mask: ["29", 0],
+                                noise_mask: true
+                            }, 
+                            class_type: "InpaintModelConditioning"
+                        },
+                        "3": { 
+                            inputs: { 
+                                seed: seed, 
+                                steps: steps, 
+                                cfg: cfg, 
+                                sampler_name: "dpmpp_2m_sde_gpu",
+                                scheduler: "karras", 
+                                denoise: 1.0, 
+                                model: ["4", 0], 
+                                positive: ["52", 0], 
+                                negative: ["52", 1], 
+                                latent_image: ["52", 2] 
+                            }, 
+                            class_type: "KSampler"
+                        },
+                        "8": { 
+                            inputs: { 
+                                samples: ["3", 0], 
+                                vae: ["4", 2] 
+                            }, 
+                            class_type: "VAEDecode"
+                        },
+                        "9": { 
+                            inputs: { 
+                                filename_prefix: "IrisForge_Inpaint_", 
+                                images: ["8", 0] 
+                            }, 
+                            class_type: "SaveImage"
+                        }
+                    };
+                    
+                    console.log('Inpainting workflow created');
+                } else {
+                    if (enableUpscale) {
+                        // Workflow avec upscale et refiner pour qualité maximale
+                        workflow = {
+                            "1": { 
+                                inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" }, 
+                                class_type: "CheckpointLoaderSimple" 
+                            },
+                            "2": { 
+                                inputs: { text: finalPositive, clip: ["1", 1] }, 
+                                class_type: "CLIPTextEncode" 
+                            },
+                            "3": { 
+                                inputs: { text: finalNegative, clip: ["1", 1] }, 
+                                class_type: "CLIPTextEncode" 
+                            },
+                            "4": { 
+                                inputs: { width: width, height: height, batch_size: 1 }, 
+                                class_type: "EmptyLatentImage" 
+                            },
+                            "5": { 
+                                inputs: { 
+                                    seed: seed, 
+                                    steps: steps, 
+                                    cfg: cfg, 
+                                    sampler_name: "dpmpp_2m_sde_gpu", 
+                                    scheduler: "karras", 
+                                    denoise: 1.0, 
+                                    model: ["1", 0], 
+                                    positive: ["2", 0], 
+                                    negative: ["3", 0], 
+                                    latent_image: ["4", 0] 
+                                }, 
+                                class_type: "KSampler" 
+                            },
+                            "6": { 
+                                inputs: { samples: ["5", 0], vae: ["1", 2] }, 
+                                class_type: "VAEDecode" 
+                            },
+                            "10": {
+                                inputs: {
+                                    upscale_method: "nearest-exact",
+                                    width: width * 2,
+                                    height: height * 2,
+                                    crop: "disabled",
+                                    image: ["6", 0]
+                                },
+                                class_type: "ImageScale"
+                            },
+                            "11": {
+                                inputs: {
+                                    pixels: ["10", 0],
+                                    vae: ["1", 2]
+                                },
+                                class_type: "VAEEncode"
+                            },
+                            "12": {
+                                inputs: {
+                                    seed: seed + 1,
+                                    steps: Math.floor(steps * 0.5),
+                                    cfg: cfg,
+                                    sampler_name: "dpmpp_2m_sde_gpu",
+                                    scheduler: "karras",
+                                    denoise: 0.4,
+                                    model: ["1", 0],
+                                    positive: ["2", 0],
+                                    negative: ["3", 0],
+                                    latent_image: ["11", 0]
+                                },
+                                class_type: "KSampler"
+                            },
+                            "13": {
+                                inputs: {
+                                    samples: ["12", 0],
+                                    vae: ["1", 2]
+                                },
+                                class_type: "VAEDecode"
+                            },
+                            "9": { 
+                                inputs: { filename_prefix: "IrisForge_Upscaled_", images: ["13", 0] }, 
+                                class_type: "SaveImage" 
+                            }
+                        };
+                    } else {
+                        // Workflow standard sans upscale
+                        workflow = {
+                            "1": { 
+                                inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" }, 
+                                class_type: "CheckpointLoaderSimple" 
+                            },
+                            "2": { 
+                                inputs: { text: finalPositive, clip: ["1", 1] }, 
+                                class_type: "CLIPTextEncode" 
+                            },
+                            "3": { 
+                                inputs: { text: finalNegative, clip: ["1", 1] }, 
+                                class_type: "CLIPTextEncode" 
+                            },
+                            "4": { 
+                                inputs: { width: width, height: height, batch_size: 1 }, 
+                                class_type: "EmptyLatentImage" 
+                            },
+                            "5": { 
+                                inputs: { 
+                                    seed: seed, 
+                                    steps: steps, 
+                                    cfg: cfg, 
+                                    sampler_name: "dpmpp_2m_sde_gpu", 
+                                    scheduler: "karras", 
+                                    denoise: 1.0, 
+                                    model: ["1", 0], 
+                                    positive: ["2", 0], 
+                                    negative: ["3", 0], 
+                                    latent_image: ["4", 0] 
+                                }, 
+                                class_type: "KSampler" 
+                            },
+                            "6": { 
+                                inputs: { samples: ["5", 0], vae: ["1", 2] }, 
+                                class_type: "VAEDecode" 
+                            },
+                            "9": { 
+                                inputs: { filename_prefix: "IrisForge_", images: ["6", 0] }, 
+                                class_type: "SaveImage" 
+                            }
+                        };
+                    }
+                }
+
+                updateProgress(18, 'Envoi...');
+
+                const promptResponse = await fetch(`${apiUrl}/prompt`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: workflow, client_id: clientId })
+                });
+
+                if (!promptResponse.ok) {
+                    const errorText = await promptResponse.text();
+                    throw new Error(`HTTP ${promptResponse.status}: ${errorText.substring(0, 150)}`);
+                }
+
+                const promptData = await promptResponse.json();
+                const promptId = promptData.prompt_id;
+
+                updateProgress(20, 'Génération...');
+                let modeLabel = isInpainting ? '🎭 Inpainting en cours...' : '✨ Génération haute qualité...';
+                if (enableUpscale && !isInpainting) {
+                    modeLabel = '🚀 Génération + Upscale 2x...';
+                }
+                showStatus(modeLabel, 'loading');
+                
+                await waitForCompletion(apiUrl, promptId);
+
+                updateProgress(95, 'Récupération...');
+                
+                const historyResponse = await fetch(`${apiUrl}/history/${promptId}`);
+                const historyData = await historyResponse.json();
+                const outputs = historyData[promptId].outputs;
+                
+                const imageNode = outputs["9"];
+                
+                if (imageNode && imageNode.images && imageNode.images.length > 0) {
+                    const imageInfo = imageNode.images[0];
+                    const imageUrl = `${apiUrl}/view?filename=${imageInfo.filename}&subfolder=${imageInfo.subfolder || ''}&type=${imageInfo.type}`;
+                    
+                    updateProgress(100, 'Terminé !');
+                    
+                    resultImage.src = imageUrl;
+                    resultImage.classList.add('show');
+                    document.getElementById('floatingActions').classList.add('show');
+                    
+                    const inpaintInfo = isInpainting ? ' • Inpainting' : '';
+                    const upscaleInfo = enableUpscale && !isInpainting ? ' • Upscaled x2' : '';
+                    const finalWidth = enableUpscale && !isInpainting ? width * 2 : width;
+                    const finalHeight = enableUpscale && !isInpainting ? height * 2 : height;
+                    showStatus(`✅ Image générée !\n${finalWidth}x${finalHeight} • ${steps} steps • CFG ${cfg}${inpaintInfo}${upscaleInfo}`, 'success');
+                    
+                    setTimeout(() => hideProgress(), 2000);
+                } else {
+                    throw new Error('Aucune image trouvée dans la réponse');
+                }
+
+            } catch (error) {
+                showStatus('❌ Erreur: ' + error.message, 'error');
+                hideProgress();
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function waitForCompletion(apiUrl, promptId, maxAttempts = 300) {
+            let currentProgress = 20;
+            for (let i = 0; i < maxAttempts; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                try {
+                    const historyResponse = await fetch(`${apiUrl}/history/${promptId}`);
+                    const historyData = await historyResponse.json();
+                    if (historyData[promptId]) {
+                        const status = historyData[promptId].status;
+                        currentProgress = Math.min(20 + (i * 0.25), 90);
+                        updateProgress(currentProgress, `${Math.round(currentProgress)}%`);
+                        if (status && status.completed) return true;
+                    }
+                } catch (error) { }
+            }
+            throw new Error('Timeout');
+        }
+
+        function downloadImage() {
+            const img = document.getElementById('imageResult');
+            if (img.src) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = 'irisforge_' + Date.now() + '.png';
+                link.click();
+                showStatus('✅ Téléchargement lancé !', 'success');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', checkMask);
+    </script>
+</body>
+</html>
