@@ -319,7 +319,7 @@
         let isGenerating = false;
 
         const gpuPresets = {
-            rtx4090: { steps: 90, cfg: 7.5, mode: "ultra", faceRestore: true, faceSteps: 30, faceGuideSize: 512, faceMaxSize: 1024, faceDenoise: 0.4, refinementSteps: 0.6, refinementDenoise: 0.35 },
+            rtx4090: { steps: 90, cfg: 7.5, mode: "ultra", faceRestore: false, faceSteps: 30, faceGuideSize: 512, faceMaxSize: 1024, faceDenoise: 0.4, refinementSteps: 0.6, refinementDenoise: 0.35 },
             a4500: { steps: 60, cfg: 7.5, mode: "high", faceRestore: false, faceSteps: 20, faceGuideSize: 384, faceMaxSize: 768, faceDenoise: 0.35, refinementSteps: 0.5, refinementDenoise: 0.30 },
             budget: { steps: 40, cfg: 7.0, mode: "high", faceRestore: false, faceSteps: 15, faceGuideSize: 320, faceMaxSize: 640, faceDenoise: 0.30, refinementSteps: 0.4, refinementDenoise: 0.25 }
         };
