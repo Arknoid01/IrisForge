@@ -580,15 +580,15 @@ if (isInpainting) {
                         "9": { inputs: { filename_prefix: "IrisForge_Fast_", images: ["6", 0] }, class_type: "SaveImage" }
                     };
 
-                    if (qualityMode === 'high' || qualityMode === 'ultra') {
-                        workflow["10"] = { inputs: { upscale_model_name: "RealESRGAN_x2.pth", image: ["6", 0] }, class_type: "ImageUpscaleWithModel" };
-                        workflow["11"] = { inputs: { pixels: ["10", 0], vae: ["1", 2] }, class_type: "VAEEncode" };
-                        
-                        const refinementSteps = Math.floor(steps * gpuConfig.refinementSteps);
-                        workflow["12"] = { inputs: { seed: seed + 1, steps: refinementSteps, cfg: cfg - 0.5, sampler_name: "dpmpp_2m_sde_gpu", scheduler: "karras", denoise: gpuConfig.refinementDenoise, model: ["1", 0], positive: ["2", 0], negative: ["3", 0], latent_image: ["11", 0] }, class_type: "KSampler" };
-                        workflow["13"] = { inputs: { samples: ["12", 0], vae: ["1", 2] }, class_type: "VAEDecode" };
-                        workflow["9"] = { inputs: { filename_prefix: "IrisForge_High_", images: ["13", 0] }, class_type: "SaveImage" };
-                    }
+                    if (qualityMode === 'high') {
+    workflow["10"] = { inputs: { upscale_model_name: "RealESRGAN_x2.pth", image: ["6", 0] }, class_type: "ImageUpscaleWithModel" };
+    workflow["11"] = { inputs: { pixels: ["10", 0], vae: ["1", 2] }, class_type: "VAEEncode" };
+    
+    const refinementSteps = Math.floor(steps * gpuConfig.refinementSteps);
+    workflow["12"] = { inputs: { seed: seed + 1, steps: refinementSteps, cfg: cfg - 0.5, sampler_name: "dpmpp_2m_sde_gpu", scheduler: "karras", denoise: gpuConfig.refinementDenoise, model: ["1", 0], positive: ["2", 0], negative: ["3", 0], latent_image: ["11", 0] }, class_type: "KSampler" };
+    workflow["13"] = { inputs: { samples: ["12", 0], vae: ["1", 2] }, class_type: "VAEDecode" };
+    workflow["9"] = { inputs: { filename_prefix: "IrisForge_High_", images: ["13", 0] }, class_type: "SaveImage" };
+}
 
                     if (qualityMode === 'ultra' && enableFaceRestore) {
                         workflow["20"] = { inputs: { threshold: 0.5, dilation: 10, crop_factor: 3.0, drop_size: 10, labels: "face", image: ["13", 0] }, class_type: "UltralyticsDetectorProvider" };
