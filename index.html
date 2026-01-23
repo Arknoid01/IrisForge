@@ -244,11 +244,27 @@
             }
         }
 
-        function openEditor() {
+        async function openEditor() {
             const img = document.getElementById('resultImg');
             if (img.src) {
-                localStorage.setItem('editorImage', img.src);
-                window.location.href = 'editor.html';
+                showStatus('Préparation de l\'image...', 'loading');
+                try {
+                    // Convertir l'image en blob pour éviter les problèmes CORS
+                    const response = await fetch(img.src);
+                    const blob = await response.blob();
+                    
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        localStorage.setItem('editorImage', reader.result);
+                        window.location.href = 'editor.html';
+                    };
+                    reader.readAsDataURL(blob);
+                } catch (err) {
+                    console.error('Erreur conversion:', err);
+                    // Si ça échoue, on essaie quand même avec l'URL directe
+                    localStorage.setItem('editorImage', img.src);
+                    window.location.href = 'editor.html';
+                }
             }
         }
 
