@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrisForge Video - Générateur de Vidéo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f1e;
+            background-image: radial-gradient(at 20% 30%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 80% 70%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            color: #a78bfa;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .back-link:hover { color: #667eea; }
+        .form-group { margin-bottom: 24px; }
+        label {
+            display: block;
+            color: #a78bfa;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        .file-upload {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .file-upload input { display: none; }
+        .file-upload-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        .preview-img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .info-box {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .info-box p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 4px 0;
+        }
+        .info-box strong {
+            color: #a78bfa;
+        }
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        .status.loading {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #a78bfa);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .result-video {
+            margin-top: 30px;
+            text-align: center;
+            display: none;
+        }
+        .result-video video {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+        }
+        .download-btn {
+            margin-top: 16px;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        .mode-btn {
+            transition: all 0.3s;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .mode-btn.active {
+            background: rgba(102, 126, 234, 0.3) !important;
+            border-color: #667eea !important;
+        }
+        .mode-btn:hover {
+            background: rgba(102, 126, 234, 0.15) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Retour à l'accueil</a>
+        
+        <h1>🎬 IrisForge Video</h1>
+        <p class="subtitle">Générateur de vidéo longue par segments</p>
+
+        <div class="form-group">
+            <label>URL ComfyUI</label>
+            <input type="text" id="comfyUrl" placeholder="http://127.0.0.1:8188" value="http://127.0.0.1:8188">
+        </div>
+
+        <div class="form-group">
+            <label>Source de départ</label>
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <button type="button" class="mode-btn active" id="imageModeBtn" onclick="switchMode('image')" style="flex: 1; padding: 12px; background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.4);">
+                    🖼️ Image
+                </button>
+                <button type="button" class="mode-btn" id="videoModeBtn" onclick="switchMode('video')" style="flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    🎬 Vidéo
+                </button>
+            </div>
+
+            <div id="imageUploadSection">
+                <label for="imageFile" class="file-upload">
+                    <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+                    <div class="file-upload-text" id="imageFileText">📤 Cliquez pour choisir une image</div>
+                    <img id="imagePreview" class="preview-img" style="display:none">
+                </label>
+            </div>
+
+            <div id="videoUploadSection" style="display: none;">
+                <label for="videoFile" class="file-upload">
+                    <input type="file" id="videoFile" accept="video/*" onchange="previewVideo(event)">
+                    <div class="file-upload-text" id="videoFileText">🎬 Cliquez pour choisir une vidéo</div>
+                    <video id="videoPreview" class="preview-img" style="display:none; max-width: 100%;" controls></video>
+                </label>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px;">
+                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin: 0;">
+                        💡 La dernière frame de votre vidéo sera utilisée comme image de départ
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Durée totale souhaitée (secondes)</label>
+            <input type="number" id="duration" value="10" min="2" max="60" onchange="updateInfo()">
+        </div>
+
+        <div class="form-group">
+            <label>Prompt (description du mouvement)</label>
+            <textarea id="prompt" placeholder="Ex: water flowing gently, smooth camera movement..."></textarea>
+        </div>
+
+        <div class="info-box" id="infoBox">
+            <p><strong>Configuration :</strong></p>
+            <p id="segmentsInfo">• Segments à générer : 5</p>
+            <p id="timeInfo">• Temps estimé : ~15 minutes</p>
+            <p>• Résolution : 768x1536 (portrait haute qualité)</p>
+            <p>• FPS : 24 (cinématique)</p>
+        </div>
+
+        <button onclick="generateVideo()">🎬 Générer la vidéo</button>
+
+        <div class="status" id="status"></div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Segment 0/0</div>
+        </div>
+
+        <div class="result-video" id="resultVideo">
+            <video id="finalVideo" controls></video>
+            <button class="download-btn" onclick="downloadVideo()">💾 Télécharger la vidéo</button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+        let uploadedVideo = null;
+        let currentMode = 'image';
+        let currentSegmentBlobs = [];
+        let currentSegmentPaths = [];
+        let clientId = Math.random().toString(36).substring(7);
+        let initialComfyUrl = null;
+        let finalAssembledBlob = null;
+
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            document.getElementById('imageModeBtn').classList.toggle('active', mode === 'image');
+            document.getElementById('videoModeBtn').classList.toggle('active', mode === 'video');
+            
+            document.getElementById('imageUploadSection').style.display = mode === 'image' ? 'block' : 'none';
+            document.getElementById('videoUploadSection').style.display = mode === 'video' ? 'block' : 'none';
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImage = e.target.result;
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('imageFileText').textContent = '✔ ' + file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewVideo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                uploadedVideo = file;
+                document.getElementById('videoPreview').src = url;
+                document.getElementById('videoPreview').style.display = 'block';
+                document.getElementById('videoFileText').textContent = '✔ ' + file.name;
+                
+                const video = document.getElementById('videoPreview');
+                video.addEventListener('loadedmetadata', () => {
+                    extractLastFrame(video);
+                });
+            }
+        }
+
+        function extractLastFrame(video) {
+            video.currentTime = video.duration - 0.1;
+            
+            video.addEventListener('seeked', function onSeeked() {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                uploadedImage = canvas.toDataURL('image/png');
+                
+                showStatus('✔ Dernière frame extraite avec succès !', 'success');
+                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+                
+                video.removeEventListener('seeked', onSeeked);
+            }, { once: true });
+        }
+
+        function updateInfo() {
+            const duration = parseInt(document.getElementById('duration').value);
+            const segmentDuration = 2.04;
+            const segments = Math.ceil(duration / segmentDuration);
+            const estimatedTime = Math.round(segments * 3);
+
+            document.getElementById('segmentsInfo').textContent = `• Segments à générer : ${segments}`;
+            document.getElementById('timeInfo').textContent = `• Temps estimé : ~${estimatedTime} minutes`;
+        }
+
+        function showStatus(msg, type) {
+            const s = document.getElementById('status');
+            s.textContent = msg;
+            s.className = 'status ' + type;
+            s.style.display = 'block';
+        }
+
+        function updateProgress(current, total) {
+            const container = document.getElementById('progressContainer');
+            const fill = document.getElementById('progressFill');
+            const text = document.getElementById('progressText');
+            
+            container.style.display = 'block';
+            const percent = (current / total) * 100;
+            fill.style.width = percent + '%';
+            text.textContent = `Segment ${current}/${total}`;
+        }
+
+        async function uploadImageToComfyUI(apiUrl, imageBase64) {
+            const response = await fetch(imageBase64);
+            const blob = await response.blob();
+            
+            const formData = new FormData();
+            formData.append('image', blob, `segment_${Date.now()}.png`);
+            formData.append('overwrite', 'true');
+            
+            const uploadRes = await fetch(`${apiUrl}/upload/image`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!uploadRes.ok) {
+                throw new Error('Erreur lors de l\'upload de l\'image');
+            }
+            
+            const uploadData = await uploadRes.json();
+            return uploadData.name;
+        }
+
+        async function generateVideo() {
+            const apiUrl = document.getElementById('comfyUrl').value.trim();
+            const userPrompt = document.getElementById('prompt').value.trim();
+            const totalDuration = parseInt(document.getElementById('duration').value);
+
+            if (!apiUrl || !userPrompt) {
+                showStatus('❌ Veuillez remplir tous les champs', 'error');
+                return;
+            }
+
+            if (currentMode === 'image' && !uploadedImage) {
+                showStatus('❌ Veuillez uploader une image de départ', 'error');
+                return;
+            }
+
+            if (currentMode === 'video' && !uploadedVideo) {
+                showStatus('❌ Veuillez uploader une vidéo', 'error');
+                return;
+            }
+
+            initialComfyUrl = apiUrl;
+
+            const segmentDuration = 2.04;
+            const segmentsNeeded = Math.ceil(totalDuration / segmentDuration);
+            
+            currentSegmentBlobs = [];
+            currentSegmentPaths = [];
+            finalAssembledBlob = null;
+            let currentImage = uploadedImage;
+
+            showStatus(`Génération de ${segmentsNeeded} segments...`, 'loading');
+
+            try {
+                // Générer tous les segments
+                for (let i = 0; i < segmentsNeeded; i++) {
+                    const currentUrl = document.getElementById('comfyUrl').value.trim();
+                    if (currentUrl !== initialComfyUrl) {
+                        throw new Error('⚠️ L\'URL ComfyUI a changé pendant la génération. Génération annulée pour éviter les erreurs.');
+                    }
+
+                    updateProgress(i + 1, segmentsNeeded);
+                    showStatus(`🎬 Génération du segment ${i + 1}/${segmentsNeeded}...`, 'loading');
+
+                    const segmentData = await generateSegment(initialComfyUrl, currentImage, userPrompt, i + 1);
+                    currentSegmentBlobs.push(segmentData.videoBlob);
+                    
+                    // Stocker les informations exactes retournées par ComfyUI
+                    const pathInfo = {
+                        fullPath: segmentData.fullPath,
+                        filename: segmentData.filename,
+                        subfolder: segmentData.subfolder,
+                        type: segmentData.type
+                    };
+                    currentSegmentPaths.push(pathInfo);
+                    
+                    console.log(`✅ Segment ${i + 1} stocké:`, pathInfo);
+                    console.log(`📁 Chemin pour LoadVideo:`, segmentData.fullPath);
+                    
+                    showStatus(`✔ Segment ${i + 1}/${segmentsNeeded} terminé !`, 'success');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    if (i < segmentsNeeded - 1) {
+                        showStatus(`🖼️ Extraction de la dernière frame du segment ${i + 1}...`, 'loading');
+                        const extractedFrame = await extractLastFrameFromBlob(segmentData.videoBlob);
+                        console.log(`✅ Frame du segment ${i + 1} extraite, taille:`, extractedFrame.length);
+                        currentImage = extractedFrame;
+                        showStatus(`✔ Frame extraite, préparation du segment ${i + 2}...`, 'success');
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                }
+
+                // Assembler les vidéos via ComfyUI
+                showStatus('🔧 Assemblage des segments via ComfyUI...', 'loading');
+                console.log('🔧 Début assemblage, paths:', currentSegmentPaths);
+                finalAssembledBlob = await assembleVideosViaComfyUI(initialComfyUrl, currentSegmentPaths);
+                
+                const finalBlobUrl = URL.createObjectURL(finalAssembledBlob);
+                const finalVideo = document.getElementById('finalVideo');
+                finalVideo.src = finalBlobUrl;
+                document.getElementById('resultVideo').style.display = 'block';
+                
+                showStatus(`✔ Vidéo assemblée avec succès ! (${segmentsNeeded} segments)`, 'success');
+
+            } catch (error) {
+                showStatus('❌ Erreur : ' + error.message, 'error');
+                console.error('Erreur génération:', error);
+            }
+        }
+
+        async function generateSegment(apiUrl, imageBase64, prompt, segmentNumber) {
+            const uploadedImageName = await uploadImageToComfyUI(apiUrl, imageBase64);
+            const timestamp = Date.now();
+            const uniquePrefix = `video/seg_${timestamp}_${segmentNumber}`;
+            
+            return new Promise((resolve, reject) => {
+                const seed = Math.floor(Math.random() * 1000000000000000);
+                
+                const workflow = {
+                    "84": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
+                    "90": { inputs: { vae_name: "wan_2.1_vae.safetensors" }, class_type: "VAELoader" },
+                    "95": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
+                    "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
+                    "97": { inputs: { image: uploadedImageName, upload: "image" }, class_type: "LoadImage" },
+                    "120": { inputs: { upscale_method: "lanczos", width: 768, height: 1536, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
+                    "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
+                    "89": { inputs: { text: "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
+                    "101": { inputs: { lora_name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength_model: 0.15, model: ["95", 0] }, class_type: "LoraLoaderModelOnly" },
+                    "102": { inputs: { lora_name: "DetailTweaker.safetensors", strength_model: 0.15, model: ["96", 0] }, class_type: "LoraLoaderModelOnly" },
+                    "103": { inputs: { shift: 5.0, model: ["102", 0] }, class_type: "ModelSamplingSD3" },
+                    "104": { inputs: { shift: 5.0, model: ["101", 0] }, class_type: "ModelSamplingSD3" },
+                    "98": { inputs: { width: 768, height: 1536, length: 49, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
+                    "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: 18, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 9, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
+                    "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: 18, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 9, end_at_step: 18, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
+                    "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" },
+                    "94": { inputs: { fps: 24, images: ["87", 0] }, class_type: "CreateVideo" },
+                    "108": { inputs: { filename_prefix: uniquePrefix, format: "mp4", codec: "h264", video: ["94", 0] }, class_type: "SaveVideo" }
+                };
+
+                console.log(`📤 Envoi workflow segment ${segmentNumber}, prefix: ${uniquePrefix}`);
+                
+                fetch(`${apiUrl}/prompt`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: workflow, client_id: clientId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const promptId = data.prompt_id;
+                    const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
+                    
+                    ws.onmessage = async (event) => {
+                        const msg = JSON.parse(event.data);
+                        
+                        if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                            setTimeout(async () => {
+                                try {
+                                    const histRes = await fetch(`${apiUrl}/history/${promptId}`);
+                                    const hist = await histRes.json();
+                                    
+                                    console.log(`📦 Historique segment ${segmentNumber}:`, hist);
+                                    
+                                    if (hist[promptId] && hist[promptId].outputs) {
+                                        const outputs = hist[promptId].outputs;
+                                        const saveNode = outputs['108'];
+                                        
+                                        let videoInfo = null;
+                                        
+                                        if (saveNode) {
+                                            if (saveNode.images && saveNode.images.length > 0) {
+                                                videoInfo = saveNode.images[0];
+                                            } else if (saveNode.videos && saveNode.videos.length > 0) {
+                                                videoInfo = saveNode.videos[0];
+                                            } else if (saveNode.gifs && saveNode.gifs.length > 0) {
+                                                videoInfo = saveNode.gifs[0];
+                                            }
+                                        }
+                                        
+                                        if (videoInfo) {
+                                            console.log(`✅ Vidéo segment ${segmentNumber} trouvée:`, videoInfo);
+                                            
+                                            // Le chemin complet exact tel que retourné par ComfyUI
+                                            const fullPath = videoInfo.subfolder 
+                                                ? `${videoInfo.subfolder}/${videoInfo.filename}`
+                                                : videoInfo.filename;
+                                            
+                                            console.log(`📁 Chemin complet segment ${segmentNumber}:`, fullPath);
+                                            
+                                            const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder || '')}&type=${encodeURIComponent(videoInfo.type || 'output')}`;
+                                            
+                                            const videoResponse = await fetch(videoUrl);
+                                            if (!videoResponse.ok) {
+                                                throw new Error(`Erreur téléchargement vidéo: ${videoResponse.status}`);
+                                            }
+                                            const videoBlob = await videoResponse.blob();
+                                            
+                                            ws.close();
+                                            resolve({ 
+                                                videoUrl, 
+                                                videoBlob,
+                                                fullPath: fullPath,
+                                                filename: videoInfo.filename,
+                                                subfolder: videoInfo.subfolder || '',
+                                                type: videoInfo.type || 'output'
+                                            });
+                                        } else {
+                                            console.error('❌ Pas de vidéo dans outputs:', outputs);
+                                            throw new Error('Aucune vidéo dans la réponse');
+                                        }
+                                    } else {
+                                        throw new Error('Pas de données dans l\'historique');
+                                    }
+                                } catch (err) {
+                                    console.error(`❌ Erreur segment ${segmentNumber}:`, err);
+                                    ws.close();
+                                    reject(err);
+                                }
+                            }, 1000);
+                        }
+                    };
+                    
+                    ws.onerror = () => reject(new Error('Erreur WebSocket'));
+                })
+                .catch(reject);
+            });
+        }
+
+        async function assembleVideosViaComfyUI(apiUrl, segmentPaths) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    console.log('🔧 Assemblage via ComfyUI de', segmentPaths.length, 'segments');
+                    console.log('📋 Paths à assembler:', segmentPaths);
+                    
+                    // Étape 1: Télécharger et re-uploader les vidéos vers le dossier input
+                    const uploadedVideoPaths = [];
+                    
+                    for (let i = 0; i < segmentPaths.length; i++) {
+                        showStatus(`📤 Préparation segment ${i + 1}/${segmentPaths.length} pour assemblage...`, 'loading');
+                        
+                        const pathInfo = segmentPaths[i];
+                        const videoBlob = currentSegmentBlobs[i];
+                        
+                        // Upload la vidéo vers le dossier input de ComfyUI
+                        const formData = new FormData();
+                        formData.append('image', videoBlob, `assembled_${i + 1}.mp4`);
+                        formData.append('overwrite', 'true');
+                        formData.append('type', 'input');
+                        
+                        const uploadRes = await fetch(`${apiUrl}/upload/image`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (!uploadRes.ok) {
+                            throw new Error(`Erreur upload segment ${i + 1}`);
+                        }
+                        
+                        const uploadData = await uploadRes.json();
+                        uploadedVideoPaths.push(uploadData.name);
+                        console.log(`✅ Segment ${i + 1} uploadé: ${uploadData.name}`);
+                    }
+                    
+                    showStatus('🔧 Création du workflow d\'assemblage...', 'loading');
+                    
+                    const workflow = {};
+                    
+                    // Ajouter les nœuds LoadVideo pour chaque segment
+                    for (let i = 0; i < uploadedVideoPaths.length; i++) {
+                        const videoName = uploadedVideoPaths[i];
+                        
+                        console.log(`📹 Segment ${i + 1}: ${videoName}`);
+                        
+                        workflow[String(i + 1)] = {
+                            inputs: {
+                                video: videoName,
+                                force_rate: 0,
+                                force_size: "Disabled",
+                                custom_width: 768,
+                                custom_height: 1536,
+                                frame_load_cap: 0,
+                                skip_first_frames: 0,
+                                select_every_nth: 1,
+                                meta_batch: null,
+                                vae: null
+                            },
+                            class_type: "VHS_LoadVideo",
+                            _meta: { title: `Load Video ${i + 1}` }
+                        };
+                    }
+                
+                    // Créer la chaîne d'ImageBatch pour assembler les vidéos
+                    let currentNodeId = uploadedVideoPaths.length + 1;
+                    let lastBatchOutput = null;
+                    
+                    if (uploadedVideoPaths.length === 1) {
+                        lastBatchOutput = ["1", 0];
+                    } else if (uploadedVideoPaths.length === 2) {
+                        workflow[String(currentNodeId)] = {
+                            inputs: {
+                                image1: ["1", 0],
+                                image2: ["2", 0]
+                            },
+                            class_type: "ImageBatch"
+                        };
+                        lastBatchOutput = [String(currentNodeId), 0];
+                        currentNodeId++;
+                    } else {
+                        workflow[String(currentNodeId)] = {
+                            inputs: {
+                                image1: ["1", 0],
+                                image2: ["2", 0]
+                            },
+                            class_type: "ImageBatch"
+                        };
+                        let previousBatchId = currentNodeId;
+                        currentNodeId++;
+                        
+                        for (let i = 2; i < uploadedVideoPaths.length; i++) {
+                            workflow[String(currentNodeId)] = {
+                                inputs: {
+                                    image1: [String(previousBatchId), 0],
+                                    image2: [String(i + 1), 0]
+                                },
+                                class_type: "ImageBatch"
+                            };
+                            
+                            previousBatchId = currentNodeId;
+                            currentNodeId++;
+                        }
+                        
+                        lastBatchOutput = [String(previousBatchId), 0];
+                    }
+                    
+                    // Ajouter le nœud VideoCombine final
+                    const videoCombineId = String(currentNodeId);
+                    workflow[videoCombineId] = {
+                        inputs: {
+                            images: lastBatchOutput,
+                            frame_rate: 24,
+                            loop_count: 0,
+                            filename_prefix: "video/final_assembled",
+                            format: "video/h264-mp4",
+                            pix_fmt: "yuv420p",
+                            crf: 19,
+                            save_metadata: true,
+                            pingpong: false,
+                            save_output: true
+                        },
+                        class_type: "VHS_VideoCombine"
+                    };
+                    
+                    console.log('📋 Workflow généré:', JSON.stringify(workflow, null, 2));
+                    
+                    showStatus('⚙️ Lancement de l\'assemblage...', 'loading');
+                    
+                    fetch(`${apiUrl}/prompt`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: workflow, client_id: clientId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const promptId = data.prompt_id;
+                        const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
+                        
+                        ws.onmessage = async (event) => {
+                            const msg = JSON.parse(event.data);
+                            
+                            if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                                setTimeout(async () => {
+                                    try {
+                                        const histRes = await fetch(`${apiUrl}/history/${promptId}`);
+                                        const hist = await histRes.json();
+                                        
+                                        console.log('📦 Historique assemblage:', hist);
+                                        
+                                        if (hist[promptId] && hist[promptId].outputs) {
+                                            const outputs = hist[promptId].outputs;
+                                            const saveNode = outputs[videoCombineId];
+                                            
+                                            console.log('💾 Save node outputs:', saveNode);
+                                            
+                                            let videoInfo = null;
+                                            if (saveNode) {
+                                                if (saveNode.gifs && saveNode.gifs.length > 0) {
+                                                    videoInfo = saveNode.gifs[0];
+                                                } else if (saveNode.images && saveNode.images.length > 0) {
+                                                    videoInfo = saveNode.images[0];
+                                                }
+                                            }
+                                            
+                                            if (videoInfo) {
+                                                console.log('🎬 Info vidéo assemblée:', videoInfo);
+                                                const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder || '')}&type=${encodeURIComponent(videoInfo.type || 'output')}`;
+                                                
+                                                const videoResponse = await fetch(videoUrl);
+                                                if (!videoResponse.ok) {
+                                                    throw new Error(`Erreur téléchargement: ${videoResponse.status}`);
+                                                }
+                                                const videoBlob = await videoResponse.blob();
+                                                console.log('✅ Vidéo assemblée téléchargée, taille:', videoBlob.size, 'bytes');
+                                                
+                                                ws.close();
+                                                resolve(videoBlob);
+                                            } else {
+                                                console.error('❌ Structure outputs:', JSON.stringify(outputs, null, 2));
+                                                throw new Error('Vidéo assemblée introuvable');
+                                            }
+                                        } else {
+                                            throw new Error('Pas de données dans l\'historique');
+                                        }
+                                    } catch (err) {
+                                        console.error('❌ Erreur assemblage:', err);
+                                        ws.close();
+                                        reject(err);
+                                    }
+                                }, 1000);
+                            }
+                        };
+                        
+                        ws.onerror = () => reject(new Error('Erreur WebSocket assemblage'));
+                    })
+                    .catch(reject);
+                    
+                } catch (error) {
+                    console.error('❌ Erreur préparation assemblage:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        async function extractLastFrameFromBlob(videoBlob) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                const blobUrl = URL.createObjectURL(videoBlob);
+                video.src = blobUrl;
+                
+                video.addEventListener('loadedmetadata', () => {
+                    video.currentTime = Math.max(0, video.duration - 0.04);
+                });
+                
+                video.addEventListener('seeked', () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0);
+                    
+                    const imageBase64 = canvas.toDataURL('image/png');
+                    
+                    URL.revokeObjectURL(blobUrl);
+                    resolve(imageBase64);
+                }, { once: true });
+                
+                video.addEventListener('error', (e) => {
+                    URL.revokeObjectURL(blobUrl);
+                    reject(new Error('Erreur lors du chargement de la vidéo'));
+                });
+            });
+        }
+
+        function downloadVideo() {
+            if (finalAssembledBlob) {
+                const url = URL.createObjectURL(finalAssembledBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `irisforge_video_final_${Date.now()}.mp4`;
+                link.click();
+                URL.revokeObjectURL(url);
+                showStatus('✔ Vidéo finale téléchargée !', 'success');
+            } else {
+                showStatus('❌ Aucune vidéo assemblée disponible', 'error');
+            }
+        }
+
+        updateInfo();
+        
+        window.addEventListener('load', () => {
+            const imageFromIndex = localStorage.getItem('videoSourceImage');
+            if (imageFromIndex) {
+                uploadedImage = imageFromIndex;
+                document.getElementById('imagePreview').src = imageFromIndex;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('imageFileText').innerHTML = '✔ Image chargée depuis IrisForge<br><small style="color: rgba(255,255,255,0.5)">Vous pouvez changer l\'image si vous le souhaitez</small>';
+                
+                localStorage.removeItem('videoSourceImage');
+                
+                showStatus('✔ Image chargée avec succès depuis IrisForge !', 'success');
+                setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
+            }
+        });
+    </script>
+</body>
+</html>
