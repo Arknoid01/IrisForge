@@ -225,7 +225,7 @@
             <div class="steps-grid">
                 <input type="number" id="steps1" placeholder="KSampler 1" value="33" min="1">
                 <input type="number" id="steps2" placeholder="KSampler 2" value="27" min="1">
-                <input type="number" id="steps3" placeholder="KSampler 3" value="25" min="1">
+                <input type="number" id="steps3" placeholder="KSampler 3" value="45" min="1">
             </div>
         </div>
 
@@ -344,7 +344,7 @@
                     "5": { inputs: { text: userPrompt, clip: ["2", 1] }, class_type: "CLIPTextEncode" },
                     "14": { inputs: { seed: seed, steps: steps1, cfg: 8, sampler_name: "dpmpp_2m_sde_gpu", scheduler: "karras", denoise: 1, model: ["2", 0], positive: ["5", 0], negative: ["4", 0], latent_image: ["34", 0] }, class_type: "KSampler" },
                     "15": { inputs: { seed: seed + 1, steps: steps2, cfg: 5.4, sampler_name: "dpmpp_2m_sde_gpu", scheduler: "karras", denoise: 0.61, model: ["16", 0], positive: ["5", 0], negative: ["4", 0], latent_image: ["14", 0] }, class_type: "KSampler" },
-                    "16": { inputs: { lora_name: "DetailTweaker.safetensors", strength_model: 0.6, strength_clip: 0.6, model: ["17", 0], clip: ["17", 1] }, class_type: "LoraLoader" },
+                    "16": { inputs: { lora_name: "DetailTweaker.safetensors", strength_model: 0.95 , strength_clip: 0.95 , model: ["17", 0], clip: ["17", 1] }, class_type: "LoraLoader" },
                     "17": { inputs: { ckpt_name: "perfectionSuperModelILXL_20 (1).safetensors" }, class_type: "CheckpointLoaderSimple" },
                     "28": { inputs: { samples: ["29", 0], vae: ["17", 2] }, class_type: "VAEDecode" },
                     "29": { inputs: { seed: seed + 2, steps: steps3, cfg: 5.9, sampler_name: "dpmpp_sde_gpu", scheduler: "karras", denoise: 0.2, model: ["32", 0], positive: ["31", 0], negative: ["30", 0], latent_image: ["15", 0] }, class_type: "KSampler" },
