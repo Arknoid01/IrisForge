@@ -225,7 +225,7 @@
             <div class="steps-grid">
                 <input type="number" id="steps1" placeholder="KSampler 1" value="33" min="1">
                 <input type="number" id="steps2" placeholder="KSampler 2" value="27" min="1">
-                <input type="number" id="steps3" placeholder="KSampler 3" value="45" min="1">
+                <input type="number" id="steps3" placeholder="KSampler 3" value="28" min="1">
             </div>
         </div>
 
@@ -351,7 +351,7 @@
                     "30": { inputs: { text: "cross-eye, lazy eye, deformed eyes, asymmetrical eyes, over-sharpened eyes, glowing eyes, anime eyes, plastic skin, blurry eyes, low detail eyes", clip: ["17", 1] }, class_type: "CLIPTextEncode" },
                     "31": { inputs: { text: "beautiful detailed eyes, natural eye shape, sharp iris texture, clear pupils, balanced highlights, soft catchlight, realistic reflections, clean sclera, natural eyelash definition, high micro-details, subtle eye contrast, photorealistic eyes", clip: ["32", 1] }, class_type: "CLIPTextEncode" },
                     "32": { inputs: { lora_name: "Eye_Detail_Flux_Lora_-_Inpainting.safetensors", strength_model: 0.9, strength_clip: 0.9, model: ["17", 0], clip: ["17", 1] }, class_type: "LoraLoader" },
-                    "34": { inputs: { width: 640, height: 1152, batch_size: 1 }, class_type: "EmptyLatentImage" },
+                    "34": { inputs: { width: 768, height: 1536, batch_size: 1 }, class_type: "EmptyLatentImage" },
                     "12": { inputs: { filename_prefix: "ComfyUI", images: ["28", 0] }, class_type: "SaveImage" }
                 };
 
