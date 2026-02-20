@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assemblage - IrisForge 2.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f1e;
+            background-image: radial-gradient(at 20% 30%, rgba(102,126,234,0.15) 0px, transparent 50%),
+                              radial-gradient(at 80% 70%, rgba(118,75,162,0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        header {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 32px; font-weight: 700; margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 25px; }
+        .controls { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+
+        input[type="text"] {
+            flex: 1; min-width: 300px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 14px; color: #fff; font-size: 14px; transition: all 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none; border-color: #667eea;
+            background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 12px;
+            padding: 14px 28px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+            white-space: nowrap;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(102,126,234,0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-back { background: rgba(255,255,255,0.1); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); box-shadow: none; transform: none; }
+        .btn-assemble { background: linear-gradient(135deg, #ec4899 0%, #a78bfa 100%); }
+        .btn-clear { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); }
+        .btn-upload { background: rgba(102,126,234,0.2); border: 1px solid rgba(102,126,234,0.3); }
+
+        /* MAIN LAYOUT */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .panel-title {
+            color: #a78bfa; font-size: 16px; font-weight: 600;
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* GALLERY (source) */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+        .gallery-card {
+            position: relative;
+            background: rgba(255,255,255,0.04);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .gallery-card:hover { border-color: #a78bfa; transform: translateY(-2px); }
+        .gallery-card.selected { border-color: #ec4899; box-shadow: 0 0 0 3px rgba(236,72,153,0.3); }
+        .gallery-card-media {
+            width: 100%; aspect-ratio: 9/16;
+            object-fit: cover; display: block;
+        }
+        .gallery-card-overlay {
+            position: absolute; inset: 0;
+            background: rgba(236,72,153,0.25);
+            display: none; align-items: center; justify-content: center;
+            font-size: 28px;
+        }
+        .gallery-card.selected .gallery-card-overlay { display: flex; }
+        .gallery-card-order {
+            position: absolute; top: 6px; left: 6px;
+            background: #ec4899; color: #fff;
+            font-size: 12px; font-weight: 700;
+            width: 22px; height: 22px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+        }
+        .gallery-card.selected .gallery-card-order { display: flex; }
+        .gallery-card-label {
+            padding: 8px; color: rgba(255,255,255,0.7);
+            font-size: 11px; text-overflow: ellipsis;
+            overflow: hidden; white-space: nowrap;
+        }
+        .gallery-card-type {
+            position: absolute; top: 6px; right: 6px;
+            background: rgba(0,0,0,0.6); color: #fff;
+            font-size: 10px; padding: 2px 6px; border-radius: 4px;
+        }
+
+        /* QUEUE PANEL */
+        .queue-list { display: flex; flex-direction: column; gap: 10px; min-height: 80px; }
+        .queue-item {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 10px 12px;
+            transition: all 0.2s;
+        }
+        .queue-num {
+            background: #ec4899; color: #fff;
+            font-size: 12px; font-weight: 700;
+            width: 24px; height: 24px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .queue-thumb {
+            width: 36px; height: 36px; border-radius: 6px;
+            object-fit: cover; flex-shrink: 0;
+        }
+        .queue-label { flex: 1; color: rgba(255,255,255,0.8); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .queue-remove {
+            background: rgba(239,68,68,0.2); border: none; color: #f87171;
+            width: 24px; height: 24px; border-radius: 6px;
+            cursor: pointer; font-size: 14px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .queue-remove:hover { background: rgba(239,68,68,0.4); }
+        .queue-empty { color: rgba(255,255,255,0.3); font-size: 13px; text-align: center; padding: 20px; }
+
+        /* PROGRESS */
+        .progress-box { margin-top: 16px; display: none; }
+        .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ec4899, #a78bfa); border-radius: 4px; transition: width 0.3s; }
+        .progress-label { text-align: center; color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 6px; }
+
+        /* STATUS */
+        .status { padding: 12px; border-radius: 10px; font-size: 14px; text-align: center; display: none; margin-top: 14px; }
+        .status.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+        .status.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+        .status.loading { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
+
+        /* RESULT */
+        .result-box { margin-top: 20px; display: none; text-align: center; }
+        .result-box video { width: 100%; border-radius: 14px; box-shadow: 0 12px 40px rgba(102,126,234,0.3); }
+
+        /* NOTIFICATION */
+        .notification {
+            position: fixed; top: 20px; right: 20px;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 16px 20px; border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: none; z-index: 1000; min-width: 280px;
+            animation: slideIn 0.3s ease;
+        }
+        .notification.show { display: block; }
+        .notification.success { border-left: 4px solid #4ade80; }
+        .notification.error { border-left: 4px solid #f87171; }
+        .notification-content { color: white; font-size: 14px; }
+        @keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+
+        /* UPLOAD ZONE */
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px;
+            padding: 20px; text-align: center; cursor: pointer;
+            transition: all 0.3s; margin-bottom: 16px;
+        }
+        .upload-zone:hover { border-color: #667eea; background: rgba(102,126,234,0.05); }
+        .upload-zone input { display: none; }
+        .upload-zone p { color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 6px; }
+
+        .empty-state { text-align: center; padding: 40px; color: rgba(255,255,255,0.3); font-size: 14px; }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+        /* FILTER BAR */
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s;
+        }
+        .filter-btn.active { background: rgba(102,126,234,0.3); border-color: #667eea; color: #fff; }
+        .filter-btn:hover { border-color: #667eea; color: #fff; }
+        /* ── Sidebar ── */
+        .menu-btn { position: fixed; top: 52px; left: 50%; transform: translateX(-268px); width: 40px; height: 40px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 1000; transition: all 0.3s; }
+        .menu-btn:hover { background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.4); }
+        .menu-btn span { display: block; width: 18px; height: 2px; background: rgba(255,255,255,0.8); border-radius: 2px; transition: all 0.3s; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #0f0f1e; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 24px 16px; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .sidebar-title { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar-close { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .sidebar-close:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
+        .sidebar-link:hover { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); color: #fff; }
+        .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
+        .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <!-- Menu -->
+    <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">🔥 IrisForge</div>
+            <div class="sidebar-close" onclick="toggleSidebar()">✕</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
+            <div class="sidebar-divider"></div>
+            <a href="forge.html" class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
+            <a href="base.html" class="sidebar-link"><span class="icon">⚡</span> Base</a>
+            <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
+            <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
+            <a href="assemblage.html" class="sidebar-link active"><span class="icon">🎞️</span> Assemblage</a>
+            <div class="sidebar-divider"></div>
+            <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
+        </nav>
+    </div>
+<div class="container">
+    <header>
+        <h1>🎞️ Assemblage de vidéos</h1>
+        <p class="subtitle">Sélectionne les clips dans l'ordre souhaité, puis assemble-les en une seule vidéo</p>
+        <div class="controls">
+            <input type="text" id="comfyUrl" placeholder="http://127.0.0.1:8188" value="http://127.0.0.1:8188">
+            <button class="btn" onclick="loadHistory()">🔄 Actualiser</button>
+            
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- LEFT: Gallery source -->
+        <div class="panel">
+            <div class="panel-title">🎬 Sélectionne les clips (ordre de clic = ordre d'assemblage)</div>
+
+            <!-- Filter -->
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="setFilter('all', this)">Tout</button>
+                <button class="filter-btn" onclick="setFilter('video', this)">Vidéos</button>
+                <button class="filter-btn" onclick="setFilter('image', this)">Images</button>
+            </div>
+
+            <!-- Upload local files -->
+            <label class="upload-zone">
+                <input type="file" id="localFiles" accept="video/*,image/*" multiple onchange="addLocalFiles(event)">
+                <div style="font-size:24px;">📂</div>
+                <p>Ou glissez / cliquez pour ajouter des fichiers locaux (MP4, WebM, images...)</p>
+            </label>
+
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="empty-state" style="grid-column:1/-1;">
+                    <div class="empty-icon">🎬</div>
+                    Chargement de l'historique...
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Queue + Assemble -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+            <div class="panel">
+                <div class="panel-title">📋 File d'assemblage (<span id="queueCount">0</span> clip(s))</div>
+                <div class="queue-list" id="queueList">
+                    <div class="queue-empty">Aucun clip sélectionné.<br>Clique sur les vidéos à gauche.</div>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                    <button class="btn btn-assemble" style="flex:1;" onclick="assembleClips()" id="assembleBtn" disabled>
+                        🎞️ Assembler
+                    </button>
+                    <button class="btn btn-clear" onclick="clearQueue()">🗑️ Vider</button>
+                </div>
+
+                <div class="progress-box" id="progressBox">
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+                    <div class="progress-label" id="progressLabel"></div>
+                </div>
+
+                <div class="status" id="status"></div>
+
+                <div class="result-box" id="resultBox">
+                    <video id="resultVideo" controls></video>
+                    <button class="btn" style="margin-top:10px;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);" onclick="downloadResult()">💾 Télécharger</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div class="notification" id="notification">
+    <div class="notification-content" id="notificationText"></div>
+</div>
+
+<script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
+    // ── STATE ──────────────────────────────────────────────────────────────────
+    let allItems = [];       // { url, thumb, label, isVideo, isLocal, blob? }
+    let queue = [];          // items in assembly order
+    let currentFilter = 'all';
+    let resultBlob = null;
+
+    // ── NOTIFICATION ──────────────────────────────────────────────────────────
+    let notifTimer = null;
+    function showNotif(msg, type = 'success') {
+        const el = document.getElementById('notification');
+        document.getElementById('notificationText').textContent = msg;
+        el.className = `notification show ${type}`;
+        clearTimeout(notifTimer);
+        notifTimer = setTimeout(() => el.classList.remove('show'), 3500);
+    }
+
+    function showStatus(msg, type) {
+        const s = document.getElementById('status');
+        s.textContent = msg; s.className = 'status ' + type; s.style.display = 'block';
+    }
+    function hideStatus() { document.getElementById('status').style.display = 'none'; }
+
+    // ── PROGRESS ──────────────────────────────────────────────────────────────
+    function showProgress(pct, label) {
+        document.getElementById('progressBox').style.display = 'block';
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressLabel').textContent = label;
+    }
+    function hideProgress() { document.getElementById('progressBox').style.display = 'none'; }
+
+    // ── FILTER ────────────────────────────────────────────────────────────────
+    function setFilter(f, btn) {
+        currentFilter = f;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderGallery();
+    }
+
+    // ── LOAD HISTORY ──────────────────────────────────────────────────────────
+    async function loadHistory() {
+        const apiUrl = document.getElementById('comfyUrl').value.trim();
+        if (!apiUrl) { showNotif('Entrez l\'URL ComfyUI', 'error'); return; }
+
+        document.getElementById('galleryGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⏳</div>Chargement...</div>';
+
+        try {
+            const res = await fetch(`${apiUrl}/history`);
+            if (!res.ok) throw new Error(`Erreur ${res.status}`);
+            const history = await res.json();
+
+            const allMedia = [];
+            Object.entries(history).forEach(([promptId, data]) => {
+                if (!data.outputs) return;
+                Object.values(data.outputs).forEach(output => {
+                    ['images', 'videos', 'gifs'].forEach(key => {
+                        if (!output[key]) return;
+                        output[key].forEach(item => {
+                            const cb = Date.now() + Math.random();
+                            const url = `${apiUrl}/view?filename=${encodeURIComponent(item.filename)}&subfolder=${encodeURIComponent(item.subfolder||'')}&type=${encodeURIComponent(item.type||'output')}&t=${cb}`;
+                            const isVideo = /\.(mp4|webm|mov|gif)$/i.test(item.filename);
+                            allMedia.push({
+                                url,
+                                thumb: url,
+                                label: item.filename,
+                                isVideo,
+                                isLocal: false,
+                                timestamp: data.status?.completed_at || 0
+                            });
+                        });
+                    });
+                });
+            });
+
+            // Sort newest first, keep 10
+            allMedia.sort((a, b) => {
+                const nA = parseInt(a.label.match(/\d+/)?.[0] || 0);
+                const nB = parseInt(b.label.match(/\d+/)?.[0] || 0);
+                return nB - nA;
+            });
+
+            // Keep local files, replace remote ones
+            const localItems = allItems.filter(i => i.isLocal);
+            allItems = [...allMedia.slice(0, 10), ...localItems];
+            renderGallery();
+            showNotif(`✅ ${Math.min(allMedia.length, 10)} fichiers chargés`, 'success');
+
+        } catch(e) {
+            document.getElementById('galleryGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⚠️</div>${e.message}</div>`;
+            showNotif('Erreur: ' + e.message, 'error');
+        }
+    }
+
+    // ── LOCAL FILES ───────────────────────────────────────────────────────────
+    function addLocalFiles(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+            const url = URL.createObjectURL(file);
+            const isVideo = file.type.startsWith('video/');
+            allItems.unshift({ url, thumb: url, label: file.name, isVideo, isLocal: true, blob: file });
+        });
+        renderGallery();
+        showNotif(`✅ ${files.length} fichier(s) ajouté(s)`, 'success');
+        event.target.value = '';
+    }
+
+    // ── RENDER GALLERY ────────────────────────────────────────────────────────
+    function renderGallery() {
+        const grid = document.getElementById('galleryGrid');
+        const filtered = allItems.filter(item => {
+            if (currentFilter === 'video') return item.isVideo;
+            if (currentFilter === 'image') return !item.isVideo;
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div>Aucun fichier trouvé</div>';
+            return;
+        }
+
+        grid.innerHTML = '';
+        filtered.forEach((item, idx) => {
+            const globalIdx = allItems.indexOf(item);
+            const queuePos = queue.indexOf(item);
+            const isSelected = queuePos !== -1;
+
+            const card = document.createElement('div');
+            card.className = 'gallery-card' + (isSelected ? ' selected' : '');
+            card.onclick = () => toggleSelect(globalIdx);
+
+            const media = item.isVideo
+                ? `<video src="${item.url}" class="gallery-card-media" muted loop playsinline preload="metadata"></video>`
+                : `<img src="${item.url}" class="gallery-card-media" loading="lazy">`;
+
+            card.innerHTML = `
+                <div class="gallery-card-order">${isSelected ? queuePos + 1 : ''}</div>
+                ${media}
+                <div class="gallery-card-overlay">✓</div>
+                <div class="gallery-card-type">${item.isVideo ? '🎬' : '🖼️'}</div>
+                <div class="gallery-card-label" title="${item.label}">${item.label.split('/').pop()}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // ── SELECT / DESELECT ─────────────────────────────────────────────────────
+    function toggleSelect(idx) {
+        const item = allItems[idx];
+        const pos = queue.indexOf(item);
+        if (pos === -1) {
+            queue.push(item);
+        } else {
+            queue.splice(pos, 1);
+        }
+        renderGallery();
+        renderQueue();
+    }
+
+    // ── RENDER QUEUE ──────────────────────────────────────────────────────────
+    function renderQueue() {
+        const list = document.getElementById('queueList');
+        const btn = document.getElementById('assembleBtn');
+        document.getElementById('queueCount').textContent = queue.length;
+
+        if (queue.length === 0) {
+            list.innerHTML = '<div class="queue-empty">Aucun clip sélectionné.<br>Clique sur les vidéos à gauche.</div>';
+            btn.disabled = true;
+            return;
+        }
+        btn.disabled = false;
+        list.innerHTML = '';
+        queue.forEach((item, i) => {
+            const el = document.createElement('div');
+            el.className = 'queue-item';
+            const thumb = item.isVideo
+                ? `<video src="${item.url}" class="queue-thumb" muted playsinline preload="metadata"></video>`
+                : `<img src="${item.url}" class="queue-thumb">`;
+            el.innerHTML = `
+                <div class="queue-num">${i + 1}</div>
+                ${thumb}
+                <div class="queue-label" title="${item.label}">${item.label.split('/').pop()}</div>
+                <button class="queue-remove" onclick="removeFromQueue(${i})" title="Retirer">✕</button>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    function removeFromQueue(i) {
+        queue.splice(i, 1);
+        renderGallery();
+        renderQueue();
+    }
+
+    function clearQueue() {
+        queue = [];
+        renderGallery();
+        renderQueue();
+        hideStatus();
+        hideProgress();
+        document.getElementById('resultBox').style.display = 'none';
+    }
+
+    // ── ASSEMBLE ──────────────────────────────────────────────────────────────
+    async function assembleClips() {
+        if (queue.length === 0) return;
+        if (queue.length === 1) {
+            // Single clip — just download it
+            await downloadSingle(queue[0]);
+            return;
+        }
+
+        document.getElementById('assembleBtn').disabled = true;
+        document.getElementById('resultBox').style.display = 'none';
+        hideStatus();
+        resultBlob = null;
+
+        showStatus('🎞️ Assemblage en cours...', 'loading');
+        showProgress(0, 'Chargement des clips...');
+
+        try {
+            // Fetch all blobs
+            const blobs = [];
+            for (let i = 0; i < queue.length; i++) {
+                const item = queue[i];
+                showProgress(Math.round((i / queue.length) * 30), `Chargement clip ${i+1}/${queue.length}...`);
+                let blob;
+                if (item.blob) {
+                    blob = item.blob;
+                } else {
+                    const r = await fetch(item.url);
+                    if (!r.ok) throw new Error(`Impossible de charger ${item.label}`);
+                    blob = await r.blob();
+                }
+                blobs.push(blob);
+            }
+
+            showProgress(35, 'Création des éléments vidéo...');
+
+            // Create video elements
+            const videoEls = await Promise.all(blobs.map((blob, i) => new Promise((res, rej) => {
+                const v = document.createElement('video');
+                v.src = URL.createObjectURL(blob);
+                v.muted = true;
+                v.playsInline = true;
+                v.preload = 'auto';
+                const timeout = setTimeout(() => rej(new Error(`Timeout chargement clip ${i+1}`)), 20000);
+                v.onloadedmetadata = () => { clearTimeout(timeout); res(v); };
+                v.onerror = () => { clearTimeout(timeout); rej(new Error(`Erreur chargement clip ${i+1}`)); };
+                v.load();
+            })));
+
+            showProgress(45, 'Initialisation du canvas...');
+
+            const W = videoEls[0].videoWidth || 480;
+            const H = videoEls[0].videoHeight || 832;
+            const canvas = document.createElement('canvas');
+            canvas.width = W; canvas.height = H;
+            const ctx = canvas.getContext('2d');
+
+            const stream = canvas.captureStream(24);
+            const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                ? 'video/webm;codecs=vp9'
+                : (MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4');
+            const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 10000000 });
+            const chunks = [];
+            recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+            recorder.start(100);
+
+            // Draw each video sequentially
+            for (let i = 0; i < videoEls.length; i++) {
+                const v = videoEls[i];
+                const basePct = 50 + Math.round((i / videoEls.length) * 45);
+                showProgress(basePct, `Assemblage clip ${i+1}/${videoEls.length}...`);
+                showStatus(`🎞️ Assemblage clip ${i+1}/${videoEls.length}...`, 'loading');
+
+                await new Promise(res => {
+                    let drawing = true;
+                    let animId;
+                    const draw = () => {
+                        if (!drawing) return;
+                        ctx.drawImage(v, 0, 0, W, H);
+                        animId = requestAnimationFrame(draw);
+                    };
+                    v.onended = () => { drawing = false; cancelAnimationFrame(animId); res(); };
+                    v.onerror = () => { drawing = false; cancelAnimationFrame(animId); res(); };
+                    v.currentTime = 0;
+                    v.play().then(() => { animId = requestAnimationFrame(draw); }).catch(res);
+                });
+                v.pause();
+            }
+
+            recorder.stop();
+            await new Promise(res => recorder.onstop = res);
+
+            showProgress(100, 'Finalisation...');
+
+            resultBlob = new Blob(chunks, { type: mimeType });
+            const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+            // Show result
+            const url = URL.createObjectURL(resultBlob);
+            const vid = document.getElementById('resultVideo');
+            vid.src = url;
+            document.getElementById('resultBox').style.display = 'block';
+
+            hideProgress();
+            showStatus(`✅ Assemblage terminé ! (${queue.length} clips, ${(resultBlob.size / 1024 / 1024).toFixed(1)} Mo)`, 'success');
+            showNotif('✅ Vidéo assemblée prête !', 'success');
+
+        } catch(err) {
+            hideProgress();
+            showStatus('❌ Erreur : ' + err.message, 'error');
+            showNotif('❌ ' + err.message, 'error');
+        } finally {
+            document.getElementById('assembleBtn').disabled = false;
+        }
+    }
+
+    async function downloadSingle(item) {
+        showStatus('💾 Téléchargement...', 'loading');
+        try {
+            const blob = item.blob || await (await fetch(item.url)).blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = item.label.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showStatus('✅ Téléchargement lancé !', 'success');
+        } catch(e) { showStatus('❌ ' + e.message, 'error'); }
+    }
+
+    function downloadResult(ext = 'webm') {
+        if (!resultBlob) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(resultBlob);
+        a.download = `irisforge_assembled_${Date.now()}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem('comfyUrl');
+        if (saved) document.getElementById('comfyUrl').value = saved;
+        document.getElementById('comfyUrl').addEventListener('change', e => localStorage.setItem('comfyUrl', e.target.value));
+        loadHistory();
+    });
+</script>
+</body>
+</html>
