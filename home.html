@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrisForge — Accueil</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f1e;
+            background-image: radial-gradient(at 20% 30%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 80% 70%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* ── Header ── */
+        .logo {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 48px;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            margin-bottom: 36px;
+        }
+
+        /* ── URL Section ── */
+        .url-section {
+            background: rgba(102, 126, 234, 0.06);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        .url-section label {
+            display: block;
+            color: #a78bfa;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .url-row {
+            display: flex;
+            gap: 10px;
+        }
+        .url-row input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .url-row input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-validate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .btn-validate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-validate:active { transform: translateY(0); }
+        .url-status {
+            margin-top: 10px;
+            font-size: 13px;
+            min-height: 20px;
+            transition: all 0.3s;
+        }
+        .url-status.success { color: #4ade80; }
+        .url-status.error   { color: #f87171; }
+        .url-status.checking { color: #fbbf24; }
+
+        /* ── Navigation grid ── */
+        .nav-title {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .pages-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .page-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 9px 11px;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .page-card:hover {
+            background: rgba(167, 139, 250, 0.08);
+            border-color: rgba(167, 139, 250, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+        }
+        .page-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .page-icon {
+            font-size: 16px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 7px;
+            flex-shrink: 0;
+        }
+        .page-info { overflow: hidden; }
+        .page-name {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 1px;
+        }
+        .page-desc {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.07);
+            margin: 28px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .container { animation: fadeIn 0.4s ease; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="logo">🔥</div>
+    <h1>IrisForge</h1>
+    <p class="subtitle">Plateforme de génération d'images & vidéos</p>
+
+    <!-- URL ComfyUI -->
+    <div class="url-section">
+        <label>🔌 URL ComfyUI (RunPod)</label>
+        <div class="url-row">
+            <input type="text" id="comfyUrl" placeholder="https://xxx-8188.proxy.runpod.net">
+            <button class="btn-validate" onclick="validateUrl()">✓ Valider</button>
+        </div>
+        <div class="url-status" id="urlStatus"></div>
+    </div>
+
+    <!-- Pages -->
+    <div class="nav-title">Accès rapide</div>
+    <div class="pages-grid" id="pagesGrid">
+
+        <a class="page-card disabled" id="card-index" href="index.html">
+            <div class="page-icon">🎨</div>
+            <div class="page-info">
+                <div class="page-name">IrisForge 2.0</div>
+                <div class="page-desc">Génération avancée</div>
+            </div>
+        </a>
+
+        <a class="page-card disabled" id="card-base" href="base.html">
+            <div class="page-icon">⚡</div>
+            <div class="page-info">
+                <div class="page-name">Base</div>
+                <div class="page-desc">Génération rapide</div>
+            </div>
+        </a>
+
+        <a class="page-card disabled" id="card-editor" href="editor.html">
+            <div class="page-icon">✏️</div>
+            <div class="page-info">
+                <div class="page-name">Éditeur</div>
+                <div class="page-desc">Retouche & inpainting</div>
+            </div>
+        </a>
+
+        <a class="page-card disabled" id="card-video" href="video.html">
+            <div class="page-icon">🎬</div>
+            <div class="page-info">
+                <div class="page-name">Vidéo</div>
+                <div class="page-desc">Image to video</div>
+            </div>
+        </a>
+
+        <a class="page-card disabled" id="card-assemblage" href="assemblage.html">
+            <div class="page-icon">🎞️</div>
+            <div class="page-info">
+                <div class="page-name">Assemblage</div>
+                <div class="page-desc">Montage de clips</div>
+            </div>
+        </a>
+
+        <a class="page-card disabled" id="card-historique" href="historique.html">
+            <div class="page-icon">📜</div>
+            <div class="page-info">
+                <div class="page-name">Historique</div>
+                <div class="page-desc">Toutes les générations</div>
+            </div>
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique'];
+
+    function setCardsEnabled(enabled) {
+        PAGES.forEach(id => {
+            const el = document.getElementById(id);
+            if (enabled) el.classList.remove('disabled');
+            else el.classList.add('disabled');
+        });
+    }
+
+    async function validateUrl() {
+        const raw = document.getElementById('comfyUrl').value.trim();
+        const status = document.getElementById('urlStatus');
+
+        if (!raw) {
+            status.textContent = '⚠️ Veuillez entrer une URL';
+            status.className = 'url-status error';
+            return;
+        }
+
+        // Normaliser : enlever le slash final
+        const url = raw.replace(/\/$/, '');
+        document.getElementById('comfyUrl').value = url;
+
+        status.textContent = '⏳ Connexion à ComfyUI...';
+        status.className = 'url-status checking';
+        setCardsEnabled(false);
+
+        try {
+            const res = await fetch(`${url}/system_stats`, { signal: AbortSignal.timeout(5000) });
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+
+            // Sauvegarder dans localStorage
+            localStorage.setItem('comfyUrl', url);
+
+            status.textContent = '✅ Connecté ! Redirection possible vers toutes les pages.';
+            status.className = 'url-status success';
+            setCardsEnabled(true);
+
+        } catch (err) {
+            status.textContent = `❌ Impossible de joindre ComfyUI — vérifie l'URL`;
+            status.className = 'url-status error';
+            // On active quand même les cartes si une URL était déjà sauvegardée
+            if (localStorage.getItem('comfyUrl')) setCardsEnabled(true);
+        }
+    }
+
+    // Au chargement : restaurer l'URL sauvegardée
+    window.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem('comfyUrl');
+        if (saved) {
+            document.getElementById('comfyUrl').value = saved;
+            document.getElementById('urlStatus').textContent = '✅ URL chargée — clique Valider pour tester la connexion';
+            document.getElementById('urlStatus').className = 'url-status success';
+            setCardsEnabled(true);
+        }
+    });
+
+    // Valider avec la touche Entrée
+    document.getElementById('comfyUrl').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') validateUrl();
+    });
+</script>
+</body>
+</html>
