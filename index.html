@@ -182,6 +182,30 @@
             margin: 28px 0;
         }
 
+        /* ── DeepL Section ── */
+        .api-section {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        .api-section label {
+            display: block;
+            color: #34d399;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .api-section .api-desc {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .api-status { margin-top: 10px; font-size: 13px; min-height: 20px; }
+        .api-status.success { color: #4ade80; }
+        .api-status.error   { color: #f87171; }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -204,6 +228,17 @@
             <button class="btn-validate" onclick="validateUrl()">✓ Valider</button>
         </div>
         <div class="url-status" id="urlStatus"></div>
+    </div>
+
+    <!-- DeepL API -->
+    <div class="api-section">
+        <label>🌐 Clé API DeepL (traduction auto FR→EN)</label>
+        <div class="api-desc">Tes prompts seront automatiquement traduits avant chaque génération.</div>
+        <div class="url-row">
+            <input type="password" id="deeplKey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx">
+            <button class="btn-validate" onclick="saveDeeplKey()">✓ Valider</button>
+        </div>
+        <div class="api-status" id="deeplStatus"></div>
     </div>
 
     <!-- Pages -->
@@ -258,12 +293,20 @@
             </div>
         </a>
 
+        <a class="page-card disabled" id="card-modifier" href="modifier.html">
+            <div class="page-icon">🎭</div>
+            <div class="page-info">
+                <div class="page-name">Modifier Vidéo</div>
+                <div class="page-desc">Édition V2V CogVideoX</div>
+            </div>
+        </a>
+
     </div>
 
 </div>
 
 <script>
-    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique'];
+    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique','card-modifier'];
 
     function setCardsEnabled(enabled) {
         PAGES.forEach(id => {
@@ -310,6 +353,19 @@
         }
     }
 
+    function saveDeeplKey() {
+        const key = document.getElementById('deeplKey').value.trim();
+        const status = document.getElementById('deeplStatus');
+        if (!key) {
+            status.textContent = '⚠️ Clé vide';
+            status.className = 'api-status error';
+            return;
+        }
+        localStorage.setItem('deeplApiKey', key);
+        status.textContent = '✅ Clé sauvegardée — traduction automatique activée sur toutes les pages !';
+        status.className = 'api-status success';
+    }
+
     // Au chargement : restaurer l'URL sauvegardée
     window.addEventListener('DOMContentLoaded', () => {
         const saved = localStorage.getItem('comfyUrl');
@@ -319,11 +375,20 @@
             document.getElementById('urlStatus').className = 'url-status success';
             setCardsEnabled(true);
         }
+        const savedKey = localStorage.getItem('deeplApiKey');
+        if (savedKey) {
+            document.getElementById('deeplKey').value = savedKey;
+            document.getElementById('deeplStatus').textContent = '✅ Clé chargée — traduction automatique active';
+            document.getElementById('deeplStatus').className = 'api-status success';
+        }
     });
 
     // Valider avec la touche Entrée
     document.getElementById('comfyUrl').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') validateUrl();
+    });
+    document.getElementById('deeplKey').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveDeeplKey();
     });
 </script>
 </body>

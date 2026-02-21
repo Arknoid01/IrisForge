@@ -198,6 +198,7 @@
             <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
             <a href="video.html" class="sidebar-link active"><span class="icon">🎬</span> Vidéo</a>
             <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
+            <a href="modifier.html" class="sidebar-link"><span class="icon">🎭</span> Modifier Vidéo</a>
             <div class="sidebar-divider"></div>
             <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
         </nav>
@@ -277,7 +278,7 @@
         <p id="durationInfo">• Durée : ~2 secondes (49 frames)</p>
         <p id="interpolationInfo">• Interpolation : Aucune (qualité maximale)</p>
         <p id="timeInfo">• Temps estimé : variable selon GPU</p>
-        <p>• Résolution : 480x832 (portrait optimisé)</p>
+        <p>• Résolution : 384x672 (portrait optimisé)</p>
         <p>• FPS : 24 (cinématique)</p>
     </div>
 
@@ -545,8 +546,8 @@
         video.onseeked = function() {
             video.onseeked = null;
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 480;
-            canvas.height = video.videoHeight || 832;
+            canvas.width = video.videoWidth || 384;
+            canvas.height = video.videoHeight || 672;
             canvas.getContext('2d').drawImage(video, 0, 0);
             uploadedImage = canvas.toDataURL('image/png');
             lastFrameImage = uploadedImage;
@@ -568,8 +569,8 @@
                 video.onseeked = () => {
                     clearTimeout(timeout);
                     const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth || 480;
-                    canvas.height = video.videoHeight || 832;
+                    canvas.width = video.videoWidth || 384;
+                    canvas.height = video.videoHeight || 672;
                     canvas.getContext('2d').drawImage(video, 0, 0);
                     URL.revokeObjectURL(url);
                     resolve(canvas.toDataURL('image/png'));
@@ -606,14 +607,14 @@
                 "95": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
                 "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
                 "97": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
-                "120": { inputs: { upscale_method: "lanczos", width: 480, height: 832, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
+                "120": { inputs: { upscale_method: "lanczos", width: 384, height: 672, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
                 "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
                 "89": { inputs: { text: "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
                 "101": { inputs: { lora_name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength_model: 0.15, model: ["95", 0] }, class_type: "LoraLoaderModelOnly" },
                 "102": { inputs: { lora_name: "DetailTweaker.safetensors", strength_model: 0.15, model: ["96", 0] }, class_type: "LoraLoaderModelOnly" },
                 "103": { inputs: { shift: 5.0, model: ["102", 0] }, class_type: "ModelSamplingSD3" },
                 "104": { inputs: { shift: 5.0, model: ["101", 0] }, class_type: "ModelSamplingSD3" },
-                "98": { inputs: { width: 480, height: 832, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
+                "98": { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
                 "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: 18, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 9, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
                 "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: 18, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 9, end_at_step: 18, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
                 "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
@@ -904,8 +905,8 @@
                 v.load();
             })));
 
-            const W = videoElements[0].videoWidth || 480;
-            const H = videoElements[0].videoHeight || 832;
+            const W = videoElements[0].videoWidth || 384;
+            const H = videoElements[0].videoHeight || 672;
             const canvas = document.createElement('canvas');
             canvas.width = W; canvas.height = H;
             const ctx = canvas.getContext('2d');
