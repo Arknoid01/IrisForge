@@ -293,12 +293,20 @@
             </div>
         </a>
 
+        <a class="page-card disabled" id="card-prompt" href="prompt.html">
+            <div class="page-icon">💬</div>
+            <div class="page-info">
+                <div class="page-name">Prompts</div>
+                <div class="page-desc">Bibliothèque de prompts</div>
+            </div>
+        </a>
+
     </div>
 
 </div>
 
 <script>
-    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique'];
+    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique','card-prompt'];
 
     function setCardsEnabled(enabled) {
         PAGES.forEach(id => {
