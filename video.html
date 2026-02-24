@@ -615,8 +615,8 @@
                 "103": { inputs: { shift: 5.0, model: ["102", 0] }, class_type: "ModelSamplingSD3" },
                 "104": { inputs: { shift: 5.0, model: ["101", 0] }, class_type: "ModelSamplingSD3" },
                 "98": { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
-                "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: 18, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 9, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
-                "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: 18, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 9, end_at_step: 18, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
+                "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 9, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
+                "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 9, end_at_step: 18, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
                 "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
             };
 
