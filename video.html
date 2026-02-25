@@ -482,12 +482,15 @@
         // ── irisETA : calcul ETA temps réel basé sur vitesse des steps ──────
         const irisETA = {
             stepTimes: [],
-            reset() { this.stepTimes = []; },
+            globalTotal: 0,
+            reset() { this.stepTimes = []; this.globalTotal = 0; },
+            setTotal(total) { this.globalTotal = total; },
 
             onStep(currentStep, totalSteps) {
+                const effectiveTotal = this.globalTotal > 0 ? this.globalTotal : totalSteps;
                 this.stepTimes.push(Date.now());
-                const pct  = Math.round((currentStep / totalSteps) * 100);
-                const left = totalSteps - currentStep;
+                const pct  = Math.round((currentStep / effectiveTotal) * 100);
+                const left = effectiveTotal - currentStep;
                 let etaText = 'Calcul...', speedText = '';
 
                 if (this.stepTimes.length >= 2) {
@@ -497,7 +500,7 @@
                     const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
                     const avgSec = avgMs / 1000;
                     const etaSec = Math.round(left * avgSec);
-                    if (etaSec <= 0 || currentStep >= totalSteps) {
+                    if (etaSec <= 0 || currentStep >= effectiveTotal) {
                         etaText = 'Finalisation...';
                     } else if (etaSec < 60) {
                         etaText = `~${etaSec}s`;
@@ -511,7 +514,7 @@
                 document.getElementById('irisProgress').classList.add('visible');
                 document.getElementById('irisFill').style.width  = pct + '%';
                 document.getElementById('irisPct').textContent   = pct;
-                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
+                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${effectiveTotal}`;
                 if (speedText) document.getElementById('irisSpeed').textContent = speedText;
 
                 const etaEl = document.getElementById('irisEta');
@@ -960,7 +963,7 @@
         try {
             showStatus(`📤 Upload image source (clip ${clipIndex}/${totalExpected})...`, 'loading');
             const imageName = await uploadImageToComfyUI(apiUrl, lastFrameImage);
-            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.hide();
+            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.hide(); irisETA.setTotal(25);
             const { videoBlob } = await generateWithInterpolation(apiUrl, imageName, prompt);
 
             // Revoke previous result URL to free memory
@@ -1203,14 +1206,29 @@
     window.addEventListener('load', () => {
         try {
             const img = localStorage.getItem('videoSourceImage');
-            if (img && img.startsWith('data:image/')) {
-                uploadedImage = img; lastFrameImage = img;
-                document.getElementById('imagePreview').src = img;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('imageFileText').innerHTML = '✔ Image chargée depuis IrisForge<br><small style="color:rgba(255,255,255,0.5)">Vous pouvez changer l\'image</small>';
-                localStorage.removeItem('videoSourceImage');
-                showStatus('✔ Image chargée depuis IrisForge !', 'success');
-                setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
+            if (img) {
+                const applyImage = (dataUrl) => {
+                    uploadedImage = dataUrl; lastFrameImage = dataUrl;
+                    document.getElementById('imagePreview').src = dataUrl;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('imageFileText').innerHTML = '✔ Image chargée depuis IrisForge<br><small style="color:rgba(255,255,255,0.5)">Vous pouvez changer l\'image</small>';
+                    localStorage.removeItem('videoSourceImage');
+                };
+                if (img.startsWith('data:image/')) {
+                    applyImage(img);
+                    showStatus('✔ Image chargée depuis IrisForge !', 'success');
+                    setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
+                } else if (img.startsWith('http')) {
+                    fetch(img).then(r => r.blob()).then(blob => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            applyImage(reader.result);
+                            showStatus('✔ Image chargée depuis IrisForge !', 'success');
+                            setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
+                        };
+                        reader.readAsDataURL(blob);
+                    }).catch(() => localStorage.removeItem('videoSourceImage'));
+                }
             }
         } catch(e) { console.warn('Erreur lecture localStorage:', e); }
     });
