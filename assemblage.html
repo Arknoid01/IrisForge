@@ -231,14 +231,32 @@
     
         /* ── IrisForge Global Style ── */
         :root { --blue:#667eea; --violet:#a78bfa; --pink:#ec4899; --dark:#0f0f1e; }
-        body { font-family:'DM Sans',-apple-system,sans-serif !important; background:#0f0f1e !important; background-image:none !important; color:#fff; overflow-x:hidden; }
-        h1 { font-family:'Syne',sans-serif !important; }
-        .sidebar { background:rgba(10,10,24,.97) !important; backdrop-filter:blur(20px) !important; border-right:1px solid rgba(102,126,234,.18) !important; }
-        .sidebar-title { font-family:'Syne',sans-serif !important; }
-        /* Supprimer le padding-top prévu pour le vieux burger fixe */
-        .container { padding-top:20px !important; }
+
+        /* CRITIQUE : body doit être block, pas flex, pour que la topbar sticky occupe toute la largeur */
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif !important;
+            background: #0f0f1e !important;
+            background-image: none !important;
+            display: block !important;
+            align-items: unset !important;
+            justify-content: unset !important;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 0 !important;
+        }
+
+        /* Container recentré via margin auto maintenant que body n'est plus flex */
+        .container {
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-top: 20px !important;
+        }
+
+        h1 { font-family: 'Syne', sans-serif !important; }
+        .sidebar { background: rgba(10,10,24,.97) !important; backdrop-filter: blur(20px) !important; border-right: 1px solid rgba(102,126,234,.18) !important; }
+        .sidebar-title { font-family: 'Syne', sans-serif !important; }
         /* Cacher le vieux burger fixe */
-        .menu-btn { display:none !important; }
+        .menu-btn { display: none !important; }
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -247,7 +265,7 @@
     <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 55% at 50% 55%,rgba(102,126,234,.20) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 20%,rgba(118,75,162,.14) 0%,transparent 60%),radial-gradient(ellipse 45% 40% at 88% 80%,rgba(236,72,153,.10) 0%,transparent 60%),#0f0f1e;"></div>
     <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(102,126,234,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,.04) 1px,transparent 1px);background-size:60px 60px;"></div>
     <!-- IrisForge Topbar -->
-    <div style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
+    <div style="position:sticky;top:0;z-index:900;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
         <div style="display:flex;align-items:center;gap:12px;">
             <div onclick="toggleSidebar()" style="width:34px;height:34px;border-radius:9px;background:rgba(102,126,234,.12);border:1px solid rgba(102,126,234,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;" onmouseover="this.style.background='rgba(102,126,234,.25)'" onmouseout="this.style.background='rgba(102,126,234,.12)'">
                 <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
