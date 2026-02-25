@@ -676,7 +676,7 @@
                             const saveNode = hist[promptId].outputs[saveNodeId];
                             const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
                             if (videoInfo) { await applyVideo(videoInfo); }
-                            else { throw new Error('Aucune vidéo dans l'historique'); }
+                            else { throw new Error('Aucune vidéo dans l\'historique'); }
                         }
                     } catch(e) {
                         document.getElementById('irisStatus').textContent = '❌ Récupération échouée';
