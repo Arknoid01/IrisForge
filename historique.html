@@ -499,93 +499,6 @@
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.3);
         }
-
-        /* ── Barre de progression style C ── */
-        .iris-progress {
-            display: none;
-            padding: 14px 20px 12px;
-            background: rgba(0,0,0,.2);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-        }
-        .iris-progress.visible { display: block; }
-        .iris-progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 10px;
-        }
-        .iris-progress-status {
-            font-size: 11px;
-            color: rgba(255,255,255,.4);
-            margin-bottom: 2px;
-            font-family: 'Courier New', monospace;
-        }
-        .iris-progress-pct {
-            font-family: 'Syne', 'DM Sans', sans-serif;
-            font-size: 26px; font-weight: 800; line-height: 1;
-            background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .iris-progress-pct .unit {
-            font-size: 12px;
-            -webkit-text-fill-color: rgba(255,255,255,.4);
-        }
-        .iris-progress-right { text-align: right; }
-        .iris-eta-label {
-            font-size: 9px;
-            color: rgba(255,255,255,.25);
-            letter-spacing: 2px; text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-        .iris-eta-value {
-            font-family: 'Syne', 'DM Sans', sans-serif;
-            font-size: 15px; font-weight: 700;
-            color: #4ade80;
-            transition: color .4s;
-        }
-        .iris-eta-value.estimating { color: rgba(255,255,255,.3); font-size: 11px; }
-        .iris-eta-value.done { color: #a78bfa; }
-        .iris-progress-track {
-            height: 2px;
-            background: rgba(255,255,255,.07);
-            border-radius: 99px;
-            overflow: hidden;
-        }
-        .iris-progress-fill {
-            height: 100%;
-            border-radius: 99px;
-            background: linear-gradient(90deg, #667eea, #a78bfa, #ec4899);
-            background-size: 200% 100%;
-            width: 0%;
-            transition: width .35s cubic-bezier(.4,0,.2,1);
-            animation: irisShimmer 2.5s linear infinite;
-        }
-        @keyframes irisShimmer {
-            0%   { background-position: 200% 50%; }
-            100% { background-position: -200% 50%; }
-        }
-        .iris-progress-sub {
-            height: 1px; margin-top: 3px;
-            background: rgba(255,255,255,.03);
-            border-radius: 99px; overflow: hidden;
-        }
-        .iris-progress-sub-fill {
-            height: 100%;
-            background: rgba(167,139,250,.3);
-            border-radius: 99px; width: 25%;
-            animation: irisSubSlide 2.2s ease-in-out infinite;
-        }
-        @keyframes irisSubSlide {
-            0%   { margin-left: 0%; width: 20%; }
-            50%  { margin-left: 70%; width: 15%; }
-            100% { margin-left: 0%; width: 20%; }
-        }
-        .iris-progress-footer {
-            display: flex; justify-content: space-between;
-            margin-top: 8px;
-        }
-        .iris-progress-steps { font-size: 11px; color: rgba(255,255,255,.25); font-family: 'Courier New', monospace; }
-        .iris-progress-speed { font-size: 11px; color: rgba(255,255,255,.18); }
         /* ── Sidebar ── */
         .menu-btn { position: fixed; top: 20px; left: 20px; width: 36px; height: 36px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 1000; transition: all 0.3s; }
         .menu-btn:hover { background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.4); }
@@ -604,9 +517,122 @@
         .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
         .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
+    
+        /* ── IrisForge Global Style ── */
+        :root { --blue:#667eea; --violet:#a78bfa; --pink:#ec4899; --dark:#0f0f1e; }
+
+        /* CRITIQUE : body doit être block, pas flex, pour que la topbar sticky occupe toute la largeur */
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif !important;
+            background: #0f0f1e !important;
+            background-image: none !important;
+            display: block !important;
+            align-items: unset !important;
+            justify-content: unset !important;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 0 !important;
+        }
+
+        /* Container recentré via margin auto maintenant que body n'est plus flex */
+        .container {
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-top: 20px !important;
+        }
+
+        h1 { font-family: 'Syne', sans-serif !important; }
+        .sidebar { background: rgba(10,10,24,.97) !important; backdrop-filter: blur(20px) !important; border-right: 1px solid rgba(102,126,234,.18) !important; }
+        .sidebar-title { font-family: 'Syne', sans-serif !important; }
+        /* Cacher le vieux burger fixe */
+        .menu-btn { display: none !important; }
+
+    
+        /* ── Barre de progression dans le terminal ── */
+        .iris-progress-term {
+            display: none;
+            padding: 14px 20px 12px;
+            background: rgba(0,0,0,.2);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .iris-progress-term.visible { display: block; }
+        .iris-progress-term .iris-progress-header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 10px;
+        }
+        .iris-progress-term .iris-progress-status {
+            font-size: 11px; color: rgba(255,255,255,.4); margin-bottom: 2px;
+            font-family: 'Courier New', monospace;
+        }
+        .iris-progress-term .iris-progress-pct {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px; font-weight: 800; line-height: 1;
+            background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .iris-progress-term .iris-progress-pct .unit {
+            font-size: 12px; -webkit-text-fill-color: rgba(255,255,255,.4);
+        }
+        .iris-progress-term .iris-progress-right { text-align: right; }
+        .iris-progress-term .iris-eta-label {
+            font-size: 9px; color: rgba(255,255,255,.25);
+            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px;
+        }
+        .iris-progress-term .iris-eta-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px; font-weight: 700; color: #4ade80; transition: color .4s;
+        }
+        .iris-progress-term .iris-eta-value.estimating { color: rgba(255,255,255,.3); font-size: 11px; }
+        .iris-progress-term .iris-eta-value.done { color: #a78bfa; }
+        .iris-progress-term .iris-progress-track {
+            height: 2px; background: rgba(255,255,255,.07); border-radius: 99px; overflow: hidden;
+        }
+        .iris-progress-term .iris-progress-fill {
+            height: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, #667eea, #a78bfa, #ec4899);
+            background-size: 200% 100%; width: 0%;
+            transition: width .35s cubic-bezier(.4,0,.2,1);
+            animation: irisShimmer 2.5s linear infinite;
+        }
+        .iris-progress-term .iris-progress-sub {
+            height: 1px; margin-top: 3px;
+            background: rgba(255,255,255,.03); border-radius: 99px; overflow: hidden;
+        }
+        .iris-progress-term .iris-progress-sub-fill {
+            height: 100%; background: rgba(167,139,250,.3);
+            border-radius: 99px; width: 25%;
+            animation: irisSubSlide 2.2s ease-in-out infinite;
+        }
+        .iris-progress-term .iris-progress-footer {
+            display: flex; justify-content: space-between; margin-top: 8px;
+        }
+        .iris-progress-term .iris-progress-steps { font-size: 11px; color: rgba(255,255,255,.25); font-family: 'Courier New', monospace; }
+        .iris-progress-term .iris-progress-speed  { font-size: 11px; color: rgba(255,255,255,.18); }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 55% at 50% 55%,rgba(102,126,234,.20) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 20%,rgba(118,75,162,.14) 0%,transparent 60%),radial-gradient(ellipse 45% 40% at 88% 80%,rgba(236,72,153,.10) 0%,transparent 60%),#0f0f1e;"></div>
+    <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(102,126,234,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,.04) 1px,transparent 1px);background-size:60px 60px;"></div>
+    <!-- IrisForge Topbar -->
+    <div style="position:sticky;top:0;z-index:900;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div onclick="toggleSidebar()" style="width:34px;height:34px;border-radius:9px;background:rgba(102,126,234,.12);border:1px solid rgba(102,126,234,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;" onmouseover="this.style.background='rgba(102,126,234,.25)'" onmouseout="this.style.background='rgba(102,126,234,.12)'">
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+            </div>
+            <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+                <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(102,126,234,.4);flex-shrink:0;">🔥</div>
+                <div>
+                    <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1.1;">IrisForge</span>
+                    <span style="font-size:8px;color:#ec4899;font-weight:600;letter-spacing:2px;text-transform:uppercase;display:block;">Graphics</span>
+                </div>
+            </a>
+        </div>
+        <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">Historique</span>
+    </div>
+
     <!-- Menu -->
     <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
     <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -672,8 +698,8 @@
                     <span id="terminalStatusText">Connecté</span>
                 </div>
             </div>
-            <!-- Barre de progression temps réel -->
-            <div class="iris-progress" id="irisProgress">
+                        <!-- Barre de progression temps réel -->
+            <div class="iris-progress-term" id="irisProgress">
                 <div class="iris-progress-header">
                     <div>
                         <div class="iris-progress-status" id="irisStatus">Génération en cours...</div>
@@ -693,7 +719,6 @@
                     <span class="iris-progress-speed" id="irisSpeed"></span>
                 </div>
             </div>
-
             <div class="terminal-content" id="terminalContent">
                 <div class="terminal-line system">
                     <span class="terminal-timestamp">[--:--:--]</span>
@@ -714,6 +739,71 @@
     </div>
 
     <script>
+        // ── irisETA : calcul ETA temps réel basé sur vitesse des steps ──────
+        const irisETA = {
+            stepTimes: [],
+            reset() { this.stepTimes = []; },
+
+            onStep(currentStep, totalSteps) {
+                this.stepTimes.push(Date.now());
+                const pct  = Math.round((currentStep / totalSteps) * 100);
+                const left = totalSteps - currentStep;
+                let etaText = 'Calcul...', speedText = '';
+
+                if (this.stepTimes.length >= 2) {
+                    const win = this.stepTimes.slice(-6);
+                    const intervals = [];
+                    for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
+                    const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
+                    const avgSec = avgMs / 1000;
+                    const etaSec = Math.round(left * avgSec);
+                    if (etaSec <= 0 || currentStep >= totalSteps) {
+                        etaText = 'Finalisation...';
+                    } else if (etaSec < 60) {
+                        etaText = `~${etaSec}s`;
+                    } else {
+                        const m = Math.floor(etaSec / 60), s = etaSec % 60;
+                        etaText = `~${m}m${s > 0 ? s+'s' : ''}`;
+                    }
+                    speedText = `${avgSec.toFixed(1)}s/step`;
+                }
+
+                document.getElementById('irisProgress').classList.add('visible');
+                document.getElementById('irisFill').style.width  = pct + '%';
+                document.getElementById('irisPct').textContent   = pct;
+                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
+                if (speedText) document.getElementById('irisSpeed').textContent = speedText;
+
+                const etaEl = document.getElementById('irisEta');
+                etaEl.textContent = etaText;
+                etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
+
+                if (pct >= 100) {
+                    document.getElementById('irisStatus').textContent = 'Récupération...';
+                    etaEl.textContent = '✓'; etaEl.className = 'iris-eta-value done';
+                }
+            },
+
+            done() {
+                document.getElementById('irisStatus').textContent = '✅ Terminé !';
+                document.getElementById('irisEta').textContent    = '✓';
+                document.getElementById('irisEta').className      = 'iris-eta-value done';
+                document.getElementById('irisFill').style.width   = '100%';
+                document.getElementById('irisPct').textContent    = '100';
+            },
+
+            hide() {
+                document.getElementById('irisProgress').classList.remove('visible');
+                document.getElementById('irisFill').style.width   = '0%';
+                document.getElementById('irisPct').textContent    = '0';
+                document.getElementById('irisStatus').textContent = 'Génération en cours...';
+                document.getElementById('irisEta').textContent    = 'Calcul...';
+                document.getElementById('irisEta').className      = 'iris-eta-value estimating';
+                document.getElementById('irisSteps').textContent  = 'Step 0 / 0';
+                document.getElementById('irisSpeed').textContent  = '';
+                this.reset();
+            }
+        };
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
@@ -847,81 +937,6 @@
             }
         }
 
-        // ── ETA calculator ───────────────────────────────────────────────────
-        const irisETA = {
-            stepTimes: [],
-            totalSteps: 0,
-
-            reset() { this.stepTimes = []; this.totalSteps = 0; },
-
-            onStep(currentStep, totalSteps) {
-                this.stepTimes.push(Date.now());
-                this.totalSteps = totalSteps;
-
-                const pct  = Math.round((currentStep / totalSteps) * 100);
-                const left = totalSteps - currentStep;
-
-                let etaText = 'Calcul...', speedText = '';
-
-                if (this.stepTimes.length >= 2) {
-                    const win = this.stepTimes.slice(-6);
-                    const intervals = [];
-                    for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
-                    const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
-                    const avgSec = avgMs / 1000;
-                    const etaSec = Math.round(left * avgSec);
-
-                    if (etaSec <= 0 || currentStep >= totalSteps) {
-                        etaText = 'Finalisation...';
-                    } else if (etaSec < 60) {
-                        etaText = `~${etaSec}s`;
-                    } else {
-                        const m = Math.floor(etaSec / 60), s = etaSec % 60;
-                        etaText = `~${m}m${s > 0 ? s+'s' : ''}`;
-                    }
-                    speedText = `${avgSec.toFixed(1)}s/step`;
-                }
-
-                // Mise à jour DOM
-                const box = document.getElementById('irisProgress');
-                box.classList.add('visible');
-                document.getElementById('irisFill').style.width  = pct + '%';
-                document.getElementById('irisPct').textContent   = pct;
-                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
-                if (speedText) document.getElementById('irisSpeed').textContent = speedText;
-
-                const etaEl = document.getElementById('irisEta');
-                etaEl.textContent = etaText;
-                etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
-
-                if (pct >= 100) {
-                    document.getElementById('irisStatus').textContent = 'Récupération...';
-                    etaEl.textContent = '✓';
-                    etaEl.className = 'iris-eta-value done';
-                }
-            },
-
-            done() {
-                document.getElementById('irisStatus').textContent  = '✅ Terminé !';
-                document.getElementById('irisEta').textContent     = '✓';
-                document.getElementById('irisEta').className       = 'iris-eta-value done';
-                document.getElementById('irisFill').style.width    = '100%';
-                document.getElementById('irisPct').textContent     = '100';
-            },
-
-            hide() {
-                document.getElementById('irisProgress').classList.remove('visible');
-                document.getElementById('irisFill').style.width  = '0%';
-                document.getElementById('irisPct').textContent   = '0';
-                document.getElementById('irisStatus').textContent = 'Génération en cours...';
-                document.getElementById('irisEta').textContent   = 'Calcul...';
-                document.getElementById('irisEta').className     = 'iris-eta-value estimating';
-                document.getElementById('irisSteps').textContent = 'Step 0 / 0';
-                document.getElementById('irisSpeed').textContent = '';
-                this.reset();
-            }
-        };
-
         function connectWebSocket() {
             const apiUrl = document.getElementById('comfyUrl').value.trim();
             
@@ -964,7 +979,6 @@
                             const percent = ((p.value / p.max) * 100).toFixed(1);
                             const bar = '█'.repeat(Math.floor(percent / 5)) + '░'.repeat(20 - Math.floor(percent / 5));
                             addTerminalLine(`⏳ [${bar}] ${p.value}/${p.max} (${percent}%)`, 'progress');
-                            // Barre de progression style C avec ETA temps réel
                             irisETA.onStep(p.value, p.max);
                         }
                         else if (msg.type === 'executing') {
@@ -978,15 +992,12 @@
                                 const nodeName = nodeNames[msg.data.node] || `Nœud ${msg.data.node}`;
                                 addTerminalLine(`🔄 ${nodeName}${promptId}`, 'info');
                             } else {
-                                addTerminalLine(`✅ Génération terminée${promptId}`, 'system');
-                                irisETA.done();
-                                setTimeout(() => { irisETA.hide(); loadHistory(true); }, 3000);
+                                addTerminalLine(`✅ Génération terminée${promptId}`, 'system'); irisETA.done(); setTimeout(() => { irisETA.hide(); loadHistory(true); }, 3000);
                             }
                         }
                         else if (msg.type === 'execution_start') {
                             const promptId = msg.data.prompt_id.substring(0, 8);
-                            addTerminalLine(`🚀 Nouvelle génération (ID: ${promptId}...)`, 'system');
-                            irisETA.hide();
+                            addTerminalLine(`🚀 Nouvelle génération (ID: ${promptId}...)`, 'system'); irisETA.hide();
                         }
                         else if (msg.type === 'execution_error') {
                             addTerminalLine(`❌ ERREUR: ${msg.data.exception_message}`, 'error');

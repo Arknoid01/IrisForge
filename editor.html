@@ -106,14 +106,6 @@
         input[type="file"] {
             display: none;
         }
-        .recovery-banner {
-            background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3);
-            border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
-            display: none; align-items: center; justify-content: space-between; gap: 12px;
-        }
-        .recovery-banner p { color: rgba(255,255,255,0.8); font-size: 13px; margin: 0; }
-        .recovery-btn { width: auto !important; padding: 8px 16px !important; font-size: 13px !important; background: rgba(251,191,36,0.3) !important; border: 1px solid rgba(251,191,36,0.5) !important; margin-top: 0 !important; }
-        .recovery-dismiss { width: auto !important; padding: 8px 16px !important; font-size: 13px !important; background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; margin-top: 0 !important; }
         .file-btn, button {
             width: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -167,6 +159,29 @@
             border-color: #667eea;
             background: rgba(255, 255, 255, 0.08);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .status {
+            text-align: center;
+            padding: 12px;
+            margin: 16px 0;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        .status.loading {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
         }
         .result {
             margin-top: 30px;
@@ -280,6 +295,36 @@
         .translate-btn.success { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #4ade80; }
         .translate-btn.error { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #f87171; }
     
+        /* ── IrisForge Global Style ── */
+        :root { --blue:#667eea; --violet:#a78bfa; --pink:#ec4899; --dark:#0f0f1e; }
+
+        /* CRITIQUE : body doit être block, pas flex, pour que la topbar sticky occupe toute la largeur */
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif !important;
+            background: #0f0f1e !important;
+            background-image: none !important;
+            display: block !important;
+            align-items: unset !important;
+            justify-content: unset !important;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 0 !important;
+        }
+
+        /* Container recentré via margin auto maintenant que body n'est plus flex */
+        .container {
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-top: 20px !important;
+        }
+
+        h1 { font-family: 'Syne', sans-serif !important; }
+        .sidebar { background: rgba(10,10,24,.97) !important; backdrop-filter: blur(20px) !important; border-right: 1px solid rgba(102,126,234,.18) !important; }
+        .sidebar-title { font-family: 'Syne', sans-serif !important; }
+        /* Cacher le vieux burger fixe */
+        .menu-btn { display: none !important; }
+
+    
         /* ── Barre de progression Style C ── */
         .iris-progress {
             display: none;
@@ -302,7 +347,7 @@
             margin-bottom: 2px;
         }
         .iris-progress-pct {
-            font-family: 'Syne', 'DM Sans', sans-serif;
+            font-family: 'Syne', sans-serif;
             font-size: 26px; font-weight: 800; line-height: 1;
             background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -319,7 +364,7 @@
             margin-bottom: 3px;
         }
         .iris-eta-value {
-            font-family: 'Syne', 'DM Sans', sans-serif;
+            font-family: 'Syne', sans-serif;
             font-size: 15px; font-weight: 700;
             color: #4ade80;
             transition: color .4s;
@@ -368,8 +413,30 @@
         .iris-progress-steps { font-size: 11px; color: rgba(255,255,255,.25); }
         .iris-progress-speed { font-size: 11px; color: rgba(255,255,255,.18); }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 55% at 50% 55%,rgba(102,126,234,.20) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 20%,rgba(118,75,162,.14) 0%,transparent 60%),radial-gradient(ellipse 45% 40% at 88% 80%,rgba(236,72,153,.10) 0%,transparent 60%),#0f0f1e;"></div>
+    <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(102,126,234,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,.04) 1px,transparent 1px);background-size:60px 60px;"></div>
+    <!-- IrisForge Topbar -->
+    <div style="position:sticky;top:0;z-index:900;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div onclick="toggleSidebar()" style="width:34px;height:34px;border-radius:9px;background:rgba(102,126,234,.12);border:1px solid rgba(102,126,234,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;" onmouseover="this.style.background='rgba(102,126,234,.25)'" onmouseout="this.style.background='rgba(102,126,234,.12)'">
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+            </div>
+            <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+                <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(102,126,234,.4);flex-shrink:0;">🔥</div>
+                <div>
+                    <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1.1;">IrisForge</span>
+                    <span style="font-size:8px;color:#ec4899;font-weight:600;letter-spacing:2px;text-transform:uppercase;display:block;">Graphics</span>
+                </div>
+            </a>
+        </div>
+        <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">Éditeur & Inpainting</span>
+    </div>
+
     <!-- Menu -->
     <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
     <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -395,15 +462,6 @@
         
         <h1>✏️ IrisForge 2.0</h1>
         <p class="subtitle">Éditeur Inpainting</p>
-
-        <!-- RECOVERY -->
-        <div class="recovery-banner" id="recoveryBanner">
-            <p>⚠️ Une génération précédente a été interrompue. Récupérer l'image ?</p>
-            <div style="display:flex;gap:8px;">
-                <button class="recovery-btn" onclick="recoverLastGeneration()">✅ Récupérer</button>
-                <button class="recovery-dismiss" onclick="dismissRecovery()">✕ Ignorer</button>
-            </div>
-        </div>
 
         <div class="info">
             💡 Dessinez en blanc sur les zones à régénérer. Utilisez le pinceau pour masquer les parties de l'image que vous voulez modifier.
@@ -457,7 +515,7 @@
             </div>
         </div>
 
-
+        <div class="status" id="status"></div>
         <div class="iris-progress" id="irisProgress">
             <div class="iris-progress-header">
                 <div>
@@ -492,31 +550,19 @@
     </div>
 
     <script>
-        // ── ETA calculator ───────────────────────────────────────────────────
+        // ── irisETA : calcul ETA temps réel basé sur vitesse des steps ──────
         const irisETA = {
             stepTimes: [],
-            globalOffset: 0,
-            globalTotal: 0,
-            prevRawStep: 0,
-            reset() { this.stepTimes = []; this.globalOffset = 0; this.globalTotal = 0; this.prevRawStep = 0; },
-            setTotal(total) { this.globalTotal = total; },
+            reset() { this.stepTimes = []; },
 
-            onStep(rawStep, rawMax) {
-                if (rawStep <= this.prevRawStep && this.prevRawStep > 0) {
-                    this.globalOffset += this.prevRawStep;
-                }
-                this.prevRawStep = rawStep;
-
-                const currentStep = this.globalOffset + rawStep;
-                const totalSteps  = this.globalTotal > 0 ? this.globalTotal : (this.globalOffset + rawMax);
-
+            onStep(currentStep, totalSteps) {
                 this.stepTimes.push(Date.now());
-                const pct  = Math.min(Math.round((currentStep / totalSteps) * 100), 99);
+                const pct  = Math.round((currentStep / totalSteps) * 100);
                 const left = totalSteps - currentStep;
                 let etaText = 'Calcul...', speedText = '';
 
                 if (this.stepTimes.length >= 2) {
-                    const win = this.stepTimes.slice(-8);
+                    const win = this.stepTimes.slice(-6);
                     const intervals = [];
                     for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
                     const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
@@ -533,8 +579,7 @@
                     speedText = `${avgSec.toFixed(1)}s/step`;
                 }
 
-                const box = document.getElementById('irisProgress');
-                box.classList.add('visible');
+                document.getElementById('irisProgress').classList.add('visible');
                 document.getElementById('irisFill').style.width  = pct + '%';
                 document.getElementById('irisPct').textContent   = pct;
                 document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
@@ -543,6 +588,11 @@
                 const etaEl = document.getElementById('irisEta');
                 etaEl.textContent = etaText;
                 etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
+
+                if (pct >= 100) {
+                    document.getElementById('irisStatus').textContent = 'Récupération...';
+                    etaEl.textContent = '✓'; etaEl.className = 'iris-eta-value done';
+                }
             },
 
             done() {
@@ -570,129 +620,6 @@
         let isDrawing = false;
         let brushSize = 50;
         let sourceImage = null;
-
-        // ── RECOVERY ─────────────────────────────────────────────────────────
-        function saveGenerationState(promptId, apiUrl) {
-            localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId: '12', apiUrl, page: 'editor', ts: Date.now(),
-            clientId,
-        }));
-        }
-        function clearGenerationState() { localStorage.removeItem('irisforge_pending'); }
-        function checkRecovery() {
-            try {
-                const saved = localStorage.getItem('irisforge_pending');
-                if (!saved) return;
-                const data = JSON.parse(saved);
-                if (data.page !== 'editor') return;
-                if (Date.now() - data.ts < 7200000) {
-                    document.getElementById('recoveryBanner').style.display = 'flex';
-                } else { clearGenerationState(); }
-            } catch(e) { clearGenerationState(); }
-        }
-        function dismissRecovery() {
-            clearGenerationState();
-            document.getElementById('recoveryBanner').style.display = 'none';
-        }
-        async function recoverLastGeneration() {
-            let data;
-            try { data = JSON.parse(localStorage.getItem('irisforge_pending')); } catch(e) { clearGenerationState(); return; }
-            if (!data) return;
-            document.getElementById('recoveryBanner').style.display = 'none';
-            const { promptId, saveNodeId, apiUrl } = data;
-
-            const applyImage = (img) => {
-                const imgUrl = `${apiUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder||'')}&type=${encodeURIComponent(img.type||'output')}`;
-                const resultImg = document.getElementById('resultImg');
-                resultImg.src = imgUrl;
-                resultImg.classList.add('show');
-                document.getElementById('resultSection').style.display = 'block';
-                document.getElementById('floatingActions').classList.add('show');
-                irisETA.done(); setTimeout(() => irisETA.hide(), 2000);
-                clearGenerationState();
-            };
-
-            try {
-                // Cas 1 : génération déjà terminée
-                const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
-                if (hist[promptId] && hist[promptId].outputs) {
-                    const saveNode = hist[promptId].outputs[saveNodeId];
-                    if (saveNode && saveNode.images && saveNode.images.length > 0) {
-                        applyImage(saveNode.images[0]);
-                        return;
-                    }
-                }
-            } catch(e) {}
-
-            // Cas 2 : encore en cours → rebrancher WS + polling de secours
-            isGenerating = true;
-            const btn = document.querySelector('button:not(.recovery-btn):not(.recovery-dismiss)');
-            if (btn) btn.disabled = true;
-
-            // Restaurer le clientId d'origine pour recevoir les events du bon prompt
-            if (data.clientId) clientId = data.clientId;
-
-            // Afficher immédiatement la barre
-            irisETA.hide(); irisETA.setTotal(steps1 + steps2 + steps3);
-            document.getElementById('irisProgress').classList.add('visible');
-            document.getElementById('irisStatus').textContent = 'Reconnexion en cours...';
-
-            const wsUrl = apiUrl.replace(/^http/, 'ws');
-            const wsRecover = new WebSocket(`${wsUrl}/ws?clientId=${clientId}`);
-            let recovered = false;
-
-            wsRecover.onopen = () => {
-                document.getElementById('irisStatus').textContent = 'Génération en cours (reprise)...';
-            };
-
-            wsRecover.onmessage = async (event) => {
-                if (typeof event.data !== 'string') return;
-                let msg; try { msg = JSON.parse(event.data); } catch(e) { return; }
-                if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
-                    irisETA.onStep(msg.data.value, msg.data.max);
-                }
-                if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
-                    if (recovered) return;
-                    recovered = true;
-                    clearInterval(pollInterval);
-                    setTimeout(async () => {
-                        try {
-                            const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
-                            if (hist[promptId] && hist[promptId].outputs) {
-                                const saveNode = hist[promptId].outputs[saveNodeId];
-                                if (saveNode && saveNode.images && saveNode.images.length > 0) {
-                                    applyImage(saveNode.images[0]);
-                                }
-                            }
-                        } catch(e) { clearGenerationState(); }
-                        finally { wsRecover.close(); isGenerating = false; if (btn) btn.disabled = false; }
-                    }, 1000);
-                }
-            };
-
-            // Polling de secours toutes les 3s si le WS rate les events (rechargement après fin)
-            const pollInterval = setInterval(async () => {
-                if (recovered) { clearInterval(pollInterval); return; }
-                try {
-                    const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
-                    if (hist[promptId] && hist[promptId].outputs) {
-                        const saveNode = hist[promptId].outputs[saveNodeId];
-                        if (saveNode && saveNode.images && saveNode.images.length > 0) {
-                            recovered = true;
-                            clearInterval(pollInterval);
-                            wsRecover.close();
-                            applyImage(saveNode.images[0]);
-                        }
-                    }
-                } catch(e) { /* on réessaie */ }
-            }, 3000);
-
-            wsRecover.onerror = () => {
-                clearInterval(pollInterval);
-                isGenerating = false;
-                if (btn) btn.disabled = false;
-                clearGenerationState();
-            };
-        }
                 function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
@@ -740,7 +667,6 @@
                 if (el) el.value = savedUrl;
                 autoPreheat(savedUrl);
             }
-            checkRecovery();
         });
 
         // Mise à jour de la taille du pinceau
@@ -757,26 +683,15 @@
                 link.download = `irisforge_inpaint_${Date.now()}.png`;
                 link.click();
                 showStatus('✓ Téléchargement lancé !', 'success');
-
+                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
             }
         }
 
-        async function openVideo() {
+        function openVideo() {
             const img = document.getElementById('resultImg');
             if (img.src) {
-                try {
-                    const response = await fetch(img.src);
-                    const blob = await response.blob();
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        localStorage.setItem('videoSourceImage', reader.result);
-                        window.location.href = 'video.html';
-                    };
-                    reader.readAsDataURL(blob);
-                } catch (err) {
-                    localStorage.setItem('videoSourceImage', img.src);
-                    window.location.href = 'video.html';
-                }
+                localStorage.setItem('videoImage', img.src);
+                window.location.href = 'video.html';
             }
         }
 
@@ -807,7 +722,7 @@
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                             ctx.drawImage(img, 0, 0);
                             showStatus('✓ Image chargée', 'success');
-            
+                            setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
                             URL.revokeObjectURL(url);
                         };
                         img.onerror = () => {
@@ -828,7 +743,7 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0);
                     showStatus('✓ Image chargée', 'success');
-    
+                    setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
                 };
                 img.onerror = () => {
                     showStatus('✗ Erreur de chargement', 'error');
@@ -851,7 +766,7 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(sourceImage, 0, 0);
                 showStatus('✓ Masque effacé', 'success');
-
+                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
             }
         }
 
@@ -930,22 +845,12 @@
         }
 
         function showStatus(msg, type) {
-            const statusEl = document.getElementById('irisStatus');
-            if (!statusEl) return;
-            if (type === 'error') {
-                const progress = document.getElementById('irisProgress');
-                if (progress) progress.style.display = 'block';
-                statusEl.textContent = msg;
-                statusEl.style.color = '#f87171';
-            } else if (type === 'success') {
-                statusEl.textContent = msg;
-                statusEl.style.color = '#4ade80';
-            } else {
-                statusEl.textContent = msg;
-                statusEl.style.color = '';
-            }
-            console.log('[IrisForge]', type, msg);
+            const s = document.getElementById('status');
+            s.textContent = msg;
+            s.className = 'status ' + type;
+            s.style.display = 'block';
         }
+
         async function dataURLtoFile(dataURL, filename) {
             const res = await fetch(dataURL);
             const blob = await res.blob();
@@ -982,58 +887,47 @@
 
             const apiUrl = document.getElementById('apiUrl').value.trim();
             const prompt = document.getElementById('prompt').value.trim();
+            const translatedPrompt = await translateToEnglish(prompt);
+            const steps1 = parseInt(document.getElementById('steps1').value);
+            const steps2 = parseInt(document.getElementById('steps2').value);
+            const steps3 = parseInt(document.getElementById('steps3').value);
 
             if (!apiUrl || !prompt) {
                 showStatus('Remplissez tous les champs', 'error');
                 return;
             }
 
-            const translatedPrompt = (await translateToEnglish(prompt)) || prompt;
-            const steps1 = parseInt(document.getElementById('steps1').value) || 31;
-            const steps2 = parseInt(document.getElementById('steps2').value) || 25;
-            const steps3 = parseInt(document.getElementById('steps3').value) || 23;
-
             showStatus('Préparation...', 'loading');
 
             try {
-                // Créer le masque en comparant le canvas (image + tracé) avec l'image source originale.
-                // On ne peut pas détecter le tracé blanc en lisant juste les pixels du canvas
-                // car l'image source elle-même a des pixels clairs — tout serait masqué.
-                // La bonne approche : rendre l'image source dans un canvas off-screen,
-                // puis comparer pixel par pixel avec le canvas de dessin.
+                // Créer le masque (fond noir + dessin blanc)
                 const maskCanvas = document.createElement('canvas');
                 maskCanvas.width = canvas.width;
                 maskCanvas.height = canvas.height;
                 const maskCtx = maskCanvas.getContext('2d');
-
-                // Canvas off-screen avec uniquement l'image source (sans tracé)
-                const refCanvas = document.createElement('canvas');
-                refCanvas.width = canvas.width;
-                refCanvas.height = canvas.height;
-                const refCtx = refCanvas.getContext('2d');
-                refCtx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
-
-                // Fond noir pour le masque
+                
+                // Fond noir
                 maskCtx.fillStyle = '#000000';
                 maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-
-                const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const refData    = refCtx.getImageData(0, 0, canvas.width, canvas.height);
-                const maskData   = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-
-                for (let i = 0; i < canvasData.data.length; i += 4) {
-                    const dr = Math.abs(canvasData.data[i]     - refData.data[i]);
-                    const dg = Math.abs(canvasData.data[i + 1] - refData.data[i + 1]);
-                    const db = Math.abs(canvasData.data[i + 2] - refData.data[i + 2]);
-                    // Pixel modifié par le pinceau = différence notable avec l'image source
-                    if (dr + dg + db > 30) {
-                        maskData.data[i]     = 255;
+                
+                // Copier le dessin blanc
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+                
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const r = imageData.data[i];
+                    const g = imageData.data[i + 1];
+                    const b = imageData.data[i + 2];
+                    
+                    // Si pixel est blanc (masque dessiné)
+                    if (r > 200 && g > 200 && b > 200) {
+                        maskData.data[i] = 255;
                         maskData.data[i + 1] = 255;
                         maskData.data[i + 2] = 255;
                         maskData.data[i + 3] = 255;
                     }
                 }
-
+                
                 maskCtx.putImageData(maskData, 0, 0);
 
                 showStatus('Upload des images...', 'loading');
@@ -1139,14 +1033,6 @@
                         },
                         class_type: "KSampler"
                     },
-                    // Réapplique le masque avant le 2ème KSampler pour éviter la régénération hors zone
-                    "55": {
-                        inputs: {
-                            samples: ["14", 0],
-                            mask: ["52", 0]
-                        },
-                        class_type: "SetLatentNoiseMask"
-                    },
                     "15": {
                         inputs: {
                             seed: seed + 1,
@@ -1158,7 +1044,7 @@
                             model: ["16", 0],
                             positive: ["5", 0],
                             negative: ["4", 0],
-                            latent_image: ["55", 0]
+                            latent_image: ["14", 0]
                         },
                         class_type: "KSampler"
                     },
@@ -1183,14 +1069,6 @@
                         },
                         class_type: "VAEDecode"
                     },
-                    // Réapplique le masque avant le 3ème KSampler (passe de détail)
-                    "56": {
-                        inputs: {
-                            samples: ["15", 0],
-                            mask: ["52", 0]
-                        },
-                        class_type: "SetLatentNoiseMask"
-                    },
                     "29": {
                         inputs: {
                             seed: seed + 2,
@@ -1202,7 +1080,7 @@
                             model: ["32", 0],
                             positive: ["31", 0],
                             negative: ["30", 0],
-                            latent_image: ["56", 0]
+                            latent_image: ["15", 0]
                         },
                         class_type: "KSampler"
                     },
@@ -1252,16 +1130,13 @@
 
                 const queueResult = await queueRes.json();
                 const promptId = queueResult.prompt_id;
-                saveGenerationState(promptId, apiUrl);
 
-                showStatus('Génération en cours...', 'loading'); irisETA.hide(); irisETA.setTotal(steps1 + steps2 + steps3);
+                showStatus('Génération en cours...', 'loading'); irisETA.hide();
 
                 const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
                 
                 ws.onmessage = async (event) => {
-                    if (typeof event.data !== 'string') return;
-                    let msg;
-                    try { msg = JSON.parse(event.data); } catch(e) { return; }
+                    const msg = JSON.parse(event.data);
                     
                     if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
                         showStatus(`Génération... ${msg.data.value}/${msg.data.max}`, 'loading');
@@ -1292,7 +1167,6 @@
                                         document.getElementById('floatingActions').classList.add('show');
                                         
                                         irisETA.done(); setTimeout(() => irisETA.hide(), 2000); showStatus('✨ Image générée avec succès !', 'success');
-                                        clearGenerationState();
                                     } else {
                                         throw new Error('Aucune image générée');
                                     }
