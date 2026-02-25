@@ -119,29 +119,7 @@
         }
         button:active { transform: translateY(0); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 14px;
-            display: none;
-        }
-        .status.success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #4ade80;
-        }
-        .status.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-        }
-        .status.loading {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            color: #fbbf24;
-        }
+
         .result {
             margin-top: 30px;
             text-align: center;
@@ -408,7 +386,7 @@
 
         <button onclick="generateImage()">Générer l'image</button>
 
-        <div class="status" id="status"></div>
+
         <div class="iris-progress" id="irisProgress">
             <div class="iris-progress-header">
                 <div>
@@ -443,19 +421,31 @@
     </div>
 
     <script>
-        // ── ETA calculator ───────────────────────────────────────────────────
+        // ── ETA calculator (multi-pass aware) ────────────────────────────────
         const irisETA = {
             stepTimes: [],
-            reset() { this.stepTimes = []; },
+            globalOffset: 0,
+            globalTotal: 0,
+            prevRawStep: 0,
+            reset() { this.stepTimes = []; this.globalOffset = 0; this.globalTotal = 0; this.prevRawStep = 0; },
+            setTotal(total) { this.globalTotal = total; },
 
-            onStep(currentStep, totalSteps) {
+            onStep(rawStep, rawMax) {
+                if (rawStep <= this.prevRawStep && this.prevRawStep > 0) {
+                    this.globalOffset += this.prevRawStep;
+                }
+                this.prevRawStep = rawStep;
+
+                const currentStep = this.globalOffset + rawStep;
+                const totalSteps  = this.globalTotal > 0 ? this.globalTotal : (this.globalOffset + rawMax);
+
                 this.stepTimes.push(Date.now());
-                const pct  = Math.round((currentStep / totalSteps) * 100);
+                const pct  = Math.min(Math.round((currentStep / totalSteps) * 100), 99);
                 const left = totalSteps - currentStep;
                 let etaText = 'Calcul...', speedText = '';
 
                 if (this.stepTimes.length >= 2) {
-                    const win = this.stepTimes.slice(-6);
+                    const win = this.stepTimes.slice(-8);
                     const intervals = [];
                     for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
                     const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
@@ -482,12 +472,6 @@
                 const etaEl = document.getElementById('irisEta');
                 etaEl.textContent = etaText;
                 etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
-
-                if (pct >= 100) {
-                    document.getElementById('irisStatus').textContent = 'Récupération...';
-                    etaEl.textContent = '✓';
-                    etaEl.className = 'iris-eta-value done';
-                }
             },
 
             done() {
@@ -564,10 +548,7 @@
         });
 
         function showStatus(msg, type) {
-            const s = document.getElementById('status');
-            s.textContent = msg;
-            s.className = 'status ' + type;
-            s.style.display = 'block';
+            // Status text display removed – progress bar only
         }
 
         function downloadImage() {
@@ -689,7 +670,7 @@
                 const queueResult = await queueRes.json();
                 const promptId = queueResult.prompt_id;
 
-                showStatus('Génération en cours...', 'loading'); irisETA.hide();
+                showStatus('Génération en cours...', 'loading'); irisETA.hide(); irisETA.setTotal(steps1 + steps2 + steps3);
 
                 const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
                 
