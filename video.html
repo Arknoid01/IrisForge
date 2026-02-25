@@ -48,12 +48,6 @@
         .file-upload input { display: none; }
         .file-upload-text { color: rgba(255,255,255,0.6); font-size: 14px; }
         .preview-img { max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 10px; }
-        .info-box {
-            background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.3);
-            border-radius: 12px; padding: 16px; margin-bottom: 20px;
-        }
-        .info-box p { color: rgba(255,255,255,0.8); font-size: 13px; line-height: 1.6; margin: 4px 0; }
-        .info-box strong { color: #a78bfa; }
         button {
             width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; border: none; border-radius: 12px; padding: 16px;
@@ -358,14 +352,7 @@
         <textarea id="prompt" placeholder="Ex: dancing smoothly, fluid movements..."></textarea>
     </div>
 
-    <div class="info-box">
-        <p><strong>Configuration :</strong></p>
-        <p id="durationInfo">• Durée : ~2 secondes (49 frames)</p>
-        <p id="interpolationInfo">• Interpolation : Aucune (qualité maximale)</p>
-        <p id="timeInfo">• Temps estimé : variable selon GPU</p>
-        <p>• Résolution : 384x672 (portrait optimisé)</p>
-        <p>• FPS : 24 (cinématique)</p>
-    </div>
+
 
     <!-- CHAINING -->
     <div class="chaining-box">
@@ -589,7 +576,7 @@
 
     // ── RECOVERY ──────────────────────────────────────────────────────────────
     function saveGenerationState(promptId, saveNodeId, apiUrl) {
-        localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId, apiUrl, ts: Date.now() }));
+        localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId, apiUrl, page: 'video', ts: Date.now() }));
     }
     function clearGenerationState() { localStorage.removeItem('irisforge_pending'); }
 
@@ -598,6 +585,7 @@
             const saved = localStorage.getItem('irisforge_pending');
             if (!saved) return;
             const data = JSON.parse(saved);
+            if (data.page && data.page !== 'video') return;
             if (Date.now() - data.ts < 7200000) {
                 document.getElementById('recoveryBanner').style.display = 'flex';
             } else { clearGenerationState(); }
@@ -610,31 +598,62 @@
     }
 
     async function recoverLastGeneration() {
-        let saved;
-        try { saved = localStorage.getItem('irisforge_pending'); } catch(e) {}
-        if (!saved) return;
         let data;
-        try { data = JSON.parse(saved); } catch(e) { clearGenerationState(); return; }
-        const { promptId, saveNodeId, apiUrl } = data;
+        try { data = JSON.parse(localStorage.getItem('irisforge_pending')); } catch(e) { clearGenerationState(); return; }
+        if (!data) return;
         document.getElementById('recoveryBanner').style.display = 'none';
-        showStatus('🔍 Récupération de la vidéo...', 'loading');
+        const { promptId, saveNodeId, apiUrl } = data;
+
+        const applyVideo = async (videoInfo) => {
+            const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder||'')}&type=${encodeURIComponent(videoInfo.type||'output')}`;
+            const blob = await (await fetch(videoUrl)).blob();
+            clearGenerationState();
+            addClipToGallery(blob, selectedDuration);
+            irisETA.done(); setTimeout(() => irisETA.hide(), 2000);
+        };
+
         try {
+            // Cas 1 : génération déjà terminée
             const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
             if (hist[promptId] && hist[promptId].outputs) {
                 const saveNode = hist[promptId].outputs[saveNodeId];
                 const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
                 if (videoInfo) {
-                    const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder||'')}&type=${encodeURIComponent(videoInfo.type||'output')}`;
-                    const blob = await (await fetch(videoUrl)).blob();
-                    clearGenerationState();
-                    addClipToGallery(blob, selectedDuration);
-                    showStatus('✅ Vidéo récupérée et ajoutée à la galerie !', 'success');
-                } else {
-                    showStatus('⚠️ Génération pas encore terminée ou introuvable.', 'error');
-                    clearGenerationState();
+                    await applyVideo(videoInfo);
+                    return;
                 }
-            } else { showStatus('⚠️ Aucun résultat trouvé.', 'error'); clearGenerationState(); }
-        } catch(e) { showStatus('❌ Erreur récupération : ' + e.message, 'error'); }
+            }
+        } catch(e) {}
+
+        // Cas 2 : encore en cours → rebrancher WS
+        irisETA.hide(); irisETA.setTotal(25);
+        isGenerating = true;
+        const btn = document.getElementById('generateBtn');
+        if (btn) btn.disabled = true;
+
+        const wsUrl = apiUrl.replace(/^http/, 'ws');
+        const wsRecover = new WebSocket(`${wsUrl}/ws?clientId=${clientId}`);
+        wsRecover.onmessage = async (event) => {
+            if (typeof event.data !== 'string') return;
+            let msg; try { msg = JSON.parse(event.data); } catch(e) { return; }
+            if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
+                irisETA.onStep(msg.data.value, msg.data.max);
+            }
+            if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                setTimeout(async () => {
+                    try {
+                        const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
+                        if (hist[promptId] && hist[promptId].outputs) {
+                            const saveNode = hist[promptId].outputs[saveNodeId];
+                            const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
+                            if (videoInfo) await applyVideo(videoInfo);
+                        }
+                    } catch(e) { clearGenerationState(); }
+                    finally { wsRecover.close(); isGenerating = false; if (btn) btn.disabled = false; }
+                }, 1000);
+            }
+        };
+        wsRecover.onerror = () => { isGenerating = false; if (btn) btn.disabled = false; clearGenerationState(); };
     }
 
     // ── UI ────────────────────────────────────────────────────────────────────
@@ -665,15 +684,6 @@
         updateInfo();
     }
     function updateInfo() {
-        const infoMap = {
-            '2s': { dur: '~2 secondes (49 frames)', interp: 'Aucune (qualité maximale)', time: 'variable selon GPU' },
-            '4s': { dur: '~4 secondes (98 frames)', interp: 'RIFE x2 (bonne qualité)', time: 'variable selon GPU' },
-            '7s': { dur: '~7 secondes (81 frames + RIFE x2)', interp: 'RIFE x2 sur 81 vraies frames (très bonne qualité)', time: 'variable selon GPU (~2x le mode 2s)' }
-        };
-        const info = infoMap[selectedDuration] || infoMap['2s'];
-        document.getElementById('durationInfo').textContent = '• Durée : ' + info.dur;
-        document.getElementById('interpolationInfo').textContent = '• Interpolation : ' + info.interp;
-        document.getElementById('timeInfo').textContent = '• Temps estimé : ' + info.time;
     }
 
     // ── IMAGE/VIDEO ───────────────────────────────────────────────────────────
@@ -717,7 +727,7 @@
             uploadedImage = canvas.toDataURL('image/png');
             lastFrameImage = uploadedImage;
             showStatus('✔ Dernière frame extraite !', 'success');
-            setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+
         };
     }
 
@@ -1035,7 +1045,7 @@
             document.getElementById('imageFileText').innerHTML = `✔ Dernière frame du clip #${i+1}`;
             switchMode('image');
             showStatus(`✅ Clip #${i+1} défini comme source !`, 'success');
-            setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+
         } catch(e) {
             showStatus('❌ Erreur extraction frame : ' + e.message, 'error');
         }
@@ -1146,7 +1156,7 @@
                 }
                 renderGallery();
                 showStatus(`✅ ${saved.length} clip(s) restaurés depuis la session précédente !`, 'success');
-                setTimeout(() => document.getElementById('status').style.display = 'none', 4000);
+
             }
         } catch(e) { console.warn('Could not restore clips from DB:', e); }
     })();
@@ -1154,14 +1164,24 @@
     window.addEventListener('load', () => {
         try {
             const img = localStorage.getItem('videoSourceImage');
-            if (img && img.startsWith('data:image/')) {
-                uploadedImage = img; lastFrameImage = img;
-                document.getElementById('imagePreview').src = img;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('imageFileText').innerHTML = '✔ Image chargée depuis IrisForge<br><small style="color:rgba(255,255,255,0.5)">Vous pouvez changer l\'image</small>';
-                localStorage.removeItem('videoSourceImage');
-                showStatus('✔ Image chargée depuis IrisForge !', 'success');
-                setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
+            if (img) {
+                const applyImage = (dataUrl) => {
+                    uploadedImage = dataUrl; lastFrameImage = dataUrl;
+                    document.getElementById('imagePreview').src = dataUrl;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('imageFileText').innerHTML = '✔ Image chargée depuis IrisForge<br><small style="color:rgba(255,255,255,0.5)">Vous pouvez changer l\'image</small>';
+                    localStorage.removeItem('videoSourceImage');
+                };
+                if (img.startsWith('data:image/')) {
+                    applyImage(img);
+                } else if (img.startsWith('http')) {
+                    fetch(img).then(r => r.blob()).then(blob => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => applyImage(reader.result);
+                        reader.readAsDataURL(blob);
+                        localStorage.removeItem('videoSourceImage');
+                    }).catch(() => localStorage.removeItem('videoSourceImage'));
+                }
             }
         } catch(e) { console.warn('Erreur lecture localStorage:', e); }
     });

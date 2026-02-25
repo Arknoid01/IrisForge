@@ -100,6 +100,14 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
         }
+        .recovery-banner {
+            background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3);
+            border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
+            display: none; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .recovery-banner p { color: rgba(255,255,255,0.8); font-size: 13px; margin: 0; }
+        .recovery-btn { width: auto !important; padding: 8px 16px !important; font-size: 13px !important; background: rgba(251,191,36,0.3) !important; border: 1px solid rgba(251,191,36,0.5) !important; margin-top: 0 !important; }
+        .recovery-dismiss { width: auto !important; padding: 8px 16px !important; font-size: 13px !important; background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; margin-top: 0 !important; }
         button {
             width: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -352,6 +360,15 @@
         
         <h1>🎨 IrisForge Base</h1>
         <p class="subtitle">Génération d'images avancée</p>
+
+        <!-- RECOVERY -->
+        <div class="recovery-banner" id="recoveryBanner">
+            <p>⚠️ Une génération précédente a été interrompue. Récupérer l'image ?</p>
+            <div style="display:flex;gap:8px;">
+                <button class="recovery-btn" onclick="recoverLastGeneration()">✅ Récupérer</button>
+                <button class="recovery-dismiss" onclick="dismissRecovery()">✕ Ignorer</button>
+            </div>
+        </div>
         
         <div class="form-group">
             <label>URL ComfyUI</label>
@@ -467,7 +484,87 @@
                 this.reset();
             }
         };
-                function toggleSidebar() {
+
+        // ── RECOVERY ─────────────────────────────────────────────────────────
+        function saveGenerationState(promptId, apiUrl) {
+            localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId: '9', apiUrl, page: 'base', ts: Date.now() }));
+        }
+        function clearGenerationState() { localStorage.removeItem('irisforge_pending'); }
+        function checkRecovery() {
+            try {
+                const saved = localStorage.getItem('irisforge_pending');
+                if (!saved) return;
+                const data = JSON.parse(saved);
+                if (data.page !== 'base') return;
+                if (Date.now() - data.ts < 7200000) {
+                    document.getElementById('recoveryBanner').style.display = 'flex';
+                } else { clearGenerationState(); }
+            } catch(e) { clearGenerationState(); }
+        }
+        function dismissRecovery() {
+            clearGenerationState();
+            document.getElementById('recoveryBanner').style.display = 'none';
+        }
+        async function recoverLastGeneration() {
+            let data;
+            try { data = JSON.parse(localStorage.getItem('irisforge_pending')); } catch(e) { clearGenerationState(); return; }
+            if (!data) return;
+            document.getElementById('recoveryBanner').style.display = 'none';
+            const { promptId, saveNodeId, apiUrl } = data;
+
+            const applyImage = (img) => {
+                const imgUrl = `${apiUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder||'')}&type=${encodeURIComponent(img.type||'output')}`;
+                const resultImg = document.getElementById('resultImg');
+                resultImg.src = imgUrl;
+                resultImg.classList.add('show');
+                document.getElementById('floatingActions').classList.add('show');
+                irisETA.done(); setTimeout(() => irisETA.hide(), 2000);
+                clearGenerationState();
+            };
+
+            try {
+                // Cas 1 : génération déjà terminée
+                const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
+                if (hist[promptId] && hist[promptId].outputs) {
+                    const saveNode = hist[promptId].outputs[saveNodeId];
+                    if (saveNode && saveNode.images && saveNode.images.length > 0) {
+                        applyImage(saveNode.images[0]);
+                        return;
+                    }
+                }
+            } catch(e) {}
+
+            // Cas 2 : encore en cours → rebrancher WS
+            irisETA.hide(); irisETA.setTotal(10);
+            const btn = document.querySelector('button:not(.recovery-btn):not(.recovery-dismiss)');
+            if (btn) btn.disabled = true;
+            isGenerating = true;
+
+            const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
+            ws.onmessage = async (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
+                    irisETA.onStep(msg.data.value, msg.data.max);
+                }
+                if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                    setTimeout(async () => {
+                        try {
+                            const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
+                            if (hist[promptId] && hist[promptId].outputs) {
+                                const saveNode = hist[promptId].outputs[saveNodeId];
+                                if (saveNode && saveNode.images && saveNode.images.length > 0) {
+                                    applyImage(saveNode.images[0]);
+                                }
+                            }
+                        } catch(e) { clearGenerationState(); }
+                        finally { ws.close(); isGenerating = false; if (btn) btn.disabled = false; }
+                    }, 1000);
+                }
+            };
+            ws.onerror = () => { isGenerating = false; if (btn) btn.disabled = false; clearGenerationState(); };
+        }
+
+        function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
         }
@@ -511,6 +608,7 @@
                 document.getElementById('comfyUrl').value = savedUrl;
                 autoPreheat(savedUrl);
             }
+            checkRecovery();
         });
 
         document.getElementById('comfyUrl') && document.getElementById('comfyUrl').addEventListener('change', (e) => {
@@ -632,6 +730,7 @@
 
                 const queueResult = await queueRes.json();
                 const promptId = queueResult.prompt_id;
+                saveGenerationState(promptId, apiUrl);
 
                 showStatus('Génération en cours...', 'loading'); irisETA.hide();
 
@@ -665,6 +764,7 @@
                                         resultImg.classList.add('show');
                                         document.getElementById('floatingActions').classList.add('show');
                                         irisETA.done(); setTimeout(() => irisETA.hide(), 2000); showStatus('✔ Image générée avec succès !', 'success');
+                                        clearGenerationState();
                                     } else {
                                         throw new Error('Aucune image dans la réponse');
                                     }
