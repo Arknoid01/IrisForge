@@ -127,29 +127,6 @@
         }
         button:active { transform: translateY(0); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 14px;
-            display: none;
-        }
-        .status.success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #4ade80;
-        }
-        .status.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-        }
-        .status.loading {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            color: #fbbf24;
-        }
         .result {
             margin-top: 30px;
             text-align: center;
@@ -382,7 +359,7 @@
 
         <button onclick="generateImage()">Générer l'image</button>
 
-        <div class="status" id="status"></div>
+
         <div class="iris-progress" id="irisProgress">
             <div class="iris-progress-header">
                 <div>
@@ -616,10 +593,7 @@
         });
 
         function showStatus(msg, type) {
-            const s = document.getElementById('status');
-            s.textContent = msg;
-            s.className = 'status ' + type;
-            s.style.display = 'block';
+            // Status text display removed – progress bar only
         }
 
         function downloadImage() {
@@ -630,7 +604,6 @@
                 link.download = `irisforge_${Date.now()}.png`;
                 link.click();
                 showStatus('✔ Téléchargement lancé !', 'success');
-                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
             }
         }
 
@@ -737,7 +710,9 @@
                 const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
                 
                 ws.onmessage = async (event) => {
-                    const msg = JSON.parse(event.data);
+                    if (typeof event.data !== 'string') return;
+                    let msg;
+                    try { msg = JSON.parse(event.data); } catch(e) { return; }
                     
                     if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
                         showStatus(`Génération... ${msg.data.value}/${msg.data.max}`, 'loading');

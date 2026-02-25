@@ -572,7 +572,8 @@
 
             const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
             ws.onmessage = async (event) => {
-                const msg = JSON.parse(event.data);
+                if (typeof event.data !== 'string') return;
+                let msg; try { msg = JSON.parse(event.data); } catch(e) { return; }
                 if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
                     irisETA.onStep(msg.data.value, msg.data.max);
                 }
@@ -776,7 +777,9 @@
                 const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
                 
                 ws.onmessage = async (event) => {
-                    const msg = JSON.parse(event.data);
+                    if (typeof event.data !== 'string') return;
+                    let msg;
+                    try { msg = JSON.parse(event.data); } catch(e) { return; }
                     
                     if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
                         showStatus(`Génération... ${msg.data.value}/${msg.data.max}`, 'loading');
