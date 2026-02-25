@@ -451,7 +451,7 @@
                 <span class="iris-progress-speed" id="irisSpeed"></span>
             </div>
         </div>
-        <div class="progress-label" id="progressLabel">0 / 0</div>
+
     </div>
 
     <div class="frame-preview-container" id="framePreviewContainer">
@@ -512,6 +512,8 @@
                 }
 
                 document.getElementById('irisProgress').classList.add('visible');
+                const statusEl = document.getElementById('status');
+                if (statusEl) statusEl.style.display = 'none';
                 document.getElementById('irisFill').style.width  = pct + '%';
                 document.getElementById('irisPct').textContent   = pct;
                 document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${effectiveTotal}`;

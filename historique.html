@@ -963,6 +963,7 @@
                 };
                 
                 ws.onmessage = (event) => {
+                    if (typeof event.data !== 'string') return;
                     try {
                         const msg = JSON.parse(event.data);
                         

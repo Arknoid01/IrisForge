@@ -482,6 +482,8 @@
                 }
 
                 document.getElementById('irisProgress').classList.add('visible');
+                const statusEl = document.getElementById('status');
+                if (statusEl) statusEl.style.display = 'none';
                 document.getElementById('irisFill').style.width  = pct + '%';
                 document.getElementById('irisPct').textContent   = pct;
                 document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
@@ -688,10 +690,11 @@
                 const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
                 
                 ws.onmessage = async (event) => {
-                    const msg = JSON.parse(event.data);
+                    if (typeof event.data !== 'string') return;
+                    let msg;
+                    try { msg = JSON.parse(event.data); } catch(e) { return; }
                     
                     if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
-                        showStatus(`Génération... ${msg.data.value}/${msg.data.max}`, 'loading');
                         irisETA.onStep(msg.data.value, msg.data.max);
                     }
                     
