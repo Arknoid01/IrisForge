@@ -996,36 +996,44 @@
             showStatus('Préparation...', 'loading');
 
             try {
-                // Créer le masque (fond noir + dessin blanc)
+                // Créer le masque en comparant le canvas (image + tracé) avec l'image source originale.
+                // On ne peut pas détecter le tracé blanc en lisant juste les pixels du canvas
+                // car l'image source elle-même a des pixels clairs — tout serait masqué.
+                // La bonne approche : rendre l'image source dans un canvas off-screen,
+                // puis comparer pixel par pixel avec le canvas de dessin.
                 const maskCanvas = document.createElement('canvas');
                 maskCanvas.width = canvas.width;
                 maskCanvas.height = canvas.height;
                 const maskCtx = maskCanvas.getContext('2d');
-                
-                // Fond noir
+
+                // Canvas off-screen avec uniquement l'image source (sans tracé)
+                const refCanvas = document.createElement('canvas');
+                refCanvas.width = canvas.width;
+                refCanvas.height = canvas.height;
+                const refCtx = refCanvas.getContext('2d');
+                refCtx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
+
+                // Fond noir pour le masque
                 maskCtx.fillStyle = '#000000';
                 maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                
-                // Copier le dessin blanc
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-                
-                for (let i = 0; i < imageData.data.length; i += 4) {
-                    const r = imageData.data[i];
-                    const g = imageData.data[i + 1];
-                    const b = imageData.data[i + 2];
-                    const a = imageData.data[i + 3];
-                    
-                    // Pixel masqué = blanc OU semi-transparent (bords du pinceau)
-                    // On utilise aussi l'alpha pour capturer les bords doux du pinceau
-                    if ((r > 128 && g > 128 && b > 128) || a > 128) {
-                        maskData.data[i] = 255;
+
+                const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const refData    = refCtx.getImageData(0, 0, canvas.width, canvas.height);
+                const maskData   = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+
+                for (let i = 0; i < canvasData.data.length; i += 4) {
+                    const dr = Math.abs(canvasData.data[i]     - refData.data[i]);
+                    const dg = Math.abs(canvasData.data[i + 1] - refData.data[i + 1]);
+                    const db = Math.abs(canvasData.data[i + 2] - refData.data[i + 2]);
+                    // Pixel modifié par le pinceau = différence notable avec l'image source
+                    if (dr + dg + db > 30) {
+                        maskData.data[i]     = 255;
                         maskData.data[i + 1] = 255;
                         maskData.data[i + 2] = 255;
                         maskData.data[i + 3] = 255;
                     }
                 }
-                
+
                 maskCtx.putImageData(maskData, 0, 0);
 
                 showStatus('Upload des images...', 'loading');
