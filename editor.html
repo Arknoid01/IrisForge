@@ -972,9 +972,11 @@
                     const r = imageData.data[i];
                     const g = imageData.data[i + 1];
                     const b = imageData.data[i + 2];
+                    const a = imageData.data[i + 3];
                     
-                    // Si pixel est blanc (masque dessiné)
-                    if (r > 200 && g > 200 && b > 200) {
+                    // Pixel masqué = blanc OU semi-transparent (bords du pinceau)
+                    // On utilise aussi l'alpha pour capturer les bords doux du pinceau
+                    if ((r > 128 && g > 128 && b > 128) || a > 128) {
                         maskData.data[i] = 255;
                         maskData.data[i + 1] = 255;
                         maskData.data[i + 2] = 255;
@@ -1087,6 +1089,14 @@
                         },
                         class_type: "KSampler"
                     },
+                    // Réapplique le masque avant le 2ème KSampler pour éviter la régénération hors zone
+                    "55": {
+                        inputs: {
+                            samples: ["14", 0],
+                            mask: ["52", 0]
+                        },
+                        class_type: "SetLatentNoiseMask"
+                    },
                     "15": {
                         inputs: {
                             seed: seed + 1,
@@ -1098,7 +1108,7 @@
                             model: ["16", 0],
                             positive: ["5", 0],
                             negative: ["4", 0],
-                            latent_image: ["14", 0]
+                            latent_image: ["55", 0]
                         },
                         class_type: "KSampler"
                     },
@@ -1123,6 +1133,14 @@
                         },
                         class_type: "VAEDecode"
                     },
+                    // Réapplique le masque avant le 3ème KSampler (passe de détail)
+                    "56": {
+                        inputs: {
+                            samples: ["15", 0],
+                            mask: ["52", 0]
+                        },
+                        class_type: "SetLatentNoiseMask"
+                    },
                     "29": {
                         inputs: {
                             seed: seed + 2,
@@ -1134,7 +1152,7 @@
                             model: ["32", 0],
                             positive: ["31", 0],
                             negative: ["30", 0],
-                            latent_image: ["15", 0]
+                            latent_image: ["56", 0]
                         },
                         class_type: "KSampler"
                     },

@@ -576,7 +576,13 @@
 
     // ── RECOVERY ──────────────────────────────────────────────────────────────
     function saveGenerationState(promptId, saveNodeId, apiUrl) {
-        localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId, apiUrl, page: 'video', ts: Date.now() }));
+        // On sauvegarde aussi le clientId : ComfyUI ne renvoie les events WS qu'au client qui a soumis le prompt
+        localStorage.setItem('irisforge_pending', JSON.stringify({
+            promptId, saveNodeId, apiUrl,
+            clientId,
+            page: 'video',
+            ts: Date.now()
+        }));
     }
     function clearGenerationState() { localStorage.removeItem('irisforge_pending'); }
 
@@ -601,59 +607,124 @@
         let data;
         try { data = JSON.parse(localStorage.getItem('irisforge_pending')); } catch(e) { clearGenerationState(); return; }
         if (!data) return;
+
         document.getElementById('recoveryBanner').style.display = 'none';
         const { promptId, saveNodeId, apiUrl } = data;
+
+        // ── Bug corrigé : restaurer le clientId d'origine pour que ComfyUI
+        //    nous renvoie les events du bon prompt via WS
+        if (data.clientId) clientId = data.clientId;
 
         const applyVideo = async (videoInfo) => {
             const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder||'')}&type=${encodeURIComponent(videoInfo.type||'output')}`;
             const blob = await (await fetch(videoUrl)).blob();
             clearGenerationState();
             addClipToGallery(blob, selectedDuration);
-            irisETA.done(); setTimeout(() => irisETA.hide(), 2000);
+            irisETA.done();
+            setTimeout(() => irisETA.hide(), 2000);
+            isGenerating = false;
+            const b = document.getElementById('generateBtn');
+            if (b) b.disabled = false;
+            document.getElementById('nextClipBtn').style.display = 'block';
         };
 
+        // ── Cas 1 : génération déjà terminée dans l'historique ──────────────
         try {
-            // Cas 1 : génération déjà terminée
             const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
             if (hist[promptId] && hist[promptId].outputs) {
                 const saveNode = hist[promptId].outputs[saveNodeId];
                 const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
-                if (videoInfo) {
-                    await applyVideo(videoInfo);
-                    return;
-                }
+                if (videoInfo) { await applyVideo(videoInfo); return; }
             }
-        } catch(e) {}
+        } catch(e) { /* pas encore dans l'historique, on passe au WS */ }
 
-        // Cas 2 : encore en cours → rebrancher WS
-        irisETA.hide(); irisETA.setTotal(25);
+        // ── Cas 2 : encore en cours → rebrancher WS + polling de secours ────
         isGenerating = true;
         const btn = document.getElementById('generateBtn');
         if (btn) btn.disabled = true;
 
+        // Afficher immédiatement la barre de progression
+        irisETA.hide();
+        irisETA.setTotal(25);
+        document.getElementById('irisProgress').classList.add('visible');
+        document.getElementById('irisStatus').textContent = 'Reconnexion en cours...';
+
         const wsUrl = apiUrl.replace(/^http/, 'ws');
         const wsRecover = new WebSocket(`${wsUrl}/ws?clientId=${clientId}`);
+        let recovered = false;
+
+        wsRecover.onopen = () => {
+            document.getElementById('irisStatus').textContent = 'Génération en cours (reprise)...';
+        };
+
         wsRecover.onmessage = async (event) => {
             if (typeof event.data !== 'string') return;
             let msg; try { msg = JSON.parse(event.data); } catch(e) { return; }
+
             if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
                 irisETA.onStep(msg.data.value, msg.data.max);
             }
+
             if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                if (recovered) return;
+                recovered = true;
+                clearInterval(pollInterval);
                 setTimeout(async () => {
                     try {
                         const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
                         if (hist[promptId] && hist[promptId].outputs) {
                             const saveNode = hist[promptId].outputs[saveNodeId];
                             const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
-                            if (videoInfo) await applyVideo(videoInfo);
+                            if (videoInfo) { await applyVideo(videoInfo); }
+                            else { throw new Error('Aucune vidéo dans l'historique'); }
                         }
-                    } catch(e) { clearGenerationState(); }
-                    finally { wsRecover.close(); isGenerating = false; if (btn) btn.disabled = false; }
+                    } catch(e) {
+                        document.getElementById('irisStatus').textContent = '❌ Récupération échouée';
+                        clearGenerationState();
+                        isGenerating = false;
+                        if (btn) btn.disabled = false;
+                    } finally { wsRecover.close(); }
                 }, 1000);
             }
         };
-        wsRecover.onerror = () => { isGenerating = false; if (btn) btn.disabled = false; clearGenerationState(); };
+
+        // Polling de secours toutes les 3s : si la page a été rechargée après
+        // la fin de génération, le WS ne recevra jamais l'event "node: null"
+        const pollInterval = setInterval(async () => {
+            if (recovered) { clearInterval(pollInterval); return; }
+            try {
+                const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
+                if (hist[promptId] && hist[promptId].outputs) {
+                    const saveNode = hist[promptId].outputs[saveNodeId];
+                    const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
+                    if (videoInfo) {
+                        recovered = true;
+                        clearInterval(pollInterval);
+                        wsRecover.close();
+                        await applyVideo(videoInfo);
+                    }
+                }
+            } catch(e) { /* on réessaie au prochain tick */ }
+        }, 3000);
+
+        wsRecover.onerror = () => {
+            clearInterval(pollInterval);
+            document.getElementById('irisStatus').textContent = '❌ Connexion WebSocket impossible';
+            isGenerating = false;
+            if (btn) btn.disabled = false;
+            clearGenerationState();
+        };
+
+        wsRecover.onclose = (e) => {
+            if (!recovered) {
+                clearInterval(pollInterval);
+                if (!e.wasClean) {
+                    isGenerating = false;
+                    if (btn) btn.disabled = false;
+                    clearGenerationState();
+                }
+            }
+        };
     }
 
     // ── UI ────────────────────────────────────────────────────────────────────
