@@ -458,6 +458,148 @@
         /* Tab panels */
         .tab-panel { display: none; height: 100%; }
         .tab-panel.active { display: flex; flex-direction: column; height: 100%; }
+
+        /* ── MOBILE RESPONSIVE ── */
+        @media (max-width: 768px) {
+            /* Layout: stack panels vertically on mobile */
+            .page {
+                height: auto;
+                min-height: calc(100vh - 65px);
+            }
+            .main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                overflow: visible;
+                height: auto;
+            }
+
+            /* Left panel: fixed height with scroll */
+            .panel-left {
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,.07);
+                height: auto;
+                max-height: 55vh;
+                overflow: hidden;
+            }
+
+            /* Chat section fills remaining space in left panel */
+            .chat-section {
+                min-height: 200px;
+                max-height: 35vh;
+            }
+            .chat-messages {
+                max-height: 200px;
+            }
+
+            /* Right panel: full height */
+            .panel-right {
+                min-height: 60vh;
+            }
+
+            /* Profile bar: wrap nicely */
+            .profile-bar {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .profile-chip {
+                max-width: 80px;
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            /* Diff header: stack on mobile */
+            .diff-header {
+                flex-direction: column;
+                gap: 8px;
+                padding: 12px 14px;
+                align-items: flex-start;
+            }
+            .diff-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .btn {
+                padding: 7px 10px;
+                font-size: 11px;
+            }
+
+            /* Topbar label: hide on very small screens */
+            .topbar-label {
+                display: none;
+            }
+
+            /* Commit section: stack */
+            .commit-section {
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 10px 14px;
+            }
+            .commit-input {
+                min-width: 0;
+                width: 100%;
+            }
+
+            /* Profile editor: full width adjustments */
+            .profile-editor {
+                padding: 10px;
+            }
+            .key-input {
+                font-size: 10px;
+            }
+
+            /* File section */
+            .file-section {
+                padding: 10px 14px;
+            }
+
+            /* Config section */
+            .config-section {
+                padding: 10px 14px 0;
+            }
+
+            /* Diff content scrollable */
+            .diff-body {
+                min-height: 300px;
+            }
+
+            /* Stats bar */
+            .stats-bar {
+                padding: 8px 14px;
+                gap: 10px;
+            }
+
+            /* Push toast */
+            .push-toast {
+                bottom: 12px;
+                right: 12px;
+                left: 12px;
+                max-width: none;
+                font-size: 12px;
+            }
+
+            /* Sidebar width adjustment on mobile */
+            .sidebar {
+                width: min(260px, 85vw);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .topbar {
+                padding: 10px 14px;
+            }
+            .brand-name {
+                font-size: 14px;
+            }
+            .chat-textarea {
+                font-size: 14px; /* prevent zoom on iOS */
+            }
+            .key-input {
+                font-size: 16px; /* prevent zoom on iOS */
+            }
+            .commit-input {
+                font-size: 16px; /* prevent zoom on iOS */
+            }
+        }
     </style>
 </head>
 <body>
