@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrisForge — Studio IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --blue:   #667eea;
+            --violet: #a78bfa;
+            --pink:   #ec4899;
+            --dark:   #0f0f1e;
+            --green:  #4ade80;
+            --red:    #f87171;
+            --amber:  #fbbf24;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ── BACKGROUND ── */
+        .bg {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 50% 40% at 20% 20%, rgba(102,126,234,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 85% 75%, rgba(236,72,153,0.08) 0%, transparent 60%),
+                #0f0f1e;
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(102,126,234,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(102,126,234,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: sticky; top: 0; z-index: 900;
+            width: 100%;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 24px 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            background: rgba(15,15,30,.88);
+            backdrop-filter: blur(16px);
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .menu-btn {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: rgba(102,126,234,.12); border: 1px solid rgba(102,126,234,.25);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 5px; cursor: pointer; transition: all 0.2s;
+        }
+        .menu-btn:hover { background: rgba(102,126,234,.25); }
+        .menu-btn span { display: block; width: 14px; height: 2px; background: rgba(255,255,255,.8); border-radius: 2px; }
+        .brand-link { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+        .brand-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--blue), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; box-shadow: 0 0 14px rgba(102,126,234,.4); flex-shrink: 0;
+        }
+        .brand-name {
+            font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+            background: linear-gradient(135deg, #fff, var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: block; line-height: 1.1;
+        }
+        .brand-sub { font-size: 8px; color: var(--pink); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; display: block; }
+        .topbar-label {
+            font-family: 'Syne', sans-serif; font-size: 10px;
+            letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.3);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #0f0f1e; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 24px 16px; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .sidebar-title { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar-close { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .sidebar-close:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
+        .sidebar-link:hover { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); color: #fff; }
+        .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
+        .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
+
+        /* ── LAYOUT ── */
+        .page { position: relative; z-index: 1; display: flex; flex-direction: column; height: calc(100vh - 65px); }
+        .main { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; }
+
+        /* ── LEFT PANEL — CONFIG + CHAT ── */
+        .panel-left {
+            display: flex; flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,.07);
+            overflow: hidden;
+        }
+
+        /* ── PROFILES ── */
+        .config-section {
+            padding: 14px 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            flex-shrink: 0;
+        }
+        .section-label {
+            font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: rgba(255,255,255,.25); margin-bottom: 10px;
+        }
+
+        /* Profile switcher bar */
+        .profile-bar {
+            display: flex; gap: 6px; align-items: center;
+            margin-bottom: 10px; flex-wrap: wrap;
+        }
+        .profile-chip {
+            display: flex; align-items: center; gap: 5px;
+            padding: 5px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; font-family: 'Syne', sans-serif;
+            cursor: pointer; transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,.1);
+            background: rgba(255,255,255,.04);
+            color: rgba(255,255,255,.5);
+            white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis;
+        }
+        .profile-chip:hover { border-color: rgba(167,139,250,.4); color: #fff; background: rgba(167,139,250,.1); }
+        .profile-chip.active {
+            background: linear-gradient(135deg, rgba(102,126,234,.25), rgba(167,139,250,.15));
+            border-color: rgba(102,126,234,.5); color: #fff;
+        }
+        .profile-chip .chip-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+            background: rgba(255,255,255,.2);
+        }
+        .profile-chip.active .chip-dot { background: var(--green); box-shadow: 0 0 5px var(--green); }
+        .profile-chip.ok .chip-dot { background: var(--green); }
+        .profile-chip.partial .chip-dot { background: var(--amber); }
+        .btn-add-profile {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: rgba(255,255,255,.04); border: 1px dashed rgba(255,255,255,.2);
+            color: rgba(255,255,255,.3); cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0; line-height: 1;
+        }
+        .btn-add-profile:hover { border-color: var(--violet); color: var(--violet); background: rgba(167,139,250,.1); }
+
+        /* Profile editor (expanded) */
+        .profile-editor {
+            background: rgba(255,255,255,.02);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 10px; padding: 12px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .profile-editor.open { display: block; animation: fadeDown 0.2s ease; }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .profile-editor-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .profile-name-input {
+            background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,.15);
+            color: #fff; font-size: 13px; font-weight: 600; font-family: 'Syne', sans-serif;
+            padding: 2px 0; width: 140px; outline: none;
+        }
+        .profile-name-input:focus { border-bottom-color: var(--violet); }
+        .profile-editor-actions { display: flex; gap: 6px; }
+        .btn-icon {
+            width: 26px; height: 26px; border-radius: 7px;
+            background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+            color: rgba(255,255,255,.5); cursor: pointer; font-size: 13px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .btn-icon:hover { background: rgba(255,255,255,.1); color: #fff; }
+        .btn-icon.del:hover { background: rgba(248,113,113,.2); border-color: rgba(248,113,113,.4); color: var(--red); }
+        .btn-icon.save:hover { background: rgba(74,222,128,.2); border-color: rgba(74,222,128,.4); color: var(--green); }
+
+        .key-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 8px;
+        }
+        .key-icon { font-size: 13px; flex-shrink: 0; width: 16px; text-align: center; }
+        .key-input {
+            flex: 1;
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 8px; padding: 7px 10px;
+            color: #fff; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+        .key-input:focus { outline: none; border-color: var(--blue); background: rgba(255,255,255,.07); }
+        .key-input::placeholder { color: rgba(255,255,255,.18); }
+        .key-status {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,.12); flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        .key-status.ok { background: var(--green); box-shadow: 0 0 5px var(--green); }
+        .key-status.err { background: var(--red); }
+
+        /* File selector */
+        .file-section { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .file-selector-row { display: flex; gap: 8px; align-items: center; }
+        .file-select {
+            flex: 1;
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 8px; padding: 8px 10px;
+            color: #fff; font-size: 12px;
+            cursor: pointer; transition: all 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .file-select:focus { outline: none; border-color: var(--violet); }
+        .file-select option { background: #1a1a2e; }
+        .btn-refresh {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+            color: rgba(255,255,255,.6); cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-refresh:hover { background: rgba(167,139,250,.15); color: var(--violet); }
+
+        /* Chat */
+        .chat-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+
+        .msg { display: flex; flex-direction: column; gap: 4px; animation: msgIn 0.25s ease; }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .msg.user { align-items: flex-end; }
+        .msg.assistant { align-items: flex-start; }
+        .msg-bubble {
+            max-width: 90%; padding: 10px 13px; border-radius: 12px;
+            font-size: 13px; line-height: 1.5;
+        }
+        .msg.user .msg-bubble {
+            background: linear-gradient(135deg, rgba(102,126,234,.3), rgba(167,139,250,.2));
+            border: 1px solid rgba(102,126,234,.3);
+            border-bottom-right-radius: 3px;
+        }
+        .msg.assistant .msg-bubble {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-bottom-left-radius: 3px;
+            color: rgba(255,255,255,.85);
+        }
+        .msg-time { font-size: 10px; color: rgba(255,255,255,.2); padding: 0 4px; }
+
+        .typing-indicator {
+            display: flex; gap: 4px; align-items: center; padding: 10px 13px;
+            background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px; border-bottom-left-radius: 3px;
+            width: fit-content;
+        }
+        .typing-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--violet); opacity: 0.5;
+            animation: typingBounce 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+        .chat-input-row {
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            display: flex; gap: 8px; align-items: flex-end;
+        }
+        .chat-textarea {
+            flex: 1; background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px; padding: 10px 12px;
+            color: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif;
+            resize: none; min-height: 40px; max-height: 120px;
+            line-height: 1.5; transition: all 0.2s;
+        }
+        .chat-textarea:focus { outline: none; border-color: var(--blue); background: rgba(255,255,255,.08); }
+        .chat-textarea::placeholder { color: rgba(255,255,255,.22); }
+        .btn-send {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--blue), #764ba2);
+            border: none; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.2s; flex-shrink: 0;
+        }
+        .btn-send:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(102,126,234,.4); }
+        .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* ── RIGHT PANEL — DIFF + ACTIONS ── */
+        .panel-right { display: flex; flex-direction: column; overflow: hidden; }
+
+        .diff-header {
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .diff-title {
+            font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+            color: rgba(255,255,255,.7);
+        }
+        .diff-filename {
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            color: var(--violet); background: rgba(167,139,250,.1);
+            border: 1px solid rgba(167,139,250,.2); border-radius: 6px;
+            padding: 3px 8px;
+        }
+        .diff-actions { display: flex; gap: 8px; }
+
+        .btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 9px;
+            font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif;
+            cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+        }
+        .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-ghost {
+            background: rgba(255,255,255,.05);
+            border-color: rgba(255,255,255,.1);
+            color: rgba(255,255,255,.6);
+        }
+        .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,.1); color: #fff; }
+        .btn-danger {
+            background: rgba(248,113,113,.1);
+            border-color: rgba(248,113,113,.3);
+            color: var(--red);
+        }
+        .btn-danger:hover:not(:disabled) { background: rgba(248,113,113,.2); }
+        .btn-success {
+            background: linear-gradient(135deg, rgba(74,222,128,.2), rgba(74,222,128,.1));
+            border-color: rgba(74,222,128,.4);
+            color: var(--green);
+        }
+        .btn-success:hover:not(:disabled) { background: rgba(74,222,128,.25); box-shadow: 0 4px 14px rgba(74,222,128,.2); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), #764ba2);
+            color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(102,126,234,.4); }
+
+        /* Diff viewer */
+        .diff-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .diff-tabs {
+            display: flex; gap: 0;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            padding: 0 20px; flex-shrink: 0;
+        }
+        .diff-tab {
+            padding: 10px 16px; font-size: 12px; font-weight: 600;
+            font-family: 'Syne', sans-serif; cursor: pointer;
+            color: rgba(255,255,255,.35); border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .diff-tab.active { color: var(--violet); border-bottom-color: var(--violet); }
+        .diff-tab:hover:not(.active) { color: rgba(255,255,255,.6); }
+
+        .diff-content { flex: 1; overflow-y: auto; padding: 16px 20px; }
+        .diff-content::-webkit-scrollbar { width: 4px; }
+        .diff-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+
+        /* Empty state */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; gap: 16px; color: rgba(255,255,255,.2);
+            text-align: center; padding: 40px;
+        }
+        .empty-icon { font-size: 48px; opacity: 0.4; }
+        .empty-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+        .empty-sub { font-size: 12px; line-height: 1.6; max-width: 280px; }
+
+        /* Diff lines */
+        .diff-block { font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; }
+        .diff-line { display: flex; gap: 12px; padding: 1px 8px; border-radius: 3px; }
+        .diff-line.added { background: rgba(74,222,128,.08); color: #86efac; }
+        .diff-line.removed { background: rgba(248,113,113,.08); color: #fca5a5; text-decoration: line-through; opacity: 0.7; }
+        .diff-line.context { color: rgba(255,255,255,.35); }
+        .diff-line-num { color: rgba(255,255,255,.15); min-width: 32px; text-align: right; user-select: none; }
+        .diff-line-prefix { min-width: 12px; }
+        .diff-line-code { flex: 1; white-space: pre-wrap; word-break: break-all; }
+
+        /* Code view */
+        .code-block {
+            background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.07);
+            border-radius: 10px; padding: 16px; overflow: auto;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            line-height: 1.7; color: rgba(255,255,255,.75);
+            max-height: 100%;
+        }
+        .code-block::-webkit-scrollbar { width: 4px; }
+        .code-block::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+
+        /* Commit section */
+        .commit-section {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            display: flex; gap: 8px; align-items: center;
+            flex-shrink: 0;
+        }
+        .commit-input {
+            flex: 1;
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 8px; padding: 9px 12px;
+            color: #fff; font-size: 12px; font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .commit-input:focus { outline: none; border-color: var(--green); background: rgba(255,255,255,.07); }
+        .commit-input::placeholder { color: rgba(255,255,255,.2); }
+
+        /* Push status */
+        .push-toast {
+            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+            background: rgba(15,15,30,.95); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+            padding: 14px 18px; font-size: 13px;
+            display: flex; align-items: center; gap: 10px;
+            transform: translateY(80px); opacity: 0;
+            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            max-width: 340px;
+        }
+        .push-toast.show { transform: translateY(0); opacity: 1; }
+        .push-toast.success { border-color: rgba(74,222,128,.4); }
+        .push-toast.error { border-color: rgba(248,113,113,.4); }
+
+        /* Stats bar */
+        .stats-bar {
+            padding: 0 20px 10px;
+            display: flex; gap: 16px; flex-shrink: 0;
+        }
+        .stat { font-size: 11px; color: rgba(255,255,255,.25); display: flex; align-items: center; gap: 5px; }
+        .stat-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .stat-dot.added { background: var(--green); }
+        .stat-dot.removed { background: var(--red); }
+
+        /* Spinner */
+        .spinner {
+            width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.2);
+            border-top-color: var(--violet); border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Tab panels */
+        .tab-panel { display: none; height: 100%; }
+        .tab-panel.active { display: flex; flex-direction: column; height: 100%; }
+    </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">🔥 IrisForge</div>
+        <div class="sidebar-close" onclick="toggleSidebar()">✕</div>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
+        <div class="sidebar-divider"></div>
+        <a href="forge.html" class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
+        <a href="base.html" class="sidebar-link"><span class="icon">⚡</span> IrisForge 3.0</a>
+        <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
+        <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
+        <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
+        <div class="sidebar-divider"></div>
+        <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
+        <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
+        <div class="sidebar-divider"></div>
+        <a href="studio.html" class="sidebar-link active"><span class="icon">🤖</span> Studio IA</a>
+    </nav>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="menu-btn" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand-link">
+            <div class="brand-icon">🔥</div>
+            <div>
+                <span class="brand-name">IrisForge</span>
+                <span class="brand-sub">Graphics</span>
+            </div>
+        </a>
+    </div>
+    <span class="topbar-label">STUDIO IA</span>
+</div>
+
+<!-- MAIN -->
+<div class="page">
+<div class="main">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="panel-left">
+
+        <!-- Profiles -->
+        <div class="config-section">
+            <div class="section-label">👤 Profils</div>
+
+            <!-- Chips row -->
+            <div class="profile-bar" id="profileBar">
+                <!-- injected by JS -->
+                <button class="btn-add-profile" onclick="addProfile()" title="Nouveau profil">+</button>
+            </div>
+
+            <!-- Profile editor (shown when chip clicked) -->
+            <div class="profile-editor" id="profileEditor">
+                <div class="profile-editor-header">
+                    <input class="profile-name-input" id="editName" placeholder="Nom du profil" maxlength="20">
+                    <div class="profile-editor-actions">
+                        <button class="btn-icon save" onclick="saveCurrentProfile()" title="Sauvegarder">✓</button>
+                        <button class="btn-icon del"  onclick="deleteCurrentProfile()" title="Supprimer">🗑</button>
+                        <button class="btn-icon"      onclick="closeEditor()" title="Fermer">✕</button>
+                    </div>
+                </div>
+                <div class="key-row">
+                    <span class="key-icon">🤖</span>
+                    <input class="key-input" type="password" id="editAnthropic" placeholder="sk-ant-..." autocomplete="off" oninput="liveValidate()">
+                    <div class="key-status" id="statusAnthropic"></div>
+                </div>
+                <div class="key-row">
+                    <span class="key-icon">🐙</span>
+                    <input class="key-input" type="password" id="editGithubToken" placeholder="ghp_..." autocomplete="off" oninput="liveValidate()">
+                    <div class="key-status" id="statusGithub"></div>
+                </div>
+                <div class="key-row">
+                    <span class="key-icon">📁</span>
+                    <input class="key-input" type="text" id="editGithubRepo" placeholder="user/repo" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <!-- File selector -->
+        <div class="file-section">
+            <div class="section-label">📄 Fichier cible</div>
+            <div class="file-selector-row">
+                <select class="file-select" id="fileSelect">
+                    <option value="">— Charger les fichiers —</option>
+                </select>
+                <button class="btn-refresh" onclick="loadRepoFiles()" title="Actualiser">↻</button>
+            </div>
+        </div>
+
+        <!-- Chat -->
+        <div class="chat-section">
+            <div class="chat-messages" id="chatMessages">
+                <div class="msg assistant">
+                    <div class="msg-bubble">
+                        👋 Bonjour ! Je suis Claude, intégré directement dans IrisForge.<br><br>
+                        Dis-moi quelle modification tu veux apporter à ton site — je génère le code modifié, tu vois le diff, et tu valides avant le push sur GitHub.
+                    </div>
+                    <div class="msg-time">maintenant</div>
+                </div>
+            </div>
+            <div class="chat-input-row">
+                <textarea class="chat-textarea" id="chatInput"
+                    placeholder="Décris la modification souhaitée..."
+                    rows="1"
+                    onkeydown="handleKey(event)"
+                    oninput="autoResize(this)"></textarea>
+                <button class="btn-send" id="btnSend" onclick="sendMessage()">↑</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="panel-right">
+
+        <div class="diff-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span class="diff-title">Aperçu des modifications</span>
+                <span class="diff-filename" id="diffFilename" style="display:none;"></span>
+            </div>
+            <div class="diff-actions">
+                <button class="btn btn-ghost" id="btnDiscard" onclick="discardChanges()" disabled>✕ Annuler</button>
+                <button class="btn btn-success" id="btnApply" onclick="showCommitBar()" disabled>✓ Valider &amp; Push</button>
+            </div>
+        </div>
+
+        <div class="diff-body">
+            <div class="diff-tabs">
+                <div class="diff-tab active" onclick="switchTab('diff', this)">Diff</div>
+                <div class="diff-tab" onclick="switchTab('new', this)">Nouveau code</div>
+                <div class="diff-tab" onclick="switchTab('original', this)">Original</div>
+            </div>
+
+            <div class="stats-bar" id="statsBar" style="display:none; padding-top:10px;">
+                <div class="stat"><div class="stat-dot added"></div><span id="statAdded">0 ajouts</span></div>
+                <div class="stat"><div class="stat-dot removed"></div><span id="statRemoved">0 suppressions</span></div>
+            </div>
+
+            <div class="diff-content">
+                <!-- TAB: DIFF -->
+                <div class="tab-panel active" id="tab-diff">
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">💬</div>
+                        <div class="empty-title">En attente d'une modification</div>
+                        <div class="empty-sub">Sélectionne un fichier, décris ce que tu veux changer, et Claude te proposera le code modifié ici.</div>
+                    </div>
+                    <div class="diff-block" id="diffBlock" style="display:none;"></div>
+                </div>
+
+                <!-- TAB: NEW CODE -->
+                <div class="tab-panel" id="tab-new">
+                    <pre class="code-block" id="newCodeBlock" style="display:none;"></pre>
+                    <div class="empty-state" id="emptyNew">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">Aucun code généré</div>
+                    </div>
+                </div>
+
+                <!-- TAB: ORIGINAL -->
+                <div class="tab-panel" id="tab-original">
+                    <pre class="code-block" id="originalCodeBlock" style="display:none;"></pre>
+                    <div class="empty-state" id="emptyOriginal">
+                        <div class="empty-icon">📄</div>
+                        <div class="empty-title">Aucun fichier chargé</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commit bar (hidden until validated) -->
+        <div class="commit-section" id="commitSection" style="display:none;">
+            <input class="commit-input" id="commitMessage" placeholder="✏️ Message de commit..." value="">
+            <button class="btn btn-danger btn-ghost" onclick="hideCommitBar()" style="flex-shrink:0;">✕</button>
+            <button class="btn btn-primary" id="btnPush" onclick="pushToGithub()" style="flex-shrink:0;">
+                🚀 Push
+            </button>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- Toast -->
+<div class="push-toast" id="pushToast"></div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentFileContent = '';
+let newFileContent = '';
+let currentFilePath = '';
+let currentFileSha = '';
+let isLoading = false;
+const history = [];
+
+// ── PROFILE SYSTEM ────────────────────────────────────────────────────────────
+const MAX_PROFILES = 5;
+let profiles = [];
+let activeProfileId = null;
+let editingProfileId = null;
+
+function saveProfiles() {
+    localStorage.setItem('studio_profiles', JSON.stringify(profiles));
+    localStorage.setItem('studio_activeProfile', activeProfileId || '');
+}
+
+function loadProfiles() {
+    try { profiles = JSON.parse(localStorage.getItem('studio_profiles')) || []; } catch { profiles = []; }
+    activeProfileId = localStorage.getItem('studio_activeProfile') || null;
+    // Migrate legacy keys if no profiles exist
+    if (profiles.length === 0) {
+        const ak = localStorage.getItem('studio_anthropicKey');
+        const gh = localStorage.getItem('studio_githubToken');
+        const repo = localStorage.getItem('studio_githubRepo');
+        if (ak || gh) {
+            const p = { id: uid(), name: 'Perso', anthropicKey: ak||'', githubToken: gh||'', githubRepo: repo||'' };
+            profiles.push(p);
+            activeProfileId = p.id;
+            saveProfiles();
+        }
+    }
+    if (!activeProfileId && profiles.length > 0) activeProfileId = profiles[0].id;
+}
+
+function uid() { return Math.random().toString(36).slice(2,10); }
+
+function activeProfile() { return profiles.find(p => p.id === activeProfileId) || null; }
+
+function getKey(k) {
+    const p = activeProfile();
+    return p ? (p[k] || '') : '';
+}
+
+function renderProfileBar() {
+    const bar = document.getElementById('profileBar');
+    const addBtn = bar.querySelector('.btn-add-profile');
+    // Remove old chips
+    bar.querySelectorAll('.profile-chip').forEach(c => c.remove());
+    profiles.forEach(p => {
+        const hasAnt = p.anthropicKey?.startsWith('sk-ant-');
+        const hasGh  = p.githubToken?.startsWith('ghp_') || p.githubToken?.startsWith('github_pat_');
+        const statusClass = (hasAnt && hasGh) ? 'ok' : (hasAnt || hasGh) ? 'partial' : '';
+        const chip = document.createElement('div');
+        chip.className = 'profile-chip' + (p.id === activeProfileId ? ' active' : '') + (statusClass ? ' ' + statusClass : '');
+        chip.dataset.id = p.id;
+        chip.title = p.name;
+        chip.innerHTML = `<div class="chip-dot"></div><span style="overflow:hidden;text-overflow:ellipsis;">${escHtml(p.name)}</span>`;
+        chip.onclick = () => selectOrEdit(p.id);
+        bar.insertBefore(chip, addBtn);
+    });
+    // Hide add btn if max reached
+    addBtn.style.display = profiles.length >= MAX_PROFILES ? 'none' : 'flex';
+}
+
+function selectOrEdit(id) {
+    if (editingProfileId === id) {
+        closeEditor(); return;
+    }
+    // Single click = activate, double-click behavior = edit (handled by openEditor)
+    activateProfile(id);
+    openEditor(id);
+}
+
+function activateProfile(id) {
+    activeProfileId = id;
+    saveProfiles();
+    renderProfileBar();
+    // Reset file list when switching profiles
+    document.getElementById('fileSelect').innerHTML = '<option value="">— Charger les fichiers —</option>';
+    currentFileContent = ''; currentFilePath = ''; currentFileSha = '';
+    // Auto-reload files if repo set
+    const p = activeProfile();
+    if (p && p.githubToken && p.githubRepo) loadRepoFiles();
+}
+
+function openEditor(id) {
+    editingProfileId = id;
+    const p = profiles.find(pr => pr.id === id);
+    if (!p) return;
+    document.getElementById('editName').value = p.name;
+    document.getElementById('editAnthropic').value = p.anthropicKey || '';
+    document.getElementById('editGithubToken').value = p.githubToken || '';
+    document.getElementById('editGithubRepo').value = p.githubRepo || '';
+    document.getElementById('profileEditor').classList.add('open');
+    liveValidate();
+}
+
+function closeEditor() {
+    editingProfileId = null;
+    document.getElementById('profileEditor').classList.remove('open');
+}
+
+function liveValidate() {
+    const ak = document.getElementById('editAnthropic').value.trim();
+    const gh = document.getElementById('editGithubToken').value.trim();
+    document.getElementById('statusAnthropic').className = 'key-status' + (ak.startsWith('sk-ant-') ? ' ok' : ak ? ' err' : '');
+    document.getElementById('statusGithub').className    = 'key-status' + (gh.startsWith('ghp_') || gh.startsWith('github_pat_') ? ' ok' : gh ? ' err' : '');
+}
+
+function saveCurrentProfile() {
+    if (!editingProfileId) return;
+    const idx = profiles.findIndex(p => p.id === editingProfileId);
+    if (idx === -1) return;
+    profiles[idx].name         = document.getElementById('editName').value.trim() || 'Profil';
+    profiles[idx].anthropicKey = document.getElementById('editAnthropic').value.trim();
+    profiles[idx].githubToken  = document.getElementById('editGithubToken').value.trim();
+    profiles[idx].githubRepo   = document.getElementById('editGithubRepo').value.trim();
+    saveProfiles();
+    renderProfileBar();
+    showToast('✅ Profil sauvegardé', 'success');
+    closeEditor();
+}
+
+function deleteCurrentProfile() {
+    if (!editingProfileId) return;
+    if (profiles.length <= 1) { showToast('Impossible de supprimer le seul profil', 'error'); return; }
+    profiles = profiles.filter(p => p.id !== editingProfileId);
+    if (activeProfileId === editingProfileId) activeProfileId = profiles[0]?.id || null;
+    saveProfiles();
+    renderProfileBar();
+    closeEditor();
+    showToast('Profil supprimé', 'success');
+}
+
+function addProfile() {
+    if (profiles.length >= MAX_PROFILES) return;
+    const p = { id: uid(), name: `Profil ${profiles.length + 1}`, anthropicKey: '', githubToken: '', githubRepo: '' };
+    profiles.push(p);
+    activeProfileId = p.id;
+    saveProfiles();
+    renderProfileBar();
+    openEditor(p.id);
+}
+
+function initProfiles() {
+    loadProfiles();
+    renderProfileBar();
+}
+
+// ── SIDEBAR ────────────────────────────────────────────────────────────────────
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+}
+
+// ── GITHUB: LOAD FILES ────────────────────────────────────────────────────────
+async function loadRepoFiles() {
+    const token = getKey('githubToken');
+    const repo  = getKey('githubRepo');
+    if (!token || !repo) { showToast('Configure un profil avec token GitHub et repo', 'error'); return; }
+
+    const btn = document.querySelector('.btn-refresh');
+    btn.textContent = '⏳';
+    try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+        });
+        if (!res.ok) throw new Error(`GitHub API: ${res.status}`);
+        const files = await res.json();
+        const select = document.getElementById('fileSelect');
+        select.innerHTML = '<option value="">— Sélectionner un fichier —</option>';
+        files.filter(f => f.type === 'file').sort((a,b) => a.name.localeCompare(b.name)).forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.path;
+            opt.textContent = f.name;
+            select.appendChild(opt);
+        });
+        showToast(`${files.filter(f=>f.type==='file').length} fichiers chargés`, 'success');
+    } catch(e) {
+        showToast('Erreur GitHub: ' + e.message, 'error');
+    }
+    btn.textContent = '↻';
+}
+
+// ── GITHUB: FETCH FILE ────────────────────────────────────────────────────────
+async function fetchFile(path) {
+    const token = getKey('githubToken');
+    const repo  = getKey('githubRepo');
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+    });
+    if (!res.ok) throw new Error(`GitHub ${res.status}`);
+    const data = await res.json();
+    currentFileSha = data.sha;
+    return atob(data.content.replace(/\n/g,''));
+}
+
+document.getElementById('fileSelect').addEventListener('change', async function() {
+    if (!this.value) return;
+    currentFilePath = this.value;
+    try {
+        currentFileContent = await fetchFile(this.value);
+        // Show in original tab
+        document.getElementById('originalCodeBlock').textContent = currentFileContent;
+        document.getElementById('originalCodeBlock').style.display = 'block';
+        document.getElementById('emptyOriginal').style.display = 'none';
+        document.getElementById('diffFilename').textContent = this.value;
+        document.getElementById('diffFilename').style.display = 'inline';
+        // Auto-fill commit message
+        document.getElementById('commitMessage').value = `✨ Modif via IrisForge Studio — ${this.value}`;
+    } catch(e) {
+        showToast('Erreur chargement fichier: ' + e.message, 'error');
+    }
+});
+
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function addMessage(role, text) {
+    const wrap = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    const now = new Date().toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' });
+    div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${now}</div>`;
+    wrap.appendChild(div);
+    wrap.scrollTop = wrap.scrollHeight;
+    return div;
+}
+
+function addTyping() {
+    const wrap = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'msg assistant';
+    div.id = 'typingIndicator';
+    div.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    wrap.appendChild(div);
+    wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+}
+
+async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const anthropicKey = getKey('anthropicKey');
+    if (!anthropicKey) { showToast('Renseigne ta clé Anthropic !', 'error'); return; }
+    if (!currentFilePath) { showToast('Sélectionne un fichier à modifier', 'error'); return; }
+    if (!currentFileContent) { showToast('Le fichier n\'est pas chargé', 'error'); return; }
+
+    isLoading = true;
+    document.getElementById('btnSend').disabled = true;
+    input.value = '';
+    input.style.height = 'auto';
+
+    addMessage('user', text);
+    history.push({ role: 'user', content: text });
+    addTyping();
+
+    const systemPrompt = `Tu es un assistant expert en développement web intégré dans IrisForge, une interface pour générer des images avec ComfyUI.
+
+L'utilisateur veut modifier le fichier: ${currentFilePath}
+
+Voici le contenu ACTUEL du fichier:
+\`\`\`
+${currentFileContent}
+\`\`\`
+
+Quand l'utilisateur demande une modification:
+1. Réponds brièvement pour confirmer ce que tu fais (1-2 phrases max)
+2. Fournis le fichier COMPLET modifié entre les balises <MODIFIED_FILE> et </MODIFIED_FILE>
+3. Ne modifie QUE ce qui est demandé, laisse le reste intact
+4. Si la demande n'est pas claire, demande des précisions AVANT de générer
+
+IMPORTANT: Le fichier modifié doit être complet et fonctionnel, pas juste un extrait.`;
+
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': anthropicKey,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 16000,
+                system: systemPrompt,
+                messages: history
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error?.message || `API ${res.status}`);
+        }
+
+        const data = await res.json();
+        const fullText = data.content[0].text;
+        history.push({ role: 'assistant', content: fullText });
+
+        removeTyping();
+
+        // Extract modified file if present
+        const match = fullText.match(/<MODIFIED_FILE>([\s\S]*?)<\/MODIFIED_FILE>/);
+        const displayText = fullText.replace(/<MODIFIED_FILE>[\s\S]*?<\/MODIFIED_FILE>/g, '').trim();
+
+        addMessage('assistant', displayText || 'Modification générée !');
+
+        if (match) {
+            newFileContent = match[1].trim();
+            renderDiff(currentFileContent, newFileContent);
+            document.getElementById('newCodeBlock').textContent = newFileContent;
+            document.getElementById('newCodeBlock').style.display = 'block';
+            document.getElementById('emptyNew').style.display = 'none';
+            document.getElementById('btnDiscard').disabled = false;
+            document.getElementById('btnApply').disabled = false;
+            document.getElementById('commitMessage').value = `✨ ${text.slice(0,60)} — ${currentFilePath}`;
+        }
+
+    } catch(e) {
+        removeTyping();
+        addMessage('assistant', '❌ Erreur : ' + e.message);
+    }
+
+    isLoading = false;
+    document.getElementById('btnSend').disabled = false;
+}
+
+// ── DIFF ENGINE ───────────────────────────────────────────────────────────────
+function computeDiff(oldText, newText) {
+    const oldLines = oldText.split('\n');
+    const newLines = newText.split('\n');
+    // Simple LCS-based diff
+    const result = [];
+    let i = 0, j = 0;
+    // Build LCS table
+    const m = oldLines.length, n = newLines.length;
+    const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+    for (let a = m-1; a >= 0; a--)
+        for (let b = n-1; b >= 0; b--)
+            dp[a][b] = oldLines[a] === newLines[b] ? dp[a+1][b+1]+1 : Math.max(dp[a+1][b], dp[a][b+1]);
+
+    let a = 0, b = 0;
+    while (a < m || b < n) {
+        if (a < m && b < n && oldLines[a] === newLines[b]) {
+            result.push({ type: 'context', line: oldLines[a], oldN: a+1, newN: b+1 });
+            a++; b++;
+        } else if (b < n && (a >= m || dp[a][b+1] >= dp[a+1][b])) {
+            result.push({ type: 'added', line: newLines[b], newN: b+1 });
+            b++;
+        } else {
+            result.push({ type: 'removed', line: oldLines[a], oldN: a+1 });
+            a++;
+        }
+    }
+    return result;
+}
+
+function renderDiff(oldText, newText) {
+    const diff = computeDiff(oldText, newText);
+    const block = document.getElementById('diffBlock');
+    document.getElementById('emptyState').style.display = 'none';
+    block.style.display = 'block';
+
+    // Only show context around changes (±4 lines)
+    const changed = new Set();
+    diff.forEach((d, i) => { if (d.type !== 'context') { for (let k=Math.max(0,i-4); k<=Math.min(diff.length-1,i+4); k++) changed.add(k); } });
+
+    let html = '';
+    let skipped = false;
+    diff.forEach((d, i) => {
+        if (!changed.has(i)) {
+            if (!skipped) { html += `<div class="diff-line context"><span class="diff-line-num">···</span><span class="diff-line-prefix"></span><span class="diff-line-code" style="color:rgba(255,255,255,.1)">...</span></div>`; skipped = true; }
+            return;
+        }
+        skipped = false;
+        const lineNum = d.type === 'added' ? d.newN : d.oldN;
+        const prefix = d.type === 'added' ? '+' : d.type === 'removed' ? '-' : ' ';
+        const esc = d.line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        html += `<div class="diff-line ${d.type}"><span class="diff-line-num">${lineNum}</span><span class="diff-line-prefix">${prefix}</span><span class="diff-line-code">${esc}</span></div>`;
+    });
+
+    block.innerHTML = html;
+
+    const added   = diff.filter(d => d.type === 'added').length;
+    const removed = diff.filter(d => d.type === 'removed').length;
+    document.getElementById('statsBar').style.display = 'flex';
+    document.getElementById('statAdded').textContent   = `+${added} ligne${added>1?'s':''}`;
+    document.getElementById('statRemoved').textContent = `-${removed} ligne${removed>1?'s':''}`;
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name, el) {
+    document.querySelectorAll('.diff-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+function discardChanges() {
+    newFileContent = '';
+    document.getElementById('diffBlock').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('newCodeBlock').style.display = 'none';
+    document.getElementById('emptyNew').style.display = 'flex';
+    document.getElementById('statsBar').style.display = 'none';
+    document.getElementById('btnDiscard').disabled = true;
+    document.getElementById('btnApply').disabled = true;
+    hideCommitBar();
+}
+
+function showCommitBar() {
+    document.getElementById('commitSection').style.display = 'flex';
+}
+function hideCommitBar() {
+    document.getElementById('commitSection').style.display = 'none';
+}
+
+// ── GITHUB PUSH ───────────────────────────────────────────────────────────────
+async function pushToGithub() {
+    if (!newFileContent) return;
+    const token  = getKey('githubToken');
+    const repo   = getKey('githubRepo');
+    const msg    = document.getElementById('commitMessage').value.trim() || `✨ Modif via IrisForge Studio — ${currentFilePath}`;
+    const btn    = document.getElementById('btnPush');
+
+    if (!token || !repo) { showToast('Token GitHub ou repo manquant', 'error'); return; }
+
+    btn.innerHTML = '<div class="spinner"></div> Push...';
+    btn.disabled = true;
+
+    try {
+        // Encode content in base64
+        const encoded = btoa(unescape(encodeURIComponent(newFileContent)));
+
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${currentFilePath}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: msg,
+                content: encoded,
+                sha: currentFileSha
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || `GitHub ${res.status}`);
+        }
+
+        const data = await res.json();
+        currentFileSha = data.content.sha;
+        currentFileContent = newFileContent;
+        newFileContent = '';
+
+        showToast(`✅ Push réussi ! Commit: ${data.commit.sha.slice(0,7)}`, 'success');
+        addMessage('assistant', `✅ **Push effectué !** Le fichier \`${currentFilePath}\` a été mis à jour sur GitHub.\n\nCommit : \`${data.commit.sha.slice(0,7)}\``);
+        discardChanges();
+        hideCommitBar();
+
+    } catch(e) {
+        showToast('❌ Erreur push: ' + e.message, 'error');
+        addMessage('assistant', '❌ Erreur lors du push: ' + e.message);
+    }
+
+    btn.innerHTML = '🚀 Push';
+    btn.disabled = false;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('pushToast');
+    t.textContent = msg;
+    t.className = 'push-toast show ' + type;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    initProfiles();
+});
+</script>
+</body>
+</html>

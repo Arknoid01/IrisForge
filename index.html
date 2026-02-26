@@ -418,6 +418,11 @@
                         <div class="tile-info"><div class="tile-name">Historique</div><div class="tile-desc">Toutes les générations</div></div>
                         <span class="tile-arrow">›</span>
                     </a>
+                    <a class="page-tile disabled" id="card-studio" href="studio.html">
+                        <div class="tile-icon">🤖</div>
+                        <div class="tile-info"><div class="tile-name">Studio IA</div><div class="tile-desc">Éditeur assisté par Claude</div></div>
+                        <span class="tile-arrow">›</span>
+                    </a>
                     <a class="page-tile disabled" id="card-prompt" href="prompt.html">
                         <div class="tile-icon">💬</div>
                         <div class="tile-info"><div class="tile-name">Prompts</div><div class="tile-desc">Bibliothèque de prompts</div></div>
@@ -447,7 +452,7 @@
 </div>
 
 <script>
-    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique','card-prompt'];
+    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique','card-prompt','card-studio'];
 
     function setCardsEnabled(enabled) {
         PAGES.forEach(id => {
