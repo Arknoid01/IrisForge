@@ -48,12 +48,6 @@
         .file-upload input { display: none; }
         .file-upload-text { color: rgba(255,255,255,0.6); font-size: 14px; }
         .preview-img { max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 10px; }
-        .info-box {
-            background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.3);
-            border-radius: 12px; padding: 16px; margin-bottom: 20px;
-        }
-        .info-box p { color: rgba(255,255,255,0.8); font-size: 13px; line-height: 1.6; margin: 4px 0; }
-        .info-box strong { color: #a78bfa; }
         button {
             width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; border: none; border-radius: 12px; padding: 16px;
@@ -77,10 +71,12 @@
         .badge-original { background: rgba(102,126,234,0.3); color: #a78bfa; }
         .badge-recommended { background: rgba(34,197,94,0.3); color: #4ade80; }
         .badge-quality { background: rgba(236,72,153,0.3); color: #f472b6; }
-        .status { margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center; font-size: 14px; display: none; }
-        .status.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
-        .status.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
-        .status.loading { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
+
+        /* PROGRESS */
+        .progress-container { margin-top: 16px; display: none; }
+        .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #a78bfa); border-radius: 4px; transition: width 0.3s ease; }
+        .progress-label { text-align: center; color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 6px; }
         /* FRAME PREVIEW */
         .frame-preview-container { margin-top: 16px; display: none; text-align: center; }
         .frame-preview-container p { color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 8px; }
@@ -175,36 +171,6 @@
         .translate-btn.success { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #4ade80; }
         .translate-btn.error { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #f87171; }
     
-        /* ── IrisForge Global Style ── */
-        :root { --blue:#667eea; --violet:#a78bfa; --pink:#ec4899; --dark:#0f0f1e; }
-
-        /* CRITIQUE : body doit être block, pas flex, pour que la topbar sticky occupe toute la largeur */
-        body {
-            font-family: 'DM Sans', -apple-system, sans-serif !important;
-            background: #0f0f1e !important;
-            background-image: none !important;
-            display: block !important;
-            align-items: unset !important;
-            justify-content: unset !important;
-            color: #fff;
-            overflow-x: hidden;
-            padding: 0 !important;
-        }
-
-        /* Container recentré via margin auto maintenant que body n'est plus flex */
-        .container {
-            margin-left: auto !important;
-            margin-right: auto !important;
-            padding-top: 20px !important;
-        }
-
-        h1 { font-family: 'Syne', sans-serif !important; }
-        .sidebar { background: rgba(10,10,24,.97) !important; backdrop-filter: blur(20px) !important; border-right: 1px solid rgba(102,126,234,.18) !important; }
-        .sidebar-title { font-family: 'Syne', sans-serif !important; }
-        /* Cacher le vieux burger fixe */
-        .menu-btn { display: none !important; }
-
-    
         /* ── Barre de progression Style C ── */
         .iris-progress {
             display: none;
@@ -227,7 +193,7 @@
             margin-bottom: 2px;
         }
         .iris-progress-pct {
-            font-family: 'Syne', sans-serif;
+            font-family: 'Syne', 'DM Sans', sans-serif;
             font-size: 26px; font-weight: 800; line-height: 1;
             background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -244,7 +210,7 @@
             margin-bottom: 3px;
         }
         .iris-eta-value {
-            font-family: 'Syne', sans-serif;
+            font-family: 'Syne', 'DM Sans', sans-serif;
             font-size: 15px; font-weight: 700;
             color: #4ade80;
             transition: color .4s;
@@ -293,30 +259,8 @@
         .iris-progress-steps { font-size: 11px; color: rgba(255,255,255,.25); }
         .iris-progress-speed { font-size: 11px; color: rgba(255,255,255,.18); }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 55% at 50% 55%,rgba(102,126,234,.20) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 20%,rgba(118,75,162,.14) 0%,transparent 60%),radial-gradient(ellipse 45% 40% at 88% 80%,rgba(236,72,153,.10) 0%,transparent 60%),#0f0f1e;"></div>
-    <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(102,126,234,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,.04) 1px,transparent 1px);background-size:60px 60px;"></div>
-    <!-- IrisForge Topbar -->
-    <div style="position:sticky;top:0;z-index:900;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <div onclick="toggleSidebar()" style="width:34px;height:34px;border-radius:9px;background:rgba(102,126,234,.12);border:1px solid rgba(102,126,234,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;" onmouseover="this.style.background='rgba(102,126,234,.25)'" onmouseout="this.style.background='rgba(102,126,234,.12)'">
-                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
-                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
-                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
-            </div>
-            <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
-                <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(102,126,234,.4);flex-shrink:0;">🔥</div>
-                <div>
-                    <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1.1;">IrisForge</span>
-                    <span style="font-size:8px;color:#ec4899;font-weight:600;letter-spacing:2px;text-transform:uppercase;display:block;">Graphics</span>
-                </div>
-            </a>
-        </div>
-        <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">Génération Vidéo</span>
-    </div>
-
     <!-- Menu -->
     <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
     <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -408,14 +352,7 @@
         <textarea id="prompt" placeholder="Ex: dancing smoothly, fluid movements..."></textarea>
     </div>
 
-    <div class="info-box">
-        <p><strong>Configuration :</strong></p>
-        <p id="durationInfo">• Durée : ~2 secondes (49 frames)</p>
-        <p id="interpolationInfo">• Interpolation : Aucune (qualité maximale)</p>
-        <p id="timeInfo">• Temps estimé : variable selon GPU</p>
-        <p>• Résolution : 384x672 (portrait optimisé)</p>
-        <p>• FPS : 24 (cinématique)</p>
-    </div>
+
 
     <!-- CHAINING -->
     <div class="chaining-box">
@@ -429,7 +366,7 @@
 
     <button onclick="startGeneration()" id="generateBtn">🎬 Générer</button>
 
-    <div class="status" id="status"></div>
+
 
         <div class="iris-progress" id="irisProgress">
             <div class="iris-progress-header">
@@ -451,8 +388,6 @@
                 <span class="iris-progress-speed" id="irisSpeed"></span>
             </div>
         </div>
-
-    </div>
 
     <div class="frame-preview-container" id="framePreviewContainer">
         <p>🎞️ Preview en cours de génération</p>
@@ -479,28 +414,41 @@
 </div>
 
 <script>
-        // ── irisETA : calcul ETA temps réel basé sur vitesse des steps ──────
+        // ── ETA calculator (multi-pass aware) ────────────────────────────────
         const irisETA = {
             stepTimes: [],
+            globalOffset: 0,
             globalTotal: 0,
-            reset() { this.stepTimes = []; this.globalTotal = 0; },
+            prevRawStep: 0,
+            prevNode: null,
+            reset() { this.stepTimes = []; this.globalOffset = 0; this.globalTotal = 0; this.prevRawStep = 0; this.prevNode = null; },
             setTotal(total) { this.globalTotal = total; },
 
-            onStep(currentStep, totalSteps) {
-                const effectiveTotal = this.globalTotal > 0 ? this.globalTotal : totalSteps;
+            onStep(rawStep, rawMax, node) {
+                const nodeChanged = node !== undefined && node !== null && node !== this.prevNode && this.prevNode !== null;
+                const stepRegressed = rawStep <= this.prevRawStep && this.prevRawStep > 0;
+                if (nodeChanged || (!nodeChanged && node === undefined && stepRegressed)) {
+                    this.globalOffset += this.prevRawStep;
+                }
+                this.prevRawStep = rawStep;
+                if (node !== undefined && node !== null) this.prevNode = node;
+
+                const currentStep = this.globalOffset + rawStep;
+                const totalSteps  = this.globalTotal > 0 ? this.globalTotal : (this.globalOffset + rawMax);
+
                 this.stepTimes.push(Date.now());
-                const pct  = Math.round((currentStep / effectiveTotal) * 100);
-                const left = effectiveTotal - currentStep;
+                const pct  = Math.min(Math.round((currentStep / totalSteps) * 100), 99);
+                const left = totalSteps - currentStep;
                 let etaText = 'Calcul...', speedText = '';
 
                 if (this.stepTimes.length >= 2) {
-                    const win = this.stepTimes.slice(-6);
+                    const win = this.stepTimes.slice(-8);
                     const intervals = [];
                     for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
                     const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
                     const avgSec = avgMs / 1000;
                     const etaSec = Math.round(left * avgSec);
-                    if (etaSec <= 0 || currentStep >= effectiveTotal) {
+                    if (etaSec <= 0 || currentStep >= totalSteps) {
                         etaText = 'Finalisation...';
                     } else if (etaSec < 60) {
                         etaText = `~${etaSec}s`;
@@ -511,22 +459,16 @@
                     speedText = `${avgSec.toFixed(1)}s/step`;
                 }
 
-                document.getElementById('irisProgress').classList.add('visible');
-                const statusEl = document.getElementById('status');
-                if (statusEl) statusEl.style.display = 'none';
+                const box = document.getElementById('irisProgress');
+                box.classList.add('visible');
                 document.getElementById('irisFill').style.width  = pct + '%';
                 document.getElementById('irisPct').textContent   = pct;
-                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${effectiveTotal}`;
+                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
                 if (speedText) document.getElementById('irisSpeed').textContent = speedText;
 
                 const etaEl = document.getElementById('irisEta');
                 etaEl.textContent = etaText;
                 etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
-
-                if (pct >= 100) {
-                    document.getElementById('irisStatus').textContent = 'Récupération...';
-                    etaEl.textContent = '✓'; etaEl.className = 'iris-eta-value done';
-                }
             },
 
             done() {
@@ -638,7 +580,7 @@
 
     // ── RECOVERY ──────────────────────────────────────────────────────────────
     function saveGenerationState(promptId, saveNodeId, apiUrl) {
-        localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId, apiUrl, ts: Date.now() }));
+        localStorage.setItem('irisforge_pending', JSON.stringify({ promptId, saveNodeId, apiUrl, page: 'video', ts: Date.now() }));
     }
     function clearGenerationState() { localStorage.removeItem('irisforge_pending'); }
 
@@ -647,6 +589,7 @@
             const saved = localStorage.getItem('irisforge_pending');
             if (!saved) return;
             const data = JSON.parse(saved);
+            if (data.page && data.page !== 'video') return;
             if (Date.now() - data.ts < 7200000) {
                 document.getElementById('recoveryBanner').style.display = 'flex';
             } else { clearGenerationState(); }
@@ -659,44 +602,70 @@
     }
 
     async function recoverLastGeneration() {
-        let saved;
-        try { saved = localStorage.getItem('irisforge_pending'); } catch(e) {}
-        if (!saved) return;
         let data;
-        try { data = JSON.parse(saved); } catch(e) { clearGenerationState(); return; }
-        const { promptId, saveNodeId, apiUrl } = data;
+        try { data = JSON.parse(localStorage.getItem('irisforge_pending')); } catch(e) { clearGenerationState(); return; }
+        if (!data) return;
         document.getElementById('recoveryBanner').style.display = 'none';
-        showStatus('🔍 Récupération de la vidéo...', 'loading');
+        const { promptId, saveNodeId, apiUrl } = data;
+
+        const applyVideo = async (videoInfo) => {
+            const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder||'')}&type=${encodeURIComponent(videoInfo.type||'output')}`;
+            const blob = await (await fetch(videoUrl)).blob();
+            clearGenerationState();
+            addClipToGallery(blob, selectedDuration);
+            irisETA.done(); setTimeout(() => irisETA.hide(), 2000);
+        };
+
         try {
+            // Cas 1 : génération déjà terminée
             const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
             if (hist[promptId] && hist[promptId].outputs) {
                 const saveNode = hist[promptId].outputs[saveNodeId];
                 const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
                 if (videoInfo) {
-                    const videoUrl = `${apiUrl}/view?filename=${encodeURIComponent(videoInfo.filename)}&subfolder=${encodeURIComponent(videoInfo.subfolder||'')}&type=${encodeURIComponent(videoInfo.type||'output')}`;
-                    const blob = await (await fetch(videoUrl)).blob();
-                    clearGenerationState();
-                    addClipToGallery(blob, selectedDuration);
-                    showStatus('✅ Vidéo récupérée et ajoutée à la galerie !', 'success');
-                } else {
-                    showStatus('⚠️ Génération pas encore terminée ou introuvable.', 'error');
-                    clearGenerationState();
+                    await applyVideo(videoInfo);
+                    return;
                 }
-            } else { showStatus('⚠️ Aucun résultat trouvé.', 'error'); clearGenerationState(); }
-        } catch(e) { showStatus('❌ Erreur récupération : ' + e.message, 'error'); }
+            }
+        } catch(e) {}
+
+        // Cas 2 : encore en cours → rebrancher WS
+        irisETA.hide(); irisETA.setTotal(25);
+        isGenerating = true;
+        const btn = document.getElementById('generateBtn');
+        if (btn) btn.disabled = true;
+
+        const wsUrl = apiUrl.replace(/^http/, 'ws');
+        const wsRecover = new WebSocket(`${wsUrl}/ws?clientId=${clientId}`);
+        wsRecover.onmessage = async (event) => {
+            if (typeof event.data !== 'string') return;
+            let msg; try { msg = JSON.parse(event.data); } catch(e) { return; }
+            if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
+                irisETA.onStep(msg.data.value, msg.data.max, msg.data.node);
+            }
+            if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                setTimeout(async () => {
+                    try {
+                        const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
+                        if (hist[promptId] && hist[promptId].outputs) {
+                            const saveNode = hist[promptId].outputs[saveNodeId];
+                            const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
+                            if (videoInfo) await applyVideo(videoInfo);
+                        }
+                    } catch(e) { clearGenerationState(); }
+                    finally { wsRecover.close(); isGenerating = false; if (btn) btn.disabled = false; }
+                }, 1000);
+            }
+        };
+        wsRecover.onerror = () => { isGenerating = false; if (btn) btn.disabled = false; clearGenerationState(); };
     }
 
     // ── UI ────────────────────────────────────────────────────────────────────
     function showStatus(msg, type) {
-        const s = document.getElementById('status');
-        s.textContent = msg; s.className = 'status ' + type; s.style.display = 'block';
+        // Status text display removed – progress bar only
     }
-    function showProgress(val, max) { irisETA.onStep(val, max); }
-
-    
+    function showProgress(val, max, node) { irisETA.onStep(val, max, node); }
     function hideProgress() { irisETA.hide(); }
-
-    
     function showFramePreview(url) {
         document.getElementById('framePreviewImg').src = url;
         document.getElementById('framePreviewContainer').style.display = 'block';
@@ -719,15 +688,6 @@
         updateInfo();
     }
     function updateInfo() {
-        const infoMap = {
-            '2s': { dur: '~2 secondes (49 frames)', interp: 'Aucune (qualité maximale)', time: 'variable selon GPU' },
-            '4s': { dur: '~4 secondes (98 frames)', interp: 'RIFE x2 (bonne qualité)', time: 'variable selon GPU' },
-            '7s': { dur: '~7 secondes (81 frames + RIFE x2)', interp: 'RIFE x2 sur 81 vraies frames (très bonne qualité)', time: 'variable selon GPU (~2x le mode 2s)' }
-        };
-        const info = infoMap[selectedDuration] || infoMap['2s'];
-        document.getElementById('durationInfo').textContent = '• Durée : ' + info.dur;
-        document.getElementById('interpolationInfo').textContent = '• Interpolation : ' + info.interp;
-        document.getElementById('timeInfo').textContent = '• Temps estimé : ' + info.time;
     }
 
     // ── IMAGE/VIDEO ───────────────────────────────────────────────────────────
@@ -771,7 +731,7 @@
             uploadedImage = canvas.toDataURL('image/png');
             lastFrameImage = uploadedImage;
             showStatus('✔ Dernière frame extraite !', 'success');
-            setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+
         };
     }
 
@@ -889,7 +849,7 @@
                     try { msg = JSON.parse(event.data); } catch(e) { return; }
 
                     if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
-                        showProgress(msg.data.value, msg.data.max);
+                        irisETA.onStep(msg.data.value, msg.data.max, msg.data.node);
                     }
 
                     if (msg.type === 'executed' && msg.data.prompt_id === promptId && msg.data.output) {
@@ -957,7 +917,7 @@
         document.getElementById('generateBtn').disabled = true;
         document.getElementById('nextClipBtn').style.display = 'none';
         document.getElementById('resultVideo').style.display = 'none';
-        hideProgress(); hideFramePreview();
+        irisETA.hide(); hideFramePreview();
 
         const clipIndex = clips.length + 1;
         const totalExpected = clipIndex + chainRemaining - 1;
@@ -965,7 +925,7 @@
         try {
             showStatus(`📤 Upload image source (clip ${clipIndex}/${totalExpected})...`, 'loading');
             const imageName = await uploadImageToComfyUI(apiUrl, lastFrameImage);
-            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.hide(); irisETA.setTotal(25);
+            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(25);
             const { videoBlob } = await generateWithInterpolation(apiUrl, imageName, prompt);
 
             // Revoke previous result URL to free memory
@@ -981,7 +941,7 @@
             lastFrameImage = await extractLastFrameFromBlob(videoBlob);
 
             chainRemaining--;
-            hideProgress(); hideFramePreview();
+            irisETA.hide(); hideFramePreview();
 
             if (chainRemaining > 0) {
                 irisETA.hide(); showStatus(`✅ Clip ${clipIndex} terminé ! Lancement du suivant...`, 'success');
@@ -993,7 +953,7 @@
                 document.getElementById('generateBtn').disabled = false;
             }
         } catch(err) {
-            hideProgress(); hideFramePreview();
+            irisETA.hide(); hideFramePreview();
             showStatus('❌ Erreur : ' + err.message, 'error');
             isGenerating = false;
             document.getElementById('generateBtn').disabled = false;
@@ -1089,7 +1049,7 @@
             document.getElementById('imageFileText').innerHTML = `✔ Dernière frame du clip #${i+1}`;
             switchMode('image');
             showStatus(`✅ Clip #${i+1} défini comme source !`, 'success');
-            setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+
         } catch(e) {
             showStatus('❌ Erreur extraction frame : ' + e.message, 'error');
         }
@@ -1200,7 +1160,7 @@
                 }
                 renderGallery();
                 showStatus(`✅ ${saved.length} clip(s) restaurés depuis la session précédente !`, 'success');
-                setTimeout(() => document.getElementById('status').style.display = 'none', 4000);
+
             }
         } catch(e) { console.warn('Could not restore clips from DB:', e); }
     })();
@@ -1218,17 +1178,12 @@
                 };
                 if (img.startsWith('data:image/')) {
                     applyImage(img);
-                    showStatus('✔ Image chargée depuis IrisForge !', 'success');
-                    setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
                 } else if (img.startsWith('http')) {
                     fetch(img).then(r => r.blob()).then(blob => {
                         const reader = new FileReader();
-                        reader.onloadend = () => {
-                            applyImage(reader.result);
-                            showStatus('✔ Image chargée depuis IrisForge !', 'success');
-                            setTimeout(() => document.getElementById('status').style.display = 'none', 3000);
-                        };
+                        reader.onloadend = () => applyImage(reader.result);
                         reader.readAsDataURL(blob);
+                        localStorage.removeItem('videoSourceImage');
                     }).catch(() => localStorage.removeItem('videoSourceImage'));
                 }
             }
