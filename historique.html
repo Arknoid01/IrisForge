@@ -604,15 +604,28 @@
         .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
         .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
-        .header-nav { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .nav-link { display: inline-block; color: #a78bfa; text-decoration: none; font-size: 14px; padding: 8px 16px; border-radius: 8px; transition: all 0.3s; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.2); }
-        .nav-link:hover { background: rgba(167, 139, 250, 0.2); transform: translateY(-2px); }
     </style>
 </head>
 <body>
-    <!-- Menu -->
-    <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
-    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <!-- IrisForge Topbar -->
+    <div style="position:sticky;top:0;z-index:900;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div onclick="toggleSidebar()" style="width:34px;height:34px;border-radius:9px;background:rgba(102,126,234,.12);border:1px solid rgba(102,126,234,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;" onmouseover="this.style.background='rgba(102,126,234,.25)'" onmouseout="this.style.background='rgba(102,126,234,.12)'">
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+                <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
+            </div>
+            <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+                <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(102,126,234,.4);flex-shrink:0;">🔥</div>
+                <div>
+                    <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1.1;">IrisForge</span>
+                    <span style="font-size:8px;color:#ec4899;font-weight:600;letter-spacing:2px;text-transform:uppercase;display:block;">Graphics</span>
+                </div>
+            </a>
+        </div>
+        <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">HISTORIQUE</span>
+    </div>
+        <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">🔥 IrisForge</div>
@@ -632,16 +645,6 @@
         </nav>
     </div>
     <div class="container">
-        <div class="header-nav">
-            <a href="index.html" class="nav-link">🏠 Accueil</a>
-            <a href="forge.html" class="nav-link">🎨 IrisForge 2.0</a>
-            <a href="base.html" class="nav-link">⚡ Base</a>
-            <a href="editor.html" class="nav-link">✏️ Éditeur</a>
-            <a href="video.html" class="nav-link">🎬 Vidéo</a>
-            <a href="assemblage.html" class="nav-link">🎞️ Assemblage</a>
-            <a href="historique.html" class="nav-link">📜 Historique</a>
-            <a href="prompt.html" class="nav-link">💬 Prompts</a>
-        </div>
         <header>
             <h1>📚 Historique</h1>
             <p class="subtitle">Les 10 dernières générations</p>
