@@ -12,7 +12,7 @@
         }
 
         body {
-            background: transparent;
+            background: radial-gradient(ellipse 60% 55% at 50% 55%, rgba(102,126,234,0.20) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 15% 20%, rgba(118,75,162,0.14) 0%, transparent 60%), radial-gradient(ellipse 45% 40% at 88% 80%, rgba(236,72,153,0.10) 0%, transparent 60%), #0f0f1e;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
             padding: 20px;
@@ -602,32 +602,17 @@
         .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
         .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
-    
-        /* ── BACKGROUND (same as index.html) ── */
-        .bg {
-            position: fixed; inset: 0; z-index: 0;
-            background:
-                radial-gradient(ellipse 60% 55% at 50% 55%, rgba(102,126,234,0.20) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 40% at 15% 20%, rgba(118,75,162,0.14) 0%, transparent 60%),
-                radial-gradient(ellipse 45% 40% at 88% 80%, rgba(236,72,153,0.10) 0%, transparent 60%),
-                #0f0f1e;
-        }
-        .bg-grid {
-            position: fixed; inset: 0; z-index: 0;
+
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
                 linear-gradient(rgba(102,126,234,0.04) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(102,126,234,0.04) 1px, transparent 1px);
             background-size: 60px 60px;
         }
-
-        /* Lift content above fixed bg layers */
-        body > *:not(.bg):not(.bg-grid) { position: relative; z-index: 1; }
 </style>
 </head>
 <body>
-<div class="bg"></div>
-<div class="bg-grid"></div>
-
     <!-- IrisForge Topbar -->
     <div style="position:sticky;top:0;z-index:900;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,15,30,.85);backdrop-filter:blur(16px);">
         <div style="display:flex;align-items:center;gap:12px;">
