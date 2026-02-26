@@ -703,6 +703,10 @@
 
         <!-- Chat -->
         <div class="chat-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0;flex-shrink:0;">
+                <span class="section-label" style="margin-bottom:0;">💬 Conversation</span>
+                <button onclick="clearHistory()" title="Effacer la conversation" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:rgba(248,113,113,.7);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:1px;transition:all 0.2s;" onmouseover="this.style.background='rgba(248,113,113,.2)'" onmouseout="this.style.background='rgba(248,113,113,.1)'">✕ Effacer</button>
+            </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="msg assistant">
                     <div class="msg-bubble">
@@ -797,13 +801,66 @@
 <div class="push-toast" id="pushToast"></div>
 
 <script>
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // ── STATE ────────────────────────────────────────────────────────────────────
 let currentFileContent = '';
 let newFileContent = '';
 let currentFilePath = '';
 let currentFileSha = '';
 let isLoading = false;
-const history = [];
+
+// Historique persistant : chargé depuis localStorage, jamais perdu entre pages
+let history = [];
+
+function saveHistory() {
+    try { localStorage.setItem('studio_history', JSON.stringify(history)); } catch(e) {}
+}
+
+function loadHistory() {
+    try {
+        const saved = localStorage.getItem('studio_history');
+        if (saved) history = JSON.parse(saved);
+    } catch(e) { history = []; }
+}
+
+function clearHistory() {
+    history = [];
+    saveHistory();
+    document.getElementById('chatMessages').innerHTML = `
+        <div class="msg assistant">
+            <div class="msg-bubble">
+                👋 Bonjour ! Je suis Claude, intégré directement dans IrisForge.<br><br>
+                Dis-moi quelle modification tu veux apporter à ton site — je génère le code modifié, tu vois le diff, et tu valides avant le push sur GitHub.
+            </div>
+            <div class="msg-time">maintenant</div>
+        </div>`;
+    showToast('Conversation effacée', 'success');
+}
+
+function restoreHistory() {
+    loadHistory();
+    if (history.length === 0) return;
+    const wrap = document.getElementById('chatMessages');
+    // Effacer le message de bienvenue par défaut si on a un historique
+    wrap.innerHTML = '';
+    // Réafficher chaque message user/assistant (sans les balises MODIFIED_FILE)
+    history.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'msg ' + msg.role;
+        let text = msg.content;
+        if (msg.role === 'assistant') {
+            text = text.replace(/<MODIFIED_FILE>[\s\S]*?<\/MODIFIED_FILE>/g, '').trim();
+            if (!text) text = '✅ Modification générée.';
+        }
+        div.innerHTML = `<div class="msg-bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&lt;br&gt;/g,'<br>').replace(/\n/g,'<br>')}</div><div class="msg-time">historique</div>`;
+        wrap.appendChild(div);
+    });
+    wrap.scrollTop = wrap.scrollHeight;
+}
 
 // ── PROFILE SYSTEM ────────────────────────────────────────────────────────────
 const MAX_PROFILES = 5;
@@ -1069,6 +1126,7 @@ async function sendMessage() {
 
     addMessage('user', text);
     history.push({ role: 'user', content: text });
+    saveHistory();
     addTyping();
 
     const systemPrompt = `Tu es un assistant expert en développement web intégré dans IrisForge, une interface pour générer des images avec ComfyUI.
@@ -1113,6 +1171,7 @@ IMPORTANT: Le fichier modifié doit être complet et fonctionnel, pas juste un e
         const data = await res.json();
         const fullText = data.content[0].text;
         history.push({ role: 'assistant', content: fullText });
+        saveHistory();
 
         removeTyping();
 
@@ -1300,6 +1359,7 @@ function showToast(msg, type = 'success') {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     initProfiles();
+    restoreHistory();
 });
 </script>
 </body>
