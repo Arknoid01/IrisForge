@@ -1,0 +1,144 @@
+/* ═══════════════════════════════════════════════════════════════════
+   iris-shared.css — Améliorations globales IrisForge
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── SCROLLBAR CUSTOM ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea, #ec4899);
+    border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: #a78bfa; }
+* { scrollbar-width: thin; scrollbar-color: #667eea transparent; }
+
+/* ── TRANSITION DE PAGE (fondu noir) ────────────────────────────── */
+#iris-page-transition {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #0f0f1e;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+#iris-page-transition.fade-out { opacity: 1; pointer-events: all; }
+
+/* ── LOGO PULSE sur brand-icon ──────────────────────────────────── */
+.brand-icon, .topbar .brand-icon,
+[style*="linear-gradient(135deg,#667eea,#ec4899)"][style*="border-radius:8px"],
+[style*="linear-gradient(135deg, #667eea, #ec4899)"][style*="border-radius: 8px"] {
+    animation: iris-logo-pulse 3.5s ease-in-out infinite;
+}
+@keyframes iris-logo-pulse {
+    0%, 100% { box-shadow: 0 0 14px rgba(102,126,234,0.4); }
+    50%       { box-shadow: 0 0 28px rgba(167,139,250,0.7), 0 0 8px rgba(236,72,153,0.4); }
+}
+
+/* ── TOPBAR UNIFORME ────────────────────────────────────────────── */
+.iris-topbar {
+    position: sticky; top: 0; z-index: 900;
+    width: 100%; box-sizing: border-box;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    background: rgba(15,15,30,.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── TILE SCAN EFFECT au hover ──────────────────────────────────── */
+.page-tile {
+    overflow: hidden;
+}
+.page-tile::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 5%, rgba(167,139,250,0.8) 50%, transparent 95%);
+    top: -2px;
+    opacity: 0;
+    transition: top 0s, opacity 0.1s;
+    pointer-events: none;
+}
+.page-tile:hover::after {
+    animation: iris-tile-scan 0.55s linear forwards;
+    opacity: 1;
+}
+@keyframes iris-tile-scan {
+    0%   { top: 0%;   opacity: 1; }
+    90%  { opacity: 0.5; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* ── TILE CASCADE ANIMATION ─────────────────────────────────────── */
+.page-tile {
+    opacity: 0;
+    animation: iris-tile-in 0.45s ease forwards;
+}
+/* Les délais sont appliqués via nth-child */
+.tiles-col .page-tile:nth-child(1) { animation-delay: 0.05s; }
+.tiles-col .page-tile:nth-child(2) { animation-delay: 0.12s; }
+.tiles-col .page-tile:nth-child(3) { animation-delay: 0.19s; }
+.tiles-col .page-tile:nth-child(4) { animation-delay: 0.26s; }
+.tiles-col .page-tile:nth-child(5) { animation-delay: 0.33s; }
+.tiles-col .page-tile:nth-child(6) { animation-delay: 0.40s; }
+
+@keyframes iris-tile-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Les tiles désactivées restent à faible opacité après animation */
+.page-tile.disabled {
+    animation: iris-tile-in-disabled 0.45s ease forwards !important;
+}
+@keyframes iris-tile-in-disabled {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 0.28; transform: translateY(0); }
+}
+
+/* ── GLASSMORPHISM RENFORCÉ sur les tiles ───────────────────────── */
+.page-tile {
+    background: rgba(255,255,255,0.045) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.10) !important;
+}
+.page-tile:hover {
+    background: rgba(102,126,234,0.13) !important;
+    border-color: rgba(102,126,234,0.32) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── BOUTONS — état de chargement ───────────────────────────────── */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    top: 50%; left: 50%;
+    margin: -7px 0 0 -7px;
+    border: 2px solid rgba(255,255,255,.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: iris-spin 0.65s linear infinite;
+}
+@keyframes iris-spin { to { transform: rotate(360deg); } }
+
+/* ── LOGO PULSE pour les icônes inline (topbars inline-styled) ─── */
+.iris-brand-icon-pulse {
+    animation: iris-logo-pulse 3.5s ease-in-out infinite !important;
+}
+
+/* ── SIDEBAR LINK — transition douce ───────────────────────────── */
+.sidebar-link {
+    transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s !important;
+}
+.sidebar-link:hover {
+    transform: translateX(3px);
+}
