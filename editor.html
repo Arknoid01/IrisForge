@@ -976,8 +976,13 @@
             const apiUrl = document.getElementById('apiUrl').value.trim();
             const prompt = document.getElementById('prompt').value.trim();
 
-            if (!apiUrl || !prompt) {
-                showStatus('Remplissez tous les champs', 'error');
+            if (!apiUrl || !localStorage.getItem('comfyUrl')) {
+                showStatus('Connectez ComfyUI depuis la page d\'accueil d\'abord', 'error');
+                return;
+            }
+
+            if (!prompt) {
+                showStatus('Remplissez le champ prompt', 'error');
                 return;
             }
 
