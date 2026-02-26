@@ -170,6 +170,18 @@
         .translate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .translate-btn.success { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #4ade80; }
         .translate-btn.error { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #f87171; }
+        .queue-dot {
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+            background: #4ade80; margin-left: 8px; vertical-align: middle;
+            box-shadow: 0 0 6px #4ade80;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .queue-dot.visible { opacity: 1; }
+        .queue-dot.pulse { animation: dotPulse 1.5s ease-in-out infinite; }
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 4px #4ade80; }
+            50% { box-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74,222,128,0.4); }
+        }
     
         /* ── Barre de progression Style C ── */
         .iris-progress {
@@ -364,7 +376,7 @@
     </div>
 
     <div class="form-group">
-        <div class="translate-label-row"><label>Prompt (description du mouvement)</label><button type="button" class="translate-btn" onclick="triggerTranslate('prompt', this)">🌐 FR→EN</button></div>
+        <div class="translate-label-row"><label>Prompt (description du mouvement)</label><div style="display:flex;align-items:center;"><button type="button" class="translate-btn" onclick="triggerTranslate('prompt', this)">🌐 FR→EN</button><span class="queue-dot" id="queueDot" title="Prompt reçu par ComfyUI"></span></div></div>
         <textarea id="prompt" placeholder="Ex: dancing smoothly, fluid movements..."></textarea>
     </div>
 
@@ -855,6 +867,10 @@
                 if (!promptId) throw new Error('Pas de prompt_id dans la réponse : ' + JSON.stringify(data));
                 saveGenerationState(promptId, saveNodeId, apiUrl);
 
+                // Voyant vert : prompt bien reçu par ComfyUI
+                const dot = document.getElementById('queueDot');
+                if (dot) { dot.classList.add('visible', 'pulse'); setTimeout(() => dot.classList.remove('visible', 'pulse'), 5000); }
+
                 const wsUrl = apiUrl.replace(/^http/, 'ws');
                 ws = new WebSocket(`${wsUrl}/ws?clientId=${clientId}`);
 
@@ -923,7 +939,7 @@
 
         chainRemaining = chainCount;
         lastFrameImage = uploadedImage;
-        const translatedPrompt = await translateToEnglish(prompt);
+        const translatedPrompt = (await translateToEnglish(prompt)) || prompt;
         await runNextClip(apiUrl, translatedPrompt);
     }
 
@@ -984,7 +1000,7 @@
         if (!prompt) { showStatus('❌ Veuillez entrer un prompt', 'error'); return; }
         if (!lastFrameImage) { showStatus('❌ Aucune frame source disponible', 'error'); return; }
         chainRemaining = 1;
-        const translatedPrompt2 = await translateToEnglish(prompt);
+        const translatedPrompt2 = (await translateToEnglish(prompt)) || prompt;
         await runNextClip(apiUrl, translatedPrompt2);
     }
 
