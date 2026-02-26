@@ -412,6 +412,7 @@
         <div class="editor-grid">
             <div class="canvas-container">
                 <canvas id="canvas"></canvas>
+                <canvas id="maskOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0.5;"></canvas>
             </div>
 
             <div class="tools">
@@ -571,6 +572,9 @@
         };
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        // Canvas overlay dédié au masque (invisible à l'export, ne contient QUE les coups de pinceau)
+        const maskOverlay = document.getElementById('maskOverlay');
+        const maskOverlayCtx = maskOverlay.getContext('2d');
         let isDrawing = false;
         let brushSize = 50;
         let sourceImage = null;
@@ -766,7 +770,10 @@
                             sourceImage = img;
                             canvas.width = img.width;
                             canvas.height = img.height;
+                            maskOverlay.width = img.width;
+                            maskOverlay.height = img.height;
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            maskOverlayCtx.clearRect(0, 0, maskOverlay.width, maskOverlay.height);
                             ctx.drawImage(img, 0, 0);
                             showStatus('✓ Image chargée', 'success');
             
@@ -787,7 +794,10 @@
                     sourceImage = img;
                     canvas.width = img.width;
                     canvas.height = img.height;
+                    maskOverlay.width = img.width;
+                    maskOverlay.height = img.height;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    maskOverlayCtx.clearRect(0, 0, maskOverlay.width, maskOverlay.height);
                     ctx.drawImage(img, 0, 0);
                     showStatus('✓ Image chargée', 'success');
     
@@ -829,12 +839,14 @@
 
         canvas.addEventListener('mouseup', () => {
             isDrawing = false;
-            ctx.beginPath(); // Reset le path
+            ctx.beginPath();
+            maskOverlayCtx.beginPath();
         });
 
         canvas.addEventListener('mouseleave', () => {
             isDrawing = false;
             ctx.beginPath();
+            maskOverlayCtx.beginPath();
         });
 
         // Support tactile
@@ -864,6 +876,7 @@
         canvas.addEventListener('touchend', () => {
             isDrawing = false;
             ctx.beginPath();
+            maskOverlayCtx.beginPath();
         });
 
         function draw(e) {
@@ -878,6 +891,8 @@
             if (!isDrawing) {
                 ctx.beginPath();
                 ctx.moveTo(x, y);
+                maskOverlayCtx.beginPath();
+                maskOverlayCtx.moveTo(x, y);
                 return;
             }
 
@@ -889,6 +904,15 @@
             ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(x, y);
+            // Écrire sur l'overlay masque (blanc pur, opaque — sera exporté tel quel)
+            maskOverlayCtx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+            maskOverlayCtx.lineWidth = brushSize;
+            maskOverlayCtx.lineCap = 'round';
+            maskOverlayCtx.lineJoin = 'round';
+            maskOverlayCtx.lineTo(x, y);
+            maskOverlayCtx.stroke();
+            maskOverlayCtx.beginPath();
+            maskOverlayCtx.moveTo(x, y);
         }
 
         function showStatus(msg, type) {
@@ -958,35 +982,18 @@
             showStatus('Préparation...', 'loading');
 
             try {
-                // Créer le masque (fond noir + dessin blanc)
+                // Créer le masque depuis le canvas overlay (fond noir + coups de pinceau blancs purs)
+                // On lit maskOverlay et non le canvas principal — aucun risque de confondre
+                // les pixels clairs de l'image source avec le masque dessiné.
                 const maskCanvas = document.createElement('canvas');
-                maskCanvas.width = canvas.width;
-                maskCanvas.height = canvas.height;
+                maskCanvas.width = maskOverlay.width;
+                maskCanvas.height = maskOverlay.height;
                 const maskCtx = maskCanvas.getContext('2d');
-                
                 // Fond noir
                 maskCtx.fillStyle = '#000000';
                 maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                
-                // Copier le dessin blanc
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-                
-                for (let i = 0; i < imageData.data.length; i += 4) {
-                    const r = imageData.data[i];
-                    const g = imageData.data[i + 1];
-                    const b = imageData.data[i + 2];
-                    
-                    // Si pixel est blanc (masque dessiné)
-                    if (r > 200 && g > 200 && b > 200) {
-                        maskData.data[i] = 255;
-                        maskData.data[i + 1] = 255;
-                        maskData.data[i + 2] = 255;
-                        maskData.data[i + 3] = 255;
-                    }
-                }
-                
-                maskCtx.putImageData(maskData, 0, 0);
+                // Coller les coups de pinceau blancs depuis l'overlay
+                maskCtx.drawImage(maskOverlay, 0, 0);
 
                 showStatus('Upload des images...', 'loading');
 
