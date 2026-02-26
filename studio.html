@@ -807,6 +807,10 @@ function initProfiles() {
     renderProfileBar();
 }
 
+function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // ── SIDEBAR ────────────────────────────────────────────────────────────────────
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
