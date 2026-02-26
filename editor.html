@@ -367,6 +367,9 @@
         }
         .iris-progress-steps { font-size: 11px; color: rgba(255,255,255,.25); }
         .iris-progress-speed { font-size: 11px; color: rgba(255,255,255,.18); }
+        .header-nav { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-link { display: inline-block; color: #a78bfa; text-decoration: none; font-size: 14px; padding: 8px 16px; border-radius: 8px; transition: all 0.3s; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.2); }
+        .nav-link:hover { background: rgba(167, 139, 250, 0.2); transform: translateY(-2px); }
     </style>
 </head>
 <body>
@@ -392,6 +395,17 @@
         </nav>
     </div>
     <div class="container">
+        
+        <div class="header-nav">
+            <a href="index.html" class="nav-link">🏠 Accueil</a>
+            <a href="forge.html" class="nav-link">🎨 IrisForge 2.0</a>
+            <a href="base.html" class="nav-link">⚡ Base</a>
+            <a href="editor.html" class="nav-link">✏️ Éditeur</a>
+            <a href="video.html" class="nav-link">🎬 Vidéo</a>
+            <a href="assemblage.html" class="nav-link">🎞️ Assemblage</a>
+            <a href="historique.html" class="nav-link">📜 Historique</a>
+            <a href="prompt.html" class="nav-link">💬 Prompts</a>
+        </div>
         
         <h1>✏️ IrisForge 2.0</h1>
         <p class="subtitle">Éditeur Inpainting</p>
