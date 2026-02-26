@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque de Prompts - IrisForge</title>
+    <title>BibliothÃ¨que de Prompts - IrisForge</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -15,7 +15,7 @@
             color: #fff;
         }
 
-        /* ── SIDEBAR ── */
+        /* ââ SIDEBAR ââ */
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sidebar-overlay.open { opacity: 1; pointer-events: all; }
         .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #0f0f1e; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 24px 16px; }
@@ -31,7 +31,7 @@
         .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
 
-        /* ── LAYOUT ── */
+        /* ââ LAYOUT ââ */
         .container { max-width: 1100px; margin: 0 auto; }
 
         header {
@@ -70,7 +70,7 @@
         }
         .subtitle { color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 4px; }
 
-        /* ── MAIN GRID ── */
+        /* ââ MAIN GRID ââ */
         .main-grid {
             display: grid;
             grid-template-columns: 380px 1fr;
@@ -82,7 +82,7 @@
             .main-grid { grid-template-columns: 1fr; }
         }
 
-        /* ── FORM CARD ── */
+        /* ââ FORM CARD ââ */
         .card {
             background: rgba(255,255,255,0.03);
             backdrop-filter: blur(20px);
@@ -141,7 +141,7 @@
         .btn.danger { background: linear-gradient(135deg, #ef4444, #b91c1c); }
         .btn.danger:hover { box-shadow: 0 8px 20px rgba(239,68,68,0.4); }
 
-        /* ── TOAST ── */
+        /* ââ TOAST ââ */
         .toast {
             position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
             padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600;
@@ -153,7 +153,7 @@
         .toast.error   { background: rgba(239,68,68,0.15);  border: 1px solid rgba(239,68,68,0.4);  color: #f87171; }
         .toast.info    { background: rgba(102,126,234,0.15); border: 1px solid rgba(102,126,234,0.4); color: #a78bfa; }
 
-        /* ── FILTER BAR ── */
+        /* ââ FILTER BAR ââ */
         .filter-bar {
             display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
         }
@@ -172,7 +172,7 @@
             color: rgba(255,255,255,0.7); font-size: 13px; cursor: pointer;
         }
 
-        /* ── PROMPT CARDS ── */
+        /* ââ PROMPT CARDS ââ */
         .prompt-list { display: flex; flex-direction: column; gap: 14px; }
 
         .prompt-card {
@@ -230,7 +230,7 @@
             display: flex; gap: 14px;
         }
 
-        /* ── EMPTY STATE ── */
+        /* ââ EMPTY STATE ââ */
         .empty-state {
             text-align: center; padding: 50px 20px;
             color: rgba(255,255,255,0.3);
@@ -238,7 +238,7 @@
         .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
         .empty-state p { font-size: 14px; }
 
-        /* ── STATS BAR ── */
+        /* ââ STATS BAR ââ */
         .stats-bar {
             display: flex; gap: 14px; margin-bottom: 16px; flex-wrap: wrap;
         }
@@ -248,13 +248,13 @@
         }
         .stat-chip span { color: #a78bfa; font-weight: 700; }
 
-        /* ── CHAR COUNTER ── */
+        /* ââ CHAR COUNTER ââ */
         .char-count { font-size: 11px; color: rgba(255,255,255,0.3); text-align: right; margin-top: 4px; }
     
-        /* ── IrisForge Global Style ── */
+        /* ââ IrisForge Global Style ââ */
         :root { --blue:#667eea; --violet:#a78bfa; --pink:#ec4899; --dark:#0f0f1e; }
 
-        /* CRITIQUE : body doit être block, pas flex, pour que la topbar sticky occupe toute la largeur */
+        /* CRITIQUE : body doit Ãªtre block, pas flex, pour que la topbar sticky occupe toute la largeur */
         body {
             font-family: 'DM Sans', -apple-system, sans-serif !important;
             background: #0f0f1e !important;
@@ -267,7 +267,7 @@
             padding: 0 !important;
         }
 
-        /* Container recentré via margin auto maintenant que body n'est plus flex */
+        /* Container recentrÃ© via margin auto maintenant que body n'est plus flex */
         .container {
             margin-left: auto !important;
             margin-right: auto !important;
@@ -300,14 +300,14 @@
                 <span style="display:block;width:14px;height:2px;background:rgba(255,255,255,.8);border-radius:2px;"></span>
             </div>
             <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
-                <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(102,126,234,.4);flex-shrink:0;">🔥</div>
+                <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(102,126,234,.4);flex-shrink:0;">ð¥</div>
                 <div>
                     <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1.1;">IrisForge</span>
                     <span style="font-size:8px;color:#ec4899;font-weight:600;letter-spacing:2px;text-transform:uppercase;display:block;">Graphics</span>
                 </div>
             </a>
         </div>
-        <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">Bibliothèque Prompts</span>
+        <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">BibliothÃ¨que Prompts</span>
     </div>
 
 
@@ -315,20 +315,21 @@
     <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-title">🔥 IrisForge</div>
-            <div class="sidebar-close" onclick="toggleSidebar()">✕</div>
+            <div class="sidebar-title">ð¥ IrisForge</div>
+            <div class="sidebar-close" onclick="toggleSidebar()">â</div>
         </div>
         <nav class="sidebar-nav">
-            <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
+            <a href="index.html" class="sidebar-link"><span class="icon">ð </span> Accueil</a>
             <div class="sidebar-divider"></div>
-            <a href="forge.html"      class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
-            <a href="base.html"       class="sidebar-link"><span class="icon">⚡</span> IrisForge 3.0</a>
-            <a href="editor.html"     class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
-            <a href="video.html"      class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
-            <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
+            <a href="forge.html"      class="sidebar-link"><span class="icon">ð¨</span> IrisForge 2.0</a>
+            <a href="base.html"       class="sidebar-link"><span class="icon">â¡</span> IrisForge 3.0</a>
+            <a href="editor.html"     class="sidebar-link"><span class="icon">âï¸</span> Ãditeur</a>
+            <a href="video.html"      class="sidebar-link"><span class="icon">ð¬</span> VidÃ©o</a>
+            <a href="assemblage.html" class="sidebar-link"><span class="icon">ðï¸</span> Assemblage</a>
+            <a href="studio.html"     class="sidebar-link"><span class="icon">ð¥</span> Studio</a>
             <div class="sidebar-divider"></div>
-            <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
-            <a href="prompt.html"     class="sidebar-link active"><span class="icon">💬</span> Prompts</a>
+            <a href="historique.html" class="sidebar-link"><span class="icon">ð</span> Historique</a>
+            <a href="prompt.html"     class="sidebar-link active"><span class="icon">ð¬</span> Prompts</a>
         </nav>
     </div>
 
@@ -339,10 +340,10 @@
 
         <!-- HEADER -->
         <header>
-            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <button class="menu-btn" onclick="toggleSidebar()">â°</button>
             <div class="header-text">
-                <h1>💬 Bibliothèque de Prompts</h1>
-                <p class="subtitle">Enregistrez, organisez et réutilisez vos prompts favoris</p>
+                <h1>ð¬ BibliothÃ¨que de Prompts</h1>
+                <p class="subtitle">Enregistrez, organisez et rÃ©utilisez vos prompts favoris</p>
             </div>
         </header>
 
@@ -351,34 +352,34 @@
 
             <!-- FORM -->
             <div class="card" id="formCard">
-                <div class="card-title" id="formTitle">✨ Nouveau prompt</div>
+                <div class="card-title" id="formTitle">â¨ Nouveau prompt</div>
 
                 <input type="hidden" id="editId">
 
                 <div class="form-group">
                     <label>Titre</label>
-                    <input type="text" id="promptTitle" placeholder="Ex : Portrait lumière dorée" maxlength="80">
+                    <input type="text" id="promptTitle" placeholder="Ex : Portrait lumiÃ¨re dorÃ©e" maxlength="80">
                 </div>
 
                 <div class="form-group">
-                    <label>Catégorie</label>
+                    <label>CatÃ©gorie</label>
                     <select id="promptCategory">
-                        <option value="">— Aucune —</option>
-                        <option value="Portrait">🧑 Portrait</option>
-                        <option value="Paysage">🌄 Paysage</option>
-                        <option value="Concept">💡 Concept</option>
-                        <option value="Anime">🎌 Anime</option>
-                        <option value="Réaliste">📷 Réaliste</option>
-                        <option value="Fantaisie">🧙 Fantaisie</option>
-                        <option value="Architecture">🏛️ Architecture</option>
-                        <option value="Autre">🗂️ Autre</option>
+                        <option value="">â Aucune â</option>
+                        <option value="Portrait">ð§ Portrait</option>
+                        <option value="Paysage">ð Paysage</option>
+                        <option value="Concept">ð¡ Concept</option>
+                        <option value="Anime">ð Anime</option>
+                        <option value="RÃ©aliste">ð· RÃ©aliste</option>
+                        <option value="Fantaisie">ð§ Fantaisie</option>
+                        <option value="Architecture">ðï¸ Architecture</option>
+                        <option value="Autre">ðï¸ Autre</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Prompt</label>
-                    <textarea id="promptText" placeholder="Collez votre prompt ici…" oninput="updateCharCount()"></textarea>
-                    <div class="char-count" id="charCount">0 caractère(s)</div>
+                    <textarea id="promptText" placeholder="Collez votre prompt iciâ¦" oninput="updateCharCount()"></textarea>
+                    <div class="char-count" id="charCount">0 caractÃ¨re(s)</div>
                 </div>
 
                 <div class="form-group">
@@ -387,8 +388,8 @@
                 </div>
 
                 <div class="btn-row">
-                    <button class="btn" onclick="savePrompt()">💾 Enregistrer</button>
-                    <button class="btn secondary" onclick="resetForm()">✕ Annuler</button>
+                    <button class="btn" onclick="savePrompt()">ð¾ Enregistrer</button>
+                    <button class="btn secondary" onclick="resetForm()">â Annuler</button>
                 </div>
             </div>
 
@@ -399,14 +400,14 @@
 
                 <!-- FILTER -->
                 <div class="filter-bar">
-                    <input type="text" id="searchInput" placeholder="🔍 Rechercher…" oninput="renderList()">
+                    <input type="text" id="searchInput" placeholder="ð Rechercherâ¦" oninput="renderList()">
                     <select id="filterCategory" onchange="renderList()">
-                        <option value="">Toutes catégories</option>
+                        <option value="">Toutes catÃ©gories</option>
                         <option value="Portrait">Portrait</option>
                         <option value="Paysage">Paysage</option>
                         <option value="Concept">Concept</option>
                         <option value="Anime">Anime</option>
-                        <option value="Réaliste">Réaliste</option>
+                        <option value="RÃ©aliste">RÃ©aliste</option>
                         <option value="Fantaisie">Fantaisie</option>
                         <option value="Architecture">Architecture</option>
                         <option value="Autre">Autre</option>
@@ -421,7 +422,7 @@
     </div>
 
 <script>
-    // ── DATA ────────────────────────────────────────────────────────────────
+    // ââ DATA ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     const STORAGE_KEY = 'irisforge_prompts';
 
     function loadPrompts() {
@@ -433,13 +434,13 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
     }
 
-    // ── SIDEBAR ──────────────────────────────────────────────────────────────
+    // ââ SIDEBAR ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('open');
     }
 
-    // ── TOAST ────────────────────────────────────────────────────────────────
+    // ââ TOAST ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     let toastTimer;
     function showToast(msg, type = 'info') {
         const t = document.getElementById('toast');
@@ -449,20 +450,20 @@
         toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
-    // ── CHAR COUNTER ─────────────────────────────────────────────────────────
+    // ââ CHAR COUNTER âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function updateCharCount() {
         const n = document.getElementById('promptText').value.length;
-        document.getElementById('charCount').textContent = `${n} caractère${n > 1 ? 's' : ''}`;
+        document.getElementById('charCount').textContent = `${n} caractÃ¨re${n > 1 ? 's' : ''}`;
     }
 
-    // ── FORM ─────────────────────────────────────────────────────────────────
+    // ââ FORM âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function resetForm() {
         document.getElementById('editId').value = '';
         document.getElementById('promptTitle').value = '';
         document.getElementById('promptCategory').value = '';
         document.getElementById('promptText').value = '';
         document.getElementById('promptNotes').value = '';
-        document.getElementById('formTitle').textContent = '✨ Nouveau prompt';
+        document.getElementById('formTitle').textContent = 'â¨ Nouveau prompt';
         updateCharCount();
     }
 
@@ -473,8 +474,8 @@
         const notes    = document.getElementById('promptNotes').value.trim();
         const editId   = document.getElementById('editId').value;
 
-        if (!title) { showToast('⚠️ Veuillez saisir un titre.', 'error'); return; }
-        if (!text)  { showToast('⚠️ Le prompt est vide.', 'error'); return; }
+        if (!title) { showToast('â ï¸ Veuillez saisir un titre.', 'error'); return; }
+        if (!text)  { showToast('â ï¸ Le prompt est vide.', 'error'); return; }
 
         const prompts = loadPrompts();
 
@@ -482,7 +483,7 @@
             const idx = prompts.findIndex(p => p.id === editId);
             if (idx !== -1) {
                 prompts[idx] = { ...prompts[idx], title, text, category, notes, updatedAt: Date.now() };
-                showToast('✅ Prompt mis à jour !', 'success');
+                showToast('â Prompt mis Ã  jour !', 'success');
             }
         } else {
             prompts.unshift({
@@ -490,7 +491,7 @@
                 title, text, category, notes,
                 createdAt: Date.now(), updatedAt: Date.now()
             });
-            showToast('✅ Prompt enregistré !', 'success');
+            showToast('â Prompt enregistrÃ© !', 'success');
         }
 
         savePrompts(prompts);
@@ -498,13 +499,13 @@
         renderList();
     }
 
-    // ── COPY ─────────────────────────────────────────────────────────────────
+    // ââ COPY âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function copyPrompt(id) {
         const prompts = loadPrompts();
         const p = prompts.find(x => x.id === id);
         if (!p) return;
         navigator.clipboard.writeText(p.text)
-            .then(() => showToast('📋 Prompt copié !', 'success'))
+            .then(() => showToast('ð Prompt copiÃ© !', 'success'))
             .catch(() => {
                 // fallback
                 const ta = document.createElement('textarea');
@@ -513,11 +514,11 @@
                 ta.select();
                 document.execCommand('copy');
                 ta.remove();
-                showToast('📋 Prompt copié !', 'success');
+                showToast('ð Prompt copiÃ© !', 'success');
             });
     }
 
-    // ── EDIT ─────────────────────────────────────────────────────────────────
+    // ââ EDIT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function editPrompt(id) {
         const prompts = loadPrompts();
         const p = prompts.find(x => x.id === id);
@@ -527,28 +528,28 @@
         document.getElementById('promptCategory').value = p.category || '';
         document.getElementById('promptText').value = p.text;
         document.getElementById('promptNotes').value = p.notes || '';
-        document.getElementById('formTitle').textContent = '✏️ Modifier le prompt';
+        document.getElementById('formTitle').textContent = 'âï¸ Modifier le prompt';
         updateCharCount();
         document.getElementById('formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // ── DELETE ────────────────────────────────────────────────────────────────
+    // ââ DELETE ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function deletePrompt(id) {
         showConfirm('Supprimer ce prompt ?', () => {
             const prompts = loadPrompts().filter(p => p.id !== id);
             savePrompts(prompts);
-            showToast('Prompt supprimé.', 'error');
+            showToast('Prompt supprimÃ©.', 'error');
             renderList();
         });
     }
 
-    // ── CONFIRM MODAL ─────────────────────────────────────────────────────────
+    // ââ CONFIRM MODAL âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function showConfirm(msg, onOk) {
         const overlay = document.createElement('div');
         overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;';
         overlay.innerHTML = `
             <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:28px 32px;max-width:340px;width:90%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
-                <div style="font-size:32px;margin-bottom:12px;">🗑️</div>
+                <div style="font-size:32px;margin-bottom:12px;">ðï¸</div>
                 <p style="color:#fff;font-size:15px;margin-bottom:24px;">${msg}</p>
                 <div style="display:flex;gap:10px;justify-content:center;">
                     <button id="confirmOk" style="flex:1;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;font-weight:600;font-size:14px;cursor:pointer;">Supprimer</button>
@@ -561,21 +562,21 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
 
-    // ── TOGGLE EXPAND ─────────────────────────────────────────────────────────
+    // ââ TOGGLE EXPAND âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function toggleExpand(el) {
         el.classList.toggle('expanded');
     }
 
-    // ── STATS ─────────────────────────────────────────────────────────────────
+    // ââ STATS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function renderStats(prompts) {
         const categories = [...new Set(prompts.map(p => p.category).filter(Boolean))];
         document.getElementById('statsBar').innerHTML = `
             <div class="stat-chip">Total : <span>${prompts.length}</span></div>
-            <div class="stat-chip">Catégories : <span>${categories.length}</span></div>
+            <div class="stat-chip">CatÃ©gories : <span>${categories.length}</span></div>
         `;
     }
 
-    // ── RENDER LIST ───────────────────────────────────────────────────────────
+    // ââ RENDER LIST âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function renderList() {
         const search   = document.getElementById('searchInput').value.toLowerCase();
         const catFilter = document.getElementById('filterCategory').value;
@@ -595,10 +596,10 @@
         if (prompts.length === 0) {
             list.innerHTML = `
                 <div class="empty-state">
-                    <div class="emoji">💬</div>
+                    <div class="emoji">ð¬</div>
                     <p>${loadPrompts().length === 0
-                        ? 'Aucun prompt enregistré.<br>Créez-en un avec le formulaire.'
-                        : 'Aucun résultat pour cette recherche.'}</p>
+                        ? 'Aucun prompt enregistrÃ©.<br>CrÃ©ez-en un avec le formulaire.'
+                        : 'Aucun rÃ©sultat pour cette recherche.'}</p>
                 </div>`;
             return;
         }
@@ -611,7 +612,7 @@
                 ? `<span class="prompt-category">${p.category}</span>`
                 : '';
             const notesHtml = p.notes
-                ? `<span>📝 ${escHtml(p.notes)}</span>`
+                ? `<span>ð ${escHtml(p.notes)}</span>`
                 : '';
 
             return `
@@ -622,16 +623,16 @@
                         ${catBadge}
                     </div>
                     <div class="prompt-actions">
-                        <button class="icon-btn copy" title="Copier" data-action="copy" data-id="${p.id}">📋</button>
-                        <button class="icon-btn edit" title="Modifier" data-action="edit" data-id="${p.id}">✏️</button>
-                        <button class="icon-btn del"  title="Supprimer" data-action="delete" data-id="${p.id}">🗑️</button>
+                        <button class="icon-btn copy" title="Copier" data-action="copy" data-id="${p.id}">ð</button>
+                        <button class="icon-btn edit" title="Modifier" data-action="edit" data-id="${p.id}">âï¸</button>
+                        <button class="icon-btn del"  title="Supprimer" data-action="delete" data-id="${p.id}">ðï¸</button>
                     </div>
                 </div>
-                <div class="prompt-text" data-action="expand" title="Cliquer pour déplier">
+                <div class="prompt-text" data-action="expand" title="Cliquer pour dÃ©plier">
                     ${escHtml(p.text)}
                 </div>
                 <div class="prompt-meta">
-                    <span>🕒 ${date}</span>
+                    <span>ð ${date}</span>
                     ${notesHtml}
                 </div>
             </div>`;
@@ -642,7 +643,7 @@
         return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // ── INIT ─────────────────────────────────────────────────────────────────
+    // ââ INIT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     document.getElementById('promptList').addEventListener('click', function(e) {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
