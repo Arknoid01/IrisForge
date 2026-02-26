@@ -847,28 +847,37 @@
             maskOverlayCtx.beginPath();
         });
 
-        // Support tactile
+        // Support tactile — coordonnées lues directement depuis l'overlay pour éviter tout décalage
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             isDrawing = true;
             const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
+            const rect = maskOverlay.getBoundingClientRect();
+            const scaleX = maskOverlay.width / rect.width;
+            const scaleY = maskOverlay.height / rect.height;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            maskOverlayCtx.beginPath();
+            maskOverlayCtx.moveTo(x, y);
         });
 
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            if (isDrawing) {
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousemove', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                canvas.dispatchEvent(mouseEvent);
-            }
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = maskOverlay.getBoundingClientRect();
+            const scaleX = maskOverlay.width / rect.width;
+            const scaleY = maskOverlay.height / rect.height;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            maskOverlayCtx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
+            maskOverlayCtx.lineWidth = brushSize;
+            maskOverlayCtx.lineCap = 'round';
+            maskOverlayCtx.lineJoin = 'round';
+            maskOverlayCtx.lineTo(x, y);
+            maskOverlayCtx.stroke();
+            maskOverlayCtx.beginPath();
+            maskOverlayCtx.moveTo(x, y);
         });
 
         canvas.addEventListener('touchend', () => {
@@ -879,9 +888,10 @@
         function draw(e) {
             if (!sourceImage) return;
 
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            // Utiliser le rect de l'overlay (celui qui reçoit le dessin) pour éviter tout décalage
+            const rect = maskOverlay.getBoundingClientRect();
+            const scaleX = maskOverlay.width / rect.width;
+            const scaleY = maskOverlay.height / rect.height;
             const x = (e.clientX - rect.left) * scaleX;
             const y = (e.clientY - rect.top) * scaleY;
 
