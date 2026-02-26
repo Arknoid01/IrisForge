@@ -822,8 +822,8 @@
             if (sourceImage) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(sourceImage, 0, 0);
+                maskOverlayCtx.clearRect(0, 0, maskOverlay.width, maskOverlay.height);
                 showStatus('✓ Masque effacé', 'success');
-
             }
         }
 
@@ -839,13 +839,11 @@
 
         canvas.addEventListener('mouseup', () => {
             isDrawing = false;
-            ctx.beginPath();
             maskOverlayCtx.beginPath();
         });
 
         canvas.addEventListener('mouseleave', () => {
             isDrawing = false;
-            ctx.beginPath();
             maskOverlayCtx.beginPath();
         });
 
@@ -875,7 +873,6 @@
 
         canvas.addEventListener('touchend', () => {
             isDrawing = false;
-            ctx.beginPath();
             maskOverlayCtx.beginPath();
         });
 
@@ -889,23 +886,14 @@
             const y = (e.clientY - rect.top) * scaleY;
 
             if (!isDrawing) {
-                ctx.beginPath();
-                ctx.moveTo(x, y);
                 maskOverlayCtx.beginPath();
                 maskOverlayCtx.moveTo(x, y);
                 return;
             }
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.lineWidth = brushSize;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            // Écrire sur l'overlay masque (blanc pur, opaque — sera exporté tel quel)
-            maskOverlayCtx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+            // Dessiner uniquement sur l'overlay (blanc semi-transparent pour le rendu visuel)
+            // Le canvas principal garde l'image source intacte → plus de double trait
+            maskOverlayCtx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
             maskOverlayCtx.lineWidth = brushSize;
             maskOverlayCtx.lineCap = 'round';
             maskOverlayCtx.lineJoin = 'round';
@@ -992,8 +980,18 @@
                 // Fond noir
                 maskCtx.fillStyle = '#000000';
                 maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                // Coller les coups de pinceau blancs depuis l'overlay
-                maskCtx.drawImage(maskOverlay, 0, 0);
+                // Convertir l'overlay en masque blanc pur : tout pixel avec alpha > 0 → blanc
+                const overlayData = maskOverlayCtx.getImageData(0, 0, maskOverlay.width, maskOverlay.height);
+                const outData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+                for (let i = 0; i < overlayData.data.length; i += 4) {
+                    if (overlayData.data[i + 3] > 10) { // pixel peint (alpha > 0)
+                        outData.data[i]     = 255;
+                        outData.data[i + 1] = 255;
+                        outData.data[i + 2] = 255;
+                        outData.data[i + 3] = 255;
+                    }
+                }
+                maskCtx.putImageData(outData, 0, 0);
 
                 showStatus('Upload des images...', 'loading');
 
