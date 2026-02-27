@@ -661,7 +661,7 @@
         } catch(e) {}
 
         // Cas 2 : encore en cours → rebrancher WS
-        irisETA.hide(); irisETA.setTotal(8);
+        irisETA.hide(); irisETA.setTotal(20);
         isGenerating = true;
         const btn = document.getElementById('generateBtn');
         if (btn) btn.disabled = true;
@@ -811,19 +811,18 @@
             const framesMap = { '2s': 49, '4s': 49, '7s': 81 };
             const frameCount = framesMap[selectedDuration] || 49;
 
-            // ── Nombre de steps selon durée ──────────────────────────────────
-            // lightx2v à pleine force (~1.0) permet de descendre à 8 steps total
-            // sans perte de qualité perceptible sur Wan2.2 I2V.
-            // Passe 1 (LOW, débruitage grossier) : steps 0→4  — structure temporelle
-            // Passe 2 (HIGH, raffinement fin)    : steps 4→8  — fidélité & détails
-            const totalSteps = 8;
-            const splitStep  = 4; // handoff entre LOW→HIGH
+            // ── Nombre de steps ──────────────────────────────────────────────
+            // Sans distillation LoRA : 20 steps nécessaires pour Wan2.2 natif
+            // Passe 1 (LOW, débruitage grossier) : steps 0→10
+            // Passe 2 (HIGH, raffinement fin)    : steps 10→20
+            const totalSteps = 20;
+            const splitStep  = 10;
 
             const workflow = {
                 // ── Chargement des modèles ───────────────────────────────────
                 "84": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
                 "90": { inputs: { vae_name: "wan_2.1_vae.safetensors" }, class_type: "VAELoader" },
-                // UNet LOW : débruitage initial (structure grossière)
+                // UNet LOW : débruitage initial (structure temporelle grossière)
                 "95": { inputs: { unet_name: "Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
                 // UNet HIGH : raffinement final (détails & cohérence)
                 "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
@@ -836,21 +835,18 @@
                 "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
                 "89": { inputs: { text: "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
 
-                // ── LoRA lightx2v sur LOW (passe 1) — force pleine pour distillation steps ──
-                "101": { inputs: { lora_name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength_model: 1.0, model: ["95", 0] }, class_type: "LoraLoaderModelOnly" },
-
                 // ── ModelSampling shift (stabilise le scheduler Flow) ────────
-                "103": { inputs: { shift: 5.0, model: ["101", 0] }, class_type: "ModelSamplingSD3" }, // LOW+LoRA
-                "104": { inputs: { shift: 5.0, model: ["96",  0] }, class_type: "ModelSamplingSD3" }, // HIGH natif
+                "103": { inputs: { shift: 5.0, model: ["95", 0] }, class_type: "ModelSamplingSD3" }, // LOW natif
+                "104": { inputs: { shift: 5.0, model: ["96", 0] }, class_type: "ModelSamplingSD3" }, // HIGH natif
 
                 // ── Conditionnement vidéo partagé par les deux passes ────────
                 "98": { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
 
-                // ── Passe 1 : LOW + lightx2v — débruitage grossier (steps 0→4) ──
-                "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: totalSteps, cfg: 1.0, sampler_name: "euler", scheduler: "simple", start_at_step: 0, end_at_step: splitStep, return_with_leftover_noise: "enable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
+                // ── Passe 1 : LOW — débruitage grossier (steps 0→10) ─────────
+                "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: totalSteps, cfg: 2.0, sampler_name: "euler", scheduler: "simple", start_at_step: 0, end_at_step: splitStep, return_with_leftover_noise: "enable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
 
-                // ── Passe 2 : HIGH natif — raffinement fin (steps 4→8) ───────
-                "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: totalSteps, cfg: 1.5, sampler_name: "euler", scheduler: "simple", start_at_step: splitStep, end_at_step: totalSteps, return_with_leftover_noise: "disable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
+                // ── Passe 2 : HIGH — raffinement fin (steps 10→20) ───────────
+                "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: totalSteps, cfg: 2.0, sampler_name: "euler", scheduler: "simple", start_at_step: splitStep, end_at_step: totalSteps, return_with_leftover_noise: "disable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
 
                 // ── Décodage ─────────────────────────────────────────────────
                 "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
@@ -982,7 +978,7 @@
         try {
             showStatus(`📤 Upload image source (clip ${clipIndex}/${totalExpected})...`, 'loading');
             const imageName = await uploadImageToComfyUI(apiUrl, lastFrameImage);
-            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(8);
+            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(20);
             const { videoBlob } = await generateWithInterpolation(apiUrl, imageName, prompt);
 
             // Revoke previous result URL to free memory
