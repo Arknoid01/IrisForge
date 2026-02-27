@@ -661,7 +661,7 @@
         } catch(e) {}
 
         // Cas 2 : encore en cours → rebrancher WS
-        irisETA.hide(); irisETA.setTotal(20);
+        irisETA.hide(); irisETA.setTotal(25);
         isGenerating = true;
         const btn = document.getElementById('generateBtn');
         if (btn) btn.disabled = true;
@@ -812,27 +812,22 @@
             const frameCount = framesMap[selectedDuration] || 49;
 
             const workflow = {
-                // ── Modèles ──────────────────────────────────────────────────
                 "84": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
                 "90": { inputs: { vae_name: "wan_2.1_vae.safetensors" }, class_type: "VAELoader" },
-                "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
-
-                // ── Image source ─────────────────────────────────────────────
-                "97":  { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
+                "95": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
+                "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
+                "97": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
                 "120": { inputs: { upscale_method: "lanczos", width: 384, height: 672, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
-
-                // ── Conditionnements ─────────────────────────────────────────
                 "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
-                "89": { inputs: { text: "blurry, blur, out of focus, low quality, low resolution, compression artifacts, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, glitching, temporal inconsistency, melting face, warping", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
-
-                // ── Conditionnement vidéo ─────────────────────────────────────
+                "89": { inputs: { text: "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
+                "101": { inputs: { lora_name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength_model: 0.15, model: ["95", 0] }, class_type: "LoraLoaderModelOnly" },
+                "102": { inputs: { lora_name: "DetailTweaker.safetensors", strength_model: 0.15, model: ["96", 0] }, class_type: "LoraLoaderModelOnly" },
+                "103": { inputs: { shift: 5.0, model: ["102", 0] }, class_type: "ModelSamplingSD3" },
+                "104": { inputs: { shift: 5.0, model: ["101", 0] }, class_type: "ModelSamplingSD3" },
                 "98": { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
-
-                // ── Sampling (un seul KSampler standard) ─────────────────────
-                "86": { inputs: { seed: seed, steps: 20, cfg: 2.0, sampler_name: "euler", scheduler: "simple", denoise: 1.0, model: ["96", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSampler" },
-
-                // ── Décodage ─────────────────────────────────────────────────
-                "87": { inputs: { samples: ["86", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
+                "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 12, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
+                "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 12, end_at_step: 25, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
+                "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
             };
 
             let nodeId = 200;
@@ -961,7 +956,7 @@
         try {
             showStatus(`📤 Upload image source (clip ${clipIndex}/${totalExpected})...`, 'loading');
             const imageName = await uploadImageToComfyUI(apiUrl, lastFrameImage);
-            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(20);
+            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(25);
             const { videoBlob } = await generateWithInterpolation(apiUrl, imageName, prompt);
 
             // Revoke previous result URL to free memory
