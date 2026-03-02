@@ -263,14 +263,6 @@
         .iris-progress-steps { font-size: 11px; color: rgba(255,255,255,.25); }
         .iris-progress-speed { font-size: 11px; color: rgba(255,255,255,.18); }
 
-        /* ── Info résolution ── */
-        .resolution-info {
-            margin-top: 10px; padding: 10px 14px;
-            background: rgba(102,126,234,0.08); border: 1px solid rgba(102,126,234,0.2);
-            border-radius: 10px; font-size: 12px; color: rgba(255,255,255,0.5);
-        }
-        .resolution-info span { color: #a78bfa; font-weight: 600; }
-
         body::before {
             content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
@@ -300,8 +292,7 @@
         </div>
         <span style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);">IRISFORGE VIDEO</span>
     </div>
-
-    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+        <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">🔥 IrisForge</div>
@@ -322,11 +313,10 @@
             <a href="studio.html" class="sidebar-link"><span class="icon">🤖</span> Studio IA</a>
         </nav>
     </div>
-
 <div class="container">
     
     <h1>🎬 IrisForge Video</h1>
-    <p class="subtitle">Générateur de vidéo — Wan 2.2 5B · Chaînage automatique</p>
+    <p class="subtitle">Générateur de vidéo avec chaînage automatique</p>
 
     <!-- RECOVERY -->
     <div class="recovery-banner" id="recoveryBanner">
@@ -354,9 +344,6 @@
                 <div class="file-upload-text" id="imageFileText">📤 Cliquez pour choisir une image</div>
                 <img id="imagePreview" class="preview-img" style="display:none">
             </label>
-            <div class="resolution-info" id="resolutionInfo" style="display:none;">
-                Résolution détectée : <span id="resolutionDisplay">—</span> → ComfyUI recevra <span id="resolutionComfy">—</span>
-            </div>
         </div>
         <div id="videoUploadSection" style="display:none;">
             <label for="videoFile" class="file-upload">
@@ -376,16 +363,16 @@
             <div class="duration-option selected" onclick="selectDuration('2s')" id="duration2s">
                 <div class="duration-label">~2 sec</div>
                 <div class="duration-desc">49 frames</div>
-                <div class="duration-badge badge-original">Rapide</div>
+                <div class="duration-badge badge-original">Original</div>
             </div>
             <div class="duration-option" onclick="selectDuration('4s')" id="duration4s">
                 <div class="duration-label">~4 sec</div>
-                <div class="duration-desc">49f + RIFE x2</div>
+                <div class="duration-desc">98 frames</div>
                 <div class="duration-badge badge-recommended">Recommandé</div>
             </div>
             <div class="duration-option" onclick="selectDuration('7s')" id="duration7s">
                 <div class="duration-label">~7 sec</div>
-                <div class="duration-desc">81f + RIFE x2</div>
+                <div class="duration-desc">81 frames + RIFE x2</div>
                 <div class="duration-badge badge-quality">Qualité+</div>
             </div>
         </div>
@@ -395,6 +382,8 @@
         <div class="translate-label-row"><label>Prompt (description du mouvement)</label><button type="button" class="translate-btn" onclick="triggerTranslate('prompt', this)">🌐 FR→EN</button></div>
         <textarea id="prompt" placeholder="Ex: dancing smoothly, fluid movements..."></textarea>
     </div>
+
+
 
     <!-- CHAINING -->
     <div class="chaining-box">
@@ -408,26 +397,28 @@
 
     <button onclick="startGeneration()" id="generateBtn">🎬 Générer</button>
 
-    <div class="iris-progress" id="irisProgress">
-        <div class="iris-progress-header">
-            <div>
-                <div class="iris-progress-status" id="irisStatus">Génération en cours...</div>
-                <div class="iris-progress-pct"><span id="irisPct">0</span><span class="unit">%</span></div>
+
+
+        <div class="iris-progress" id="irisProgress">
+            <div class="iris-progress-header">
+                <div>
+                    <div class="iris-progress-status" id="irisStatus">Génération en cours...</div>
+                    <div class="iris-progress-pct"><span id="irisPct">0</span><span class="unit">%</span></div>
+                </div>
+                <div class="iris-progress-right">
+                    <div class="iris-eta-label">Temps restant</div>
+                    <div class="iris-eta-value estimating" id="irisEta">Calcul...</div>
+                </div>
             </div>
-            <div class="iris-progress-right">
-                <div class="iris-eta-label">Temps restant</div>
-                <div class="iris-eta-value estimating" id="irisEta">Calcul...</div>
+            <div class="iris-progress-track">
+                <div class="iris-progress-fill" id="irisFill"></div>
+            </div>
+            <div class="iris-progress-sub"><div class="iris-progress-sub-fill"></div></div>
+            <div class="iris-progress-footer">
+                <span class="iris-progress-steps" id="irisSteps">Step 0 / 0</span>
+                <span class="iris-progress-speed" id="irisSpeed"></span>
             </div>
         </div>
-        <div class="iris-progress-track">
-            <div class="iris-progress-fill" id="irisFill"></div>
-        </div>
-        <div class="iris-progress-sub"><div class="iris-progress-sub-fill"></div></div>
-        <div class="iris-progress-footer">
-            <span class="iris-progress-steps" id="irisSteps">Step 0 / 0</span>
-            <span class="iris-progress-speed" id="irisSpeed"></span>
-        </div>
-    </div>
 
     <div class="frame-preview-container" id="framePreviewContainer">
         <p>🎞️ Preview en cours de génération</p>
@@ -454,109 +445,83 @@
 </div>
 
 <script>
-    // ── ETA calculator ────────────────────────────────────────────────────────
-    const irisETA = {
-        stepTimes: [],
-        globalOffset: 0,
-        globalTotal: 0,
-        prevRawStep: 0,
-        prevNode: null,
-        reset() { this.stepTimes = []; this.globalOffset = 0; this.globalTotal = 0; this.prevRawStep = 0; this.prevNode = null; },
-        setTotal(total) { this.globalTotal = total; },
+        // ── ETA calculator (multi-pass aware) ────────────────────────────────
+        const irisETA = {
+            stepTimes: [],
+            globalOffset: 0,
+            globalTotal: 0,
+            prevRawStep: 0,
+            prevNode: null,
+            reset() { this.stepTimes = []; this.globalOffset = 0; this.globalTotal = 0; this.prevRawStep = 0; this.prevNode = null; },
+            setTotal(total) { this.globalTotal = total; },
 
-        onStep(rawStep, rawMax, node) {
-            const nodeChanged = node !== undefined && node !== null && node !== this.prevNode && this.prevNode !== null;
-            const stepRegressed = rawStep <= this.prevRawStep && this.prevRawStep > 0;
-            if (nodeChanged || (!nodeChanged && node === undefined && stepRegressed)) {
-                this.globalOffset += this.prevRawStep;
-            }
-            this.prevRawStep = rawStep;
-            if (node !== undefined && node !== null) this.prevNode = node;
-
-            const currentStep = this.globalOffset + rawStep;
-            const totalSteps  = this.globalTotal > 0 ? this.globalTotal : (this.globalOffset + rawMax);
-
-            this.stepTimes.push(Date.now());
-            const pct  = Math.min(Math.round((currentStep / totalSteps) * 100), 99);
-            const left = totalSteps - currentStep;
-            let etaText = 'Calcul...', speedText = '';
-
-            if (this.stepTimes.length >= 2) {
-                const win = this.stepTimes.slice(-8);
-                const intervals = [];
-                for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
-                const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
-                const avgSec = avgMs / 1000;
-                const etaSec = Math.round(left * avgSec);
-                if (etaSec <= 0 || currentStep >= totalSteps) {
-                    etaText = 'Finalisation...';
-                } else if (etaSec < 60) {
-                    etaText = `~${etaSec}s`;
-                } else {
-                    const m = Math.floor(etaSec / 60), s = etaSec % 60;
-                    etaText = `~${m}m${s > 0 ? s+'s' : ''}`;
+            onStep(rawStep, rawMax, node) {
+                const nodeChanged = node !== undefined && node !== null && node !== this.prevNode && this.prevNode !== null;
+                const stepRegressed = rawStep <= this.prevRawStep && this.prevRawStep > 0;
+                if (nodeChanged || (!nodeChanged && node === undefined && stepRegressed)) {
+                    this.globalOffset += this.prevRawStep;
                 }
-                speedText = `${avgSec.toFixed(1)}s/step`;
+                this.prevRawStep = rawStep;
+                if (node !== undefined && node !== null) this.prevNode = node;
+
+                const currentStep = this.globalOffset + rawStep;
+                const totalSteps  = this.globalTotal > 0 ? this.globalTotal : (this.globalOffset + rawMax);
+
+                this.stepTimes.push(Date.now());
+                const pct  = Math.min(Math.round((currentStep / totalSteps) * 100), 99);
+                const left = totalSteps - currentStep;
+                let etaText = 'Calcul...', speedText = '';
+
+                if (this.stepTimes.length >= 2) {
+                    const win = this.stepTimes.slice(-8);
+                    const intervals = [];
+                    for (let i = 1; i < win.length; i++) intervals.push(win[i] - win[i-1]);
+                    const avgMs  = intervals.reduce((a,b) => a+b, 0) / intervals.length;
+                    const avgSec = avgMs / 1000;
+                    const etaSec = Math.round(left * avgSec);
+                    if (etaSec <= 0 || currentStep >= totalSteps) {
+                        etaText = 'Finalisation...';
+                    } else if (etaSec < 60) {
+                        etaText = `~${etaSec}s`;
+                    } else {
+                        const m = Math.floor(etaSec / 60), s = etaSec % 60;
+                        etaText = `~${m}m${s > 0 ? s+'s' : ''}`;
+                    }
+                    speedText = `${avgSec.toFixed(1)}s/step`;
+                }
+
+                const box = document.getElementById('irisProgress');
+                box.classList.add('visible');
+                document.getElementById('irisFill').style.width  = pct + '%';
+                document.getElementById('irisPct').textContent   = pct;
+                document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
+                if (speedText) document.getElementById('irisSpeed').textContent = speedText;
+
+                const etaEl = document.getElementById('irisEta');
+                etaEl.textContent = etaText;
+                etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
+            },
+
+            done() {
+                document.getElementById('irisStatus').textContent = '✅ Terminé !';
+                document.getElementById('irisEta').textContent    = '✓';
+                document.getElementById('irisEta').className      = 'iris-eta-value done';
+                document.getElementById('irisFill').style.width   = '100%';
+                document.getElementById('irisPct').textContent    = '100';
+            },
+
+            hide() {
+                document.getElementById('irisProgress').classList.remove('visible');
+                document.getElementById('irisFill').style.width   = '0%';
+                document.getElementById('irisPct').textContent    = '0';
+                document.getElementById('irisStatus').textContent = 'Génération en cours...';
+                document.getElementById('irisEta').textContent    = 'Calcul...';
+                document.getElementById('irisEta').className      = 'iris-eta-value estimating';
+                document.getElementById('irisSteps').textContent  = 'Step 0 / 0';
+                document.getElementById('irisSpeed').textContent  = '';
+                this.reset();
             }
-
-            const box = document.getElementById('irisProgress');
-            box.classList.add('visible');
-            document.getElementById('irisFill').style.width  = pct + '%';
-            document.getElementById('irisPct').textContent   = pct;
-            document.getElementById('irisSteps').textContent = `Step ${currentStep} / ${totalSteps}`;
-            if (speedText) document.getElementById('irisSpeed').textContent = speedText;
-
-            const etaEl = document.getElementById('irisEta');
-            etaEl.textContent = etaText;
-            etaEl.className   = 'iris-eta-value' + (etaText === 'Calcul...' ? ' estimating' : '');
-        },
-
-        done() {
-            document.getElementById('irisStatus').textContent = '✅ Terminé !';
-            document.getElementById('irisEta').textContent    = '✓';
-            document.getElementById('irisEta').className      = 'iris-eta-value done';
-            document.getElementById('irisFill').style.width   = '100%';
-            document.getElementById('irisPct').textContent    = '100';
-        },
-
-        hide() {
-            document.getElementById('irisProgress').classList.remove('visible');
-            document.getElementById('irisFill').style.width   = '0%';
-            document.getElementById('irisPct').textContent    = '0';
-            document.getElementById('irisStatus').textContent = 'Génération en cours...';
-            document.getElementById('irisEta').textContent    = 'Calcul...';
-            document.getElementById('irisEta').className      = 'iris-eta-value estimating';
-            document.getElementById('irisSteps').textContent  = 'Step 0 / 0';
-            document.getElementById('irisSpeed').textContent  = '';
-            this.reset();
-        }
-    };
-
-    // ── RESOLUTION HELPER ─────────────────────────────────────────────────────
-    // Adapte la résolution de l'image au format attendu par Wan 2.2
-    // Les dimensions doivent être multiples de 32
-    function snapTo32(v) { return Math.round(v / 32) * 32; }
-
-    function computeComfyResolution(imgW, imgH) {
-        // Taille max raisonnable pour le 5B en portrait / paysage
-        const MAX_PIXELS = 384 * 672; // ~258k pixels (base portrait)
-
-        let w = imgW, h = imgH;
-
-        // Scale down si trop grand
-        const currentPixels = w * h;
-        if (currentPixels > MAX_PIXELS) {
-            const scale = Math.sqrt(MAX_PIXELS / currentPixels);
-            w = Math.round(w * scale);
-            h = Math.round(h * scale);
-        }
-
-        // Snap au multiple de 32 le plus proche
-        w = Math.max(snapTo32(w), 64);
-        h = Math.max(snapTo32(h), 64);
-
-        return { w, h };
-    }
+        };
 
     // ── INDEXEDDB ─────────────────────────────────────────────────────────────
     const DB_NAME = 'irisforge_clips';
@@ -623,15 +588,12 @@
     let uploadedVideo = null;
     let currentMode = 'image';
     let selectedDuration = '2s';
-    let sourceImageWidth = 384;
-    let sourceImageHeight = 672;
+            function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('open');
-    }
-
-    let clientId = Math.random().toString(36).substring(7);
+        let clientId = Math.random().toString(36).substring(7);
     let currentVideoBlob = null;
     let currentVideoBlobUrl = null;
     let clips = [];
@@ -686,14 +648,19 @@
         };
 
         try {
+            // Cas 1 : génération déjà terminée
             const hist = await (await fetch(`${apiUrl}/history/${promptId}`)).json();
             if (hist[promptId] && hist[promptId].outputs) {
                 const saveNode = hist[promptId].outputs[saveNodeId];
                 const videoInfo = saveNode ? (saveNode.videos || saveNode.images || saveNode.gifs || [])[0] : null;
-                if (videoInfo) { await applyVideo(videoInfo); return; }
+                if (videoInfo) {
+                    await applyVideo(videoInfo);
+                    return;
+                }
             }
         } catch(e) {}
 
+        // Cas 2 : encore en cours → rebrancher WS
         irisETA.hide(); irisETA.setTotal(20);
         isGenerating = true;
         const btn = document.getElementById('generateBtn');
@@ -725,7 +692,9 @@
     }
 
     // ── UI ────────────────────────────────────────────────────────────────────
-    function showStatus(msg, type) { /* progress bar only */ }
+    function showStatus(msg, type) {
+        // Status text display removed – progress bar only
+    }
     function showProgress(val, max, node) { irisETA.onStep(val, max, node); }
     function hideProgress() { irisETA.hide(); }
     function showFramePreview(url) {
@@ -747,15 +716,9 @@
         selectedDuration = d;
         document.querySelectorAll('.duration-option').forEach(o => o.classList.remove('selected'));
         document.getElementById('duration' + d).classList.add('selected');
+        updateInfo();
     }
-
-    function updateResolutionDisplay(w, h) {
-        const { w: cw, h: ch } = computeComfyResolution(w, h);
-        document.getElementById('resolutionInfo').style.display = 'block';
-        document.getElementById('resolutionDisplay').textContent = `${w}×${h}`;
-        document.getElementById('resolutionComfy').textContent = `${cw}×${ch}`;
-        sourceImageWidth = cw;
-        sourceImageHeight = ch;
+    function updateInfo() {
     }
 
     // ── IMAGE/VIDEO ───────────────────────────────────────────────────────────
@@ -766,14 +729,9 @@
         reader.onload = (e) => {
             uploadedImage = e.target.result;
             lastFrameImage = e.target.result;
-            const imgEl = document.getElementById('imagePreview');
-            imgEl.src = e.target.result;
-            imgEl.style.display = 'block';
+            document.getElementById('imagePreview').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
             document.getElementById('imageFileText').textContent = '✔ ' + file.name;
-            // Détecter dimensions réelles
-            const tmpImg = new Image();
-            tmpImg.onload = () => updateResolutionDisplay(tmpImg.naturalWidth, tmpImg.naturalHeight);
-            tmpImg.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -781,11 +739,12 @@
     function previewVideo(event) {
         const file = event.target.files[0];
         if (!file) return;
+        // Revoke previous object URL if any
         const vid = document.getElementById('videoPreview');
         if (vid.src && vid.src.startsWith('blob:')) URL.revokeObjectURL(vid.src);
         const url = URL.createObjectURL(file);
         uploadedVideo = file;
-        uploadedImage = null;
+        uploadedImage = null; // reset until frame is extracted
         lastFrameImage = null;
         vid.src = url; vid.style.display = 'block';
         document.getElementById('videoFileText').textContent = '✔ ' + file.name;
@@ -802,7 +761,8 @@
             canvas.getContext('2d').drawImage(video, 0, 0);
             uploadedImage = canvas.toDataURL('image/png');
             lastFrameImage = uploadedImage;
-            updateResolutionDisplay(canvas.width, canvas.height);
+            showStatus('✔ Dernière frame extraite !', 'success');
+
         };
     }
 
@@ -810,7 +770,10 @@
         return new Promise((resolve, reject) => {
             const url = URL.createObjectURL(blob);
             const video = document.createElement('video');
-            const timeout = setTimeout(() => { URL.revokeObjectURL(url); reject(new Error('Timeout extraction frame')); }, 15000);
+            const timeout = setTimeout(() => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Timeout extraction frame'));
+            }, 15000);
             video.onloadedmetadata = () => {
                 video.currentTime = Math.max(0, video.duration - 0.1);
                 video.onseeked = () => {
@@ -820,9 +783,6 @@
                     canvas.height = video.videoHeight || 672;
                     canvas.getContext('2d').drawImage(video, 0, 0);
                     URL.revokeObjectURL(url);
-                    // Mettre à jour les dimensions pour le prochain clip
-                    sourceImageWidth = computeComfyResolution(canvas.width, canvas.height).w;
-                    sourceImageHeight = computeComfyResolution(canvas.width, canvas.height).h;
                     resolve(canvas.toDataURL('image/png'));
                 };
             };
@@ -842,87 +802,51 @@
         return (await res.json()).name;
     }
 
-    // ── WORKFLOW WAN 2.2 5B ───────────────────────────────────────────────────
-    async function generateWithWan5B(apiUrl, imageName, prompt) {
+    async function generateWithInterpolation(apiUrl, imageName, prompt) {
         return new Promise((resolve, reject) => {
             const seed = Math.floor(Math.random() * 1000000000000000);
             const uniquePrefix = `video/video_${Date.now()}`;
 
-            // Frames selon durée
+            // Nombre de frames selon durée
             const framesMap = { '2s': 49, '4s': 49, '7s': 81 };
             const frameCount = framesMap[selectedDuration] || 49;
 
-            // Résolution adaptée à l'image source
-            const W = sourceImageWidth;
-            const H = sourceImageHeight;
+            const workflow = {
+                // ── Modèles ──────────────────────────────────────────────────
+                "84": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
+                "90": { inputs: { vae_name: "wan_2.1_vae.safetensors" }, class_type: "VAELoader" },
+                "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
 
-            // Négatif universel en anglais
-            const negPrompt = "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping";
+                // ── Image source ─────────────────────────────────────────────
+                "97":  { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
+                "120": { inputs: { upscale_method: "lanczos", width: 384, height: 672, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
 
-  const workflow = {
-    // Chargement modèles
-    "1": { inputs: { unet_name: "wan2.2_ti2v_5B_fp16.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
-    "2": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan", device: "default" }, class_type: "CLIPLoader" },
-    "3": { inputs: { vae_name: "wan2.2_vae.safetensors" }, class_type: "VAELoader" },
-    // ModelSamplingSD3 shift=8
-    "4": { inputs: { shift: 8, model: ["1", 0] }, class_type: "ModelSamplingSD3" },
-    // Prompts
-    "5": { inputs: { text: prompt, clip: ["2", 0] }, class_type: "CLIPTextEncode" },
-    "6": { inputs: { text: negPrompt, clip: ["2", 0] }, class_type: "CLIPTextEncode" },
-    // Image source
-    "7": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
-    // Wan22ImageToVideoLatent — résolution adaptée à l'image
-    "8": { inputs: { width: W, height: H, length: frameCount, batch_size: 1, vae: ["3", 0], start_image: ["7", 0] }, class_type: "Wan22ImageToVideoLatent" },
-    // KSampler (20 steps, CFG 5, uni_pc, simple)
-    "9": {
-        inputs: {
-            seed: seed, control_after_generate: "randomize",
-            steps: 20, cfg: 5,
-            sampler_name: "uni_pc", scheduler: "simple",
-            denoise: 1,
-            model: ["4", 0],
-            positive: ["5", 0],
-            negative: ["6", 0],
-            latent_image: ["8", 0]
-        },
-        class_type: "KSampler"
-    },
-    // VAEDecode
-    "10": { inputs: { samples: ["9", 0], vae: ["3", 0] }, class_type: "VAEDecode" }
-};
+                // ── Conditionnements ─────────────────────────────────────────
+                "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
+                "89": { inputs: { text: "blurry, blur, out of focus, low quality, low resolution, compression artifacts, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, glitching, temporal inconsistency, melting face, warping", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
 
-let nodeId = 20;
-let lastOutput = ["10", 0];
+                // ── Conditionnement vidéo ─────────────────────────────────────
+                "98": { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
 
-// RIFE pour 4s et 7s
-if (selectedDuration === '4s' || selectedDuration === '7s') {
-    workflow[String(nodeId)] = {
-        inputs: { frames: lastOutput, ckpt_name: "rife47.pth", clear_cache_after_n_frames: 10, multiplier: 2, fast_mode: true, ensemble: true, scale_factor: 1 },
-        class_type: "RIFE VFI"
-    };
-    lastOutput = [String(nodeId), 0];
-    nodeId++;
-}
+                // ── Sampling (un seul KSampler standard) ─────────────────────
+                "86": { inputs: { seed: seed, steps: 20, cfg: 2.0, sampler_name: "euler", scheduler: "simple", denoise: 1.0, model: ["96", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSampler" },
 
-// CreateVideo (fps=24, sans audio)
-const createId = String(nodeId++);
-workflow[createId] = {
-    inputs: { fps: 24, images: lastOutput },
-    class_type: "CreateVideo"
-};
-const videoOutput = [createId, 0];
+                // ── Décodage ─────────────────────────────────────────────────
+                "87": { inputs: { samples: ["86", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
+            };
 
-// SaveVideo (nouveau dans le workflow)
-const saveId = String(nodeId++);
-workflow[saveId] = {
-    inputs: {
-        video: videoOutput,
-        filename_prefix: "video/ComfyUI",
-        format: "auto",
-        codec: "auto"
-    },
-    class_type: "SaveVideo"
-};
+            let nodeId = 200;
+            let lastOutput = ["87", 0];
+
+            // RIFE pour 4s (x2) et 7s (x2 sur 81 frames)
+            if (selectedDuration === '4s' || selectedDuration === '7s') {
+                workflow[String(nodeId)] = {
+                    inputs: { frames: lastOutput, ckpt_name: "rife47.pth", clear_cache_after_n_frames: 10, multiplier: 2, fast_mode: true, ensemble: true, scale_factor: 1 },
+                    class_type: "RIFE VFI"
+                };
+                lastOutput = [String(nodeId), 0];
+                nodeId++;
+            }
 
             const createId = String(nodeId++);
             workflow[createId] = { inputs: { fps: 24, images: lastOutput }, class_type: "CreateVideo" };
@@ -930,6 +854,7 @@ workflow[saveId] = {
             const saveNodeId = String(nodeId);
             workflow[saveNodeId] = { inputs: { filename_prefix: uniquePrefix, format: "mp4", codec: "h264", video: [createId, 0] }, class_type: "SaveVideo" };
 
+            // Déclaration AVANT le fetch pour éviter tout problème de temporal dead zone
             let settled = false;
             let ws = null;
             const safeResolve = (val) => { if (!settled) { settled = true; if (ws) ws.close(); resolve(val); } };
@@ -947,15 +872,17 @@ workflow[saveId] = {
             .then(data => {
                 if (data.error) throw new Error('ComfyUI a rejeté le workflow : ' + JSON.stringify(data.error));
                 const promptId = data.prompt_id;
-                if (!promptId) throw new Error('Pas de prompt_id : ' + JSON.stringify(data));
+                if (!promptId) throw new Error('Pas de prompt_id dans la réponse : ' + JSON.stringify(data));
                 saveGenerationState(promptId, saveNodeId, apiUrl);
 
                 const wsUrl = apiUrl.replace(/^http/, 'ws');
                 ws = new WebSocket(`${wsUrl}/ws?clientId=${clientId}`);
 
                 ws.onmessage = async (event) => {
+                    // ComfyUI envoie parfois des previews binaires (Blob/ArrayBuffer) — on les ignore
                     if (typeof event.data !== 'string') return;
-                    let msg; try { msg = JSON.parse(event.data); } catch(e) { return; }
+                    let msg;
+                    try { msg = JSON.parse(event.data); } catch(e) { return; }
 
                     if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
                         irisETA.onStep(msg.data.value, msg.data.max, msg.data.node);
@@ -1000,22 +927,24 @@ workflow[saveId] = {
     }
 
     // ── GENERATION FLOW ───────────────────────────────────────────────────────
+
+    
     async function startGeneration() {
         if (isGenerating) return;
         const apiUrl = document.getElementById('comfyUrl').value.trim();
         const prompt = document.getElementById('prompt').value.trim();
         const chainCount = Math.max(1, parseInt(document.getElementById('chainCount').value) || 1);
 
-        if (!apiUrl) { alert('❌ Veuillez entrer l\'URL ComfyUI'); return; }
+        if (!apiUrl) { showStatus('❌ Veuillez entrer l\'URL ComfyUI', 'error'); return; }
         localStorage.setItem('comfyUrl', apiUrl);
-        if (!prompt) { alert('❌ Veuillez entrer un prompt'); return; }
-        if (currentMode === 'image' && !uploadedImage) { alert('❌ Veuillez uploader une image'); return; }
-        if (currentMode === 'video' && !uploadedImage) { alert('❌ Extraction de la frame en cours, patientez...'); return; }
+        if (!prompt) { showStatus('❌ Veuillez entrer un prompt', 'error'); return; }
+        if (currentMode === 'image' && !uploadedImage) { showStatus('❌ Veuillez uploader une image', 'error'); return; }
+        if (currentMode === 'video' && !uploadedImage) { showStatus('❌ Extraction de la frame en cours, patientez...', 'error'); return; }
 
         chainRemaining = chainCount;
         lastFrameImage = uploadedImage;
         const translatedPrompt = await translateToEnglish(prompt);
-        await runNextClip(apiUrl, translatedPrompt || prompt);
+        await runNextClip(apiUrl, translatedPrompt);
     }
 
     async function runNextClip(apiUrl, prompt) {
@@ -1030,10 +959,12 @@ workflow[saveId] = {
         const totalExpected = clipIndex + chainRemaining - 1;
 
         try {
+            showStatus(`📤 Upload image source (clip ${clipIndex}/${totalExpected})...`, 'loading');
             const imageName = await uploadImageToComfyUI(apiUrl, lastFrameImage);
-            irisETA.reset(); irisETA.setTotal(20);
-            const { videoBlob } = await generateWithWan5B(apiUrl, imageName, prompt);
+            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(20);
+            const { videoBlob } = await generateWithInterpolation(apiUrl, imageName, prompt);
 
+            // Revoke previous result URL to free memory
             if (currentVideoBlobUrl) { URL.revokeObjectURL(currentVideoBlobUrl); currentVideoBlobUrl = null; }
 
             addClipToGallery(videoBlob, selectedDuration);
@@ -1042,23 +973,24 @@ workflow[saveId] = {
             document.getElementById('finalVideo').src = currentVideoBlobUrl;
             document.getElementById('resultVideo').style.display = 'block';
 
-            // Extraire dernière frame + mettre à jour résolution pour le prochain clip
+            // Extract last frame for chaining
             lastFrameImage = await extractLastFrameFromBlob(videoBlob);
 
             chainRemaining--;
             irisETA.hide(); hideFramePreview();
 
             if (chainRemaining > 0) {
+                irisETA.hide(); showStatus(`✅ Clip ${clipIndex} terminé ! Lancement du suivant...`, 'success');
                 setTimeout(() => runNextClip(apiUrl, prompt), 800);
             } else {
-                irisETA.done(); setTimeout(() => irisETA.hide(), 2000);
+                irisETA.done(); setTimeout(() => irisETA.hide(), 2000); showStatus(`✅ ${clips.length} clip(s) générés avec succès !`, 'success');
                 document.getElementById('nextClipBtn').style.display = 'block';
                 isGenerating = false;
                 document.getElementById('generateBtn').disabled = false;
             }
         } catch(err) {
             irisETA.hide(); hideFramePreview();
-            alert('❌ Erreur : ' + err.message);
+            showStatus('❌ Erreur : ' + err.message, 'error');
             isGenerating = false;
             document.getElementById('generateBtn').disabled = false;
             if (clips.length > 0) document.getElementById('nextClipBtn').style.display = 'block';
@@ -1068,12 +1000,12 @@ workflow[saveId] = {
     async function generateNextClip() {
         const apiUrl = document.getElementById('comfyUrl').value.trim();
         const prompt = document.getElementById('prompt').value.trim();
-        if (!apiUrl) { alert('❌ Veuillez entrer l\'URL ComfyUI'); return; }
-        if (!prompt) { alert('❌ Veuillez entrer un prompt'); return; }
-        if (!lastFrameImage) { alert('❌ Aucune frame source disponible'); return; }
+        if (!apiUrl) { showStatus('❌ Veuillez entrer l\'URL ComfyUI', 'error'); return; }
+        if (!prompt) { showStatus('❌ Veuillez entrer un prompt', 'error'); return; }
+        if (!lastFrameImage) { showStatus('❌ Aucune frame source disponible', 'error'); return; }
         chainRemaining = 1;
-        const translatedPrompt = await translateToEnglish(prompt);
-        await runNextClip(apiUrl, translatedPrompt || prompt);
+        const translatedPrompt2 = await translateToEnglish(prompt);
+        await runNextClip(apiUrl, translatedPrompt2);
     }
 
     // ── GALLERY ───────────────────────────────────────────────────────────────
@@ -1123,21 +1055,28 @@ workflow[saveId] = {
         const a = document.createElement('a');
         a.href = clips[i].url;
         a.download = `irisforge_clip_${i+1}_${Date.now()}.mp4`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     async function deleteClip(i) {
         if (i < 0 || i >= clips.length) return;
         const clip = clips[i];
         URL.revokeObjectURL(clip.url);
-        if (clip.dbId != null) { try { await deleteClipFromDB(clip.dbId); } catch(e) {} }
+        if (clip.dbId != null) {
+            try { await deleteClipFromDB(clip.dbId); } catch(e) { console.warn('DB delete failed:', e); }
+        }
         clips.splice(i, 1);
         clips.forEach((c, idx) => c.label = `Clip ${idx+1} (~${selectedDuration})`);
+        // Sync labels in DB
+        clips.forEach(c => { if (c.dbId != null) { try { const d = db; const tx = d.transaction(STORE, 'readwrite'); const req = tx.objectStore(STORE).get(c.dbId); req.onsuccess = () => { if(req.result) { req.result.label = c.label; tx.objectStore(STORE).put(req.result); } }; } catch(e){} } });
         renderGallery();
     }
 
     async function useClipAsSource(i) {
         if (i < 0 || i >= clips.length) return;
+        showStatus('🔗 Extraction de la dernière frame...', 'loading');
         try {
             lastFrameImage = await extractLastFrameFromBlob(clips[i].blob);
             uploadedImage = lastFrameImage;
@@ -1145,7 +1084,11 @@ workflow[saveId] = {
             document.getElementById('imagePreview').style.display = 'block';
             document.getElementById('imageFileText').innerHTML = `✔ Dernière frame du clip #${i+1}`;
             switchMode('image');
-        } catch(e) { alert('❌ Erreur extraction frame : ' + e.message); }
+            showStatus(`✅ Clip #${i+1} défini comme source !`, 'success');
+
+        } catch(e) {
+            showStatus('❌ Erreur extraction frame : ' + e.message, 'error');
+        }
     }
 
     async function clearGallery() {
@@ -1153,22 +1096,28 @@ workflow[saveId] = {
         clips.forEach(c => URL.revokeObjectURL(c.url));
         clips = [];
         lastFrameImage = uploadedImage;
-        try { await clearDB(); } catch(e) {}
+        try { await clearDB(); } catch(e) { console.warn('DB clear failed:', e); }
         renderGallery();
     }
 
     // ── ASSEMBLE ──────────────────────────────────────────────────────────────
     async function assembleClips() {
-        if (clips.length === 0) { alert('❌ Aucun clip dans la galerie'); return; }
+        if (clips.length === 0) { showStatus('❌ Aucun clip dans la galerie', 'error'); return; }
         if (clips.length === 1) { downloadClip(0); return; }
 
+        showStatus('🎞️ Assemblage en cours...', 'loading');
         try {
             const videoElements = clips.map(c => {
                 const v = document.createElement('video');
-                v.src = c.url; v.muted = true; v.playsInline = true; return v;
+                v.src = c.url; v.muted = true; v.playsInline = true;
+                return v;
             });
+
+            // Load all metadata
             await Promise.all(videoElements.map(v => new Promise((res, rej) => {
-                v.onloadedmetadata = res; v.onerror = () => rej(new Error('Erreur chargement clip')); v.load();
+                v.onloadedmetadata = res;
+                v.onerror = () => rej(new Error('Erreur chargement clip'));
+                v.load();
             })));
 
             const W = videoElements[0].videoWidth || 384;
@@ -1185,13 +1134,19 @@ workflow[saveId] = {
             recorder.start(100);
 
             for (let i = 0; i < videoElements.length; i++) {
+                showStatus(`🎞️ Assemblage clip ${i+1}/${videoElements.length}...`, 'loading');
                 const v = videoElements[i];
                 await new Promise((res) => {
                     v.currentTime = 0;
-                    let animId; let drawing = true;
-                    const draw = () => { if (!drawing) return; ctx.drawImage(v, 0, 0, W, H); animId = requestAnimationFrame(draw); };
+                    let animId;
+                    let drawing = true;
+                    const draw = () => {
+                        if (!drawing) return;
+                        ctx.drawImage(v, 0, 0, W, H);
+                        animId = requestAnimationFrame(draw);
+                    };
                     v.onended = () => { drawing = false; cancelAnimationFrame(animId); res(); };
-                    v.onerror = () => { cancelAnimationFrame(animId); res(); };
+                    v.onerror = () => { cancelAnimationFrame(animId); res(); }; // skip errored clip
                     v.play().then(() => { animId = requestAnimationFrame(draw); }).catch(res);
                 });
                 v.pause();
@@ -1203,10 +1158,14 @@ workflow[saveId] = {
             const finalBlob = new Blob(chunks, { type: mimeType });
             const url = URL.createObjectURL(finalBlob);
             const a = document.createElement('a');
-            a.href = url; a.download = `irisforge_assembled_${Date.now()}.webm`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            a.href = url;
+            a.download = `irisforge_assembled_${Date.now()}.webm`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 5000);
-        } catch(err) { alert('❌ Erreur assemblage : ' + err.message); }
+            showStatus(`✅ Vidéo assemblée téléchargée (${clips.length} clips) !`, 'success');
+        } catch(err) { showStatus('❌ Erreur assemblage : ' + err.message, 'error'); }
     }
 
     // ── DOWNLOAD CURRENT ──────────────────────────────────────────────────────
@@ -1214,14 +1173,19 @@ workflow[saveId] = {
         if (!currentVideoBlob) return;
         const url = URL.createObjectURL(currentVideoBlob);
         const a = document.createElement('a');
-        a.href = url; a.download = `irisforge_clip_${Date.now()}.mp4`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        a.href = url;
+        a.download = `irisforge_clip_${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 5000);
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
+    updateInfo();
     checkRecovery();
 
+    // Restore clips from IndexedDB
     (async () => {
         try {
             const saved = await loadClipsFromDB();
@@ -1231,6 +1195,8 @@ workflow[saveId] = {
                     clips.push({ blob: row.blob, url, label: row.label, dbId: row.id });
                 }
                 renderGallery();
+                showStatus(`✅ ${saved.length} clip(s) restaurés depuis la session précédente !`, 'success');
+
             }
         } catch(e) { console.warn('Could not restore clips from DB:', e); }
     })();
@@ -1245,9 +1211,6 @@ workflow[saveId] = {
                     document.getElementById('imagePreview').style.display = 'block';
                     document.getElementById('imageFileText').innerHTML = '✔ Image chargée depuis IrisForge<br><small style="color:rgba(255,255,255,0.5)">Vous pouvez changer l\'image</small>';
                     localStorage.removeItem('videoSourceImage');
-                    const tmpImg = new Image();
-                    tmpImg.onload = () => updateResolutionDisplay(tmpImg.naturalWidth, tmpImg.naturalHeight);
-                    tmpImg.src = dataUrl;
                 };
                 if (img.startsWith('data:image/')) {
                     applyImage(img);
@@ -1260,10 +1223,10 @@ workflow[saveId] = {
                     }).catch(() => localStorage.removeItem('videoSourceImage'));
                 }
             }
-        } catch(e) {}
+        } catch(e) { console.warn('Erreur lecture localStorage:', e); }
     });
 
-    // ── TRADUCTION ────────────────────────────────────────────────────────────
+    // ── TRADUCTION MYMEMORY (gratuit, CORS ok) ───────────────────────────────
     async function translateToEnglish(text) {
         if (!text || !text.trim()) return null;
         try {
@@ -1275,7 +1238,9 @@ workflow[saveId] = {
                 return data.responseData.translatedText;
             }
             return null;
-        } catch(e) { return null; }
+        } catch(e) {
+            return null;
+        }
     }
 
     async function triggerTranslate(textareaId, btnEl) {
@@ -1283,7 +1248,8 @@ workflow[saveId] = {
         if (!ta) return;
         const original = ta.value.trim();
         if (!original) { btnEl.textContent = '✍️ Vide'; setTimeout(() => { btnEl.textContent = '🌐 FR→EN'; }, 1500); return; }
-        btnEl.disabled = true; btnEl.textContent = '⏳';
+        btnEl.disabled = true;
+        btnEl.textContent = '⏳';
         try {
             const translated = await translateToEnglish(original);
             if (translated) {
@@ -1291,10 +1257,21 @@ workflow[saveId] = {
                 ta.style.transition = 'background 0.3s';
                 ta.style.background = 'rgba(34,197,94,0.1)';
                 setTimeout(() => { ta.style.background = ''; }, 1000);
-                btnEl.textContent = '✅ Traduit'; btnEl.classList.add('success');
-            } else { btnEl.textContent = '❌ Indispo'; btnEl.classList.add('error'); }
-        } catch(e) { btnEl.textContent = '❌ Erreur'; btnEl.classList.add('error'); }
-        setTimeout(() => { btnEl.disabled = false; btnEl.textContent = '🌐 FR→EN'; btnEl.classList.remove('success', 'error'); }, 2500);
+                btnEl.textContent = '✅ Traduit';
+                btnEl.classList.add('success');
+            } else {
+                btnEl.textContent = '❌ Indispo';
+                btnEl.classList.add('error');
+            }
+        } catch(e) {
+            btnEl.textContent = '❌ Erreur';
+            btnEl.classList.add('error');
+        }
+        setTimeout(() => {
+            btnEl.disabled = false;
+            btnEl.textContent = '🌐 FR→EN';
+            btnEl.classList.remove('success', 'error');
+        }, 2500);
     }
 </script>
 
