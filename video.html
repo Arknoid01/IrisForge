@@ -174,6 +174,77 @@
         .translate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .translate-btn.success { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #4ade80; }
         .translate-btn.error { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #f87171; }
+
+        /* ── MODELS & LORAS ── */
+        .models-section {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; padding: 16px; margin-bottom: 24px;
+        }
+        .models-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+        }
+        .models-title { color: #a78bfa; font-size: 14px; font-weight: 600; }
+        .load-btn {
+            background: rgba(102,126,234,0.2); border: 1px solid rgba(102,126,234,0.4);
+            border-radius: 8px; padding: 6px 14px; color: #a78bfa;
+            font-size: 12px; font-weight: 600; cursor: pointer; width: auto;
+            transition: all 0.2s;
+        }
+        .load-btn:hover { background: rgba(102,126,234,0.4); color: #fff; transform: none; box-shadow: none; }
+        .load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .model-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .model-col { flex: 1; }
+        .model-col label { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .model-select {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 13px;
+            cursor: pointer; transition: all 0.2s; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a78bfa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center;
+            padding-right: 32px;
+        }
+        .model-select:focus { outline: none; border-color: #667eea; }
+        .model-select option { background: #1a1a2e; }
+        .lora-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 14px 0 12px; }
+        .lora-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .lora-list-title { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 500; }
+        .add-lora-btn {
+            background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3);
+            border-radius: 7px; padding: 5px 12px; color: #a78bfa;
+            font-size: 12px; font-weight: 600; cursor: pointer; width: auto;
+            transition: all 0.2s;
+        }
+        .add-lora-btn:hover { background: rgba(167,139,250,0.3); transform: none; box-shadow: none; }
+        .lora-item {
+            display: flex; gap: 8px; align-items: center; margin-bottom: 8px;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px; padding: 10px;
+        }
+        .lora-select {
+            flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; padding: 8px 10px; color: #fff; font-size: 12px;
+            cursor: pointer; appearance: none; min-width: 0;
+        }
+        .lora-select option { background: #1a1a2e; }
+        .lora-select:focus { outline: none; border-color: #667eea; }
+        .lora-model-select {
+            background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.25);
+            border-radius: 8px; padding: 8px 10px; color: #a78bfa; font-size: 12px;
+            cursor: pointer; width: auto; white-space: nowrap;
+        }
+        .lora-model-select option { background: #1a1a2e; }
+        .lora-strength-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 72px; }
+        .lora-strength-val { color: #a78bfa; font-size: 12px; font-weight: 700; font-family: monospace; }
+        .lora-strength-slider { width: 70px; accent-color: #667eea; cursor: pointer; }
+        .lora-del-btn {
+            width: 28px; height: 28px; flex-shrink: 0; padding: 0;
+            background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 7px; font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lora-del-btn:hover { background: rgba(239,68,68,0.35); transform: none; box-shadow: none; }
+        .lora-empty { color: rgba(255,255,255,0.25); font-size: 12px; text-align: center; padding: 10px 0; }
+        .load-status { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 6px; text-align: center; min-height: 14px; }
     
         /* ── Barre de progression Style C ── */
         .iris-progress {
@@ -395,6 +466,35 @@
         </div>
     </div>
 
+    <!-- MODÈLES & LORAS -->
+    <div class="models-section">
+        <div class="models-header">
+            <span class="models-title">⚙️ Modèles & LoRAs</span>
+            <button type="button" class="load-btn" id="loadAssetsBtn" onclick="loadComfyAssets()">🔄 Charger depuis ComfyUI</button>
+        </div>
+        <div class="model-row">
+            <div class="model-col">
+                <label>Modèle HIGH</label>
+                <select id="modelHigh" class="model-select">
+                    <option value="Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors">Wan2_2-I2V-A14B-HIGH_fp8...</option>
+                </select>
+            </div>
+            <div class="model-col">
+                <label>Modèle LOW</label>
+                <select id="modelLow" class="model-select">
+                    <option value="Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors">Wan2_2-I2V-A14B-LOW_fp8...</option>
+                </select>
+            </div>
+        </div>
+        <div class="lora-divider"></div>
+        <div class="lora-list-header">
+            <span class="lora-list-title">🎨 LoRAs actifs</span>
+            <button type="button" class="add-lora-btn" onclick="addLora()">+ Ajouter</button>
+        </div>
+        <div id="loraList"></div>
+        <div class="load-status" id="loadStatus"></div>
+    </div>
+
     <button onclick="startGeneration()" id="generateBtn">🎬 Générer</button>
 
 
@@ -582,6 +682,106 @@
             tx.onerror = () => reject(tx.error);
         });
     }
+
+    // ── MODELS & LORAS ────────────────────────────────────────────────────────
+    let availableUnets = [];
+    let availableLoras = [];
+    let loraList = [
+        { name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength: 0.15, model: "high" },
+        { name: "DetailTweaker.safetensors", strength: 0.15, model: "low" }
+    ];
+
+    async function loadComfyAssets() {
+        const apiUrl = document.getElementById('comfyUrl').value.trim();
+        if (!apiUrl) { setLoadStatus('❌ Entrez d\'abord l\'URL ComfyUI', 'error'); return; }
+        const btn = document.getElementById('loadAssetsBtn');
+        btn.disabled = true; btn.textContent = '⏳ Chargement...';
+        setLoadStatus('Connexion à ComfyUI...');
+        try {
+            const [unetRes, loraRes] = await Promise.all([
+                fetch(`${apiUrl}/object_info/UNETLoader`),
+                fetch(`${apiUrl}/object_info/LoraLoaderModelOnly`)
+            ]);
+            if (!unetRes.ok || !loraRes.ok) throw new Error('ComfyUI inaccessible');
+            const unetData = await unetRes.json();
+            const loraData = await loraRes.json();
+
+            availableUnets = unetData?.UNETLoader?.input?.required?.unet_name?.[0] || [];
+            availableLoras = loraData?.LoraLoaderModelOnly?.input?.required?.lora_name?.[0] || [];
+
+            populateModelSelect('modelHigh', availableUnets, 'HIGH');
+            populateModelSelect('modelLow', availableUnets, 'LOW');
+            renderLoras();
+            setLoadStatus(`✅ ${availableUnets.length} modèles · ${availableLoras.length} LoRAs chargés`, 'success');
+            localStorage.setItem('iris_unets', JSON.stringify(availableUnets));
+            localStorage.setItem('iris_loras', JSON.stringify(availableLoras));
+        } catch(e) {
+            setLoadStatus('❌ ' + e.message, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = '🔄 Charger depuis ComfyUI';
+        }
+    }
+
+    function setLoadStatus(msg, type) {
+        const el = document.getElementById('loadStatus');
+        el.textContent = msg;
+        el.style.color = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : 'rgba(255,255,255,0.35)';
+        if (type === 'success') setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 4000);
+    }
+
+    function populateModelSelect(id, options, hint) {
+        const sel = document.getElementById(id);
+        const current = sel.value;
+        sel.innerHTML = options.map(o => `<option value="${o}" ${o === current ? 'selected' : ''}>${o}</option>`).join('');
+        // Try to keep previous selection or pick one that matches hint keyword
+        if (!options.includes(current)) {
+            const hintMatch = options.find(o => o.toUpperCase().includes(hint));
+            if (hintMatch) sel.value = hintMatch;
+        }
+    }
+
+    function addLora() {
+        loraList.push({ name: availableLoras[0] || '', strength: 0.5, model: 'high' });
+        renderLoras();
+    }
+
+    function renderLoras() {
+        const container = document.getElementById('loraList');
+        if (loraList.length === 0) {
+            container.innerHTML = '<div class="lora-empty">Aucun LoRA actif — cliquez "+ Ajouter"</div>';
+            return;
+        }
+        container.innerHTML = loraList.map((l, i) => {
+            const opts = availableLoras.length > 0
+                ? availableLoras.map(n => `<option value="${n}" ${n === l.name ? 'selected' : ''}>${n}</option>`).join('')
+                : `<option value="${l.name}">${l.name || '(vide)'}</option>`;
+            return `
+            <div class="lora-item">
+                <select class="lora-select" onchange="loraList[${i}].name=this.value">${opts}</select>
+                <select class="lora-model-select" onchange="loraList[${i}].model=this.value">
+                    <option value="high" ${l.model==='high'?'selected':''}>HIGH</option>
+                    <option value="low" ${l.model==='low'?'selected':''}>LOW</option>
+                </select>
+                <div class="lora-strength-wrap">
+                    <span class="lora-strength-val" id="lsv${i}">${l.strength.toFixed(2)}</span>
+                    <input type="range" class="lora-strength-slider" min="0" max="1" step="0.05" value="${l.strength}"
+                        oninput="loraList[${i}].strength=parseFloat(this.value);document.getElementById('lsv${i}').textContent=parseFloat(this.value).toFixed(2)">
+                </div>
+                <button class="lora-del-btn" onclick="loraList.splice(${i},1);renderLoras()">🗑</button>
+            </div>`;
+        }).join('');
+    }
+
+    // Restore cached assets on load
+    (function restoreCachedAssets() {
+        try {
+            const u = localStorage.getItem('iris_unets');
+            const l = localStorage.getItem('iris_loras');
+            if (u) { availableUnets = JSON.parse(u); populateModelSelect('modelHigh', availableUnets, 'HIGH'); populateModelSelect('modelLow', availableUnets, 'LOW'); }
+            if (l) { availableLoras = JSON.parse(l); }
+        } catch(e) {}
+        renderLoras();
+    })();
 
     // ── STATE ─────────────────────────────────────────────────────────────────
     let uploadedImage = null;
@@ -811,24 +1011,44 @@
             const framesMap = { '2s': 49, '4s': 49, '7s': 81 };
             const frameCount = framesMap[selectedDuration] || 49;
 
+            // Read selected models from UI
+            const modelHighName = document.getElementById('modelHigh').value;
+            const modelLowName  = document.getElementById('modelLow').value;
+
             const workflow = {
                 "84": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
                 "90": { inputs: { vae_name: "wan_2.1_vae.safetensors" }, class_type: "VAELoader" },
-                "95": { inputs: { unet_name: "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
-                "96": { inputs: { unet_name: "Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
+                "95": { inputs: { unet_name: modelHighName, weight_dtype: "default" }, class_type: "UNETLoader" },
+                "96": { inputs: { unet_name: modelLowName,  weight_dtype: "default" }, class_type: "UNETLoader" },
                 "97": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
                 "120": { inputs: { upscale_method: "lanczos", width: 384, height: 672, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
                 "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
                 "89": { inputs: { text: "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
-                "101": { inputs: { lora_name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength_model: 0.15, model: ["95", 0] }, class_type: "LoraLoaderModelOnly" },
-                "102": { inputs: { lora_name: "DetailTweaker.safetensors", strength_model: 0.15, model: ["96", 0] }, class_type: "LoraLoaderModelOnly" },
-                "103": { inputs: { shift: 5.0, model: ["102", 0] }, class_type: "ModelSamplingSD3" },
-                "104": { inputs: { shift: 5.0, model: ["101", 0] }, class_type: "ModelSamplingSD3" },
-                "98": { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" },
-                "86": { inputs: { add_noise: "enable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 12, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" },
-                "85": { inputs: { add_noise: "disable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 12, end_at_step: 25, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" },
                 "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
             };
+
+            // Chaîner les LoRAs dynamiquement
+            let highChain = ["95", 0];
+            let lowChain  = ["96", 0];
+            let loraNodeId = 300;
+            loraList.forEach(lora => {
+                if (!lora.name) return;
+                const nid = String(loraNodeId++);
+                workflow[nid] = {
+                    inputs: { lora_name: lora.name, strength_model: lora.strength, model: lora.model === 'high' ? highChain : lowChain },
+                    class_type: "LoraLoaderModelOnly"
+                };
+                if (lora.model === 'high') highChain = [nid, 0];
+                else                       lowChain  = [nid, 0];
+            });
+
+            // ModelSamplingSD3 avec les modèles finaux (après LoRAs)
+            workflow["103"] = { inputs: { shift: 5.0, model: lowChain  }, class_type: "ModelSamplingSD3" };
+            workflow["104"] = { inputs: { shift: 5.0, model: highChain }, class_type: "ModelSamplingSD3" };
+
+            workflow["98"] = { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" };
+            workflow["86"] = { inputs: { add_noise: "enable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 12, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" };
+            workflow["85"] = { inputs: { add_noise: "disable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 12, end_at_step: 25, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" };
 
             let nodeId = 200;
             let lastOutput = ["87", 0];
