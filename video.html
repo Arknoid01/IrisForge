@@ -859,56 +859,70 @@
             // Négatif universel en anglais
             const negPrompt = "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping";
 
-            const workflow = {
-                // Chargement modèles
-                "1": { inputs: { unet_name: "wan2.2_ti2v_5B_fp16.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
-                "2": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
-                "3": { inputs: { vae_name: "wan2.2_vae.safetensors" }, class_type: "VAELoader" },
+  const workflow = {
+    // Chargement modèles
+    "1": { inputs: { unet_name: "wan2.2_ti2v_5B_fp16.safetensors", weight_dtype: "default" }, class_type: "UNETLoader" },
+    "2": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan", device: "default" }, class_type: "CLIPLoader" },
+    "3": { inputs: { vae_name: "wan2.2_vae.safetensors" }, class_type: "VAELoader" },
+    // ModelSamplingSD3 shift=8
+    "4": { inputs: { shift: 8, model: ["1", 0] }, class_type: "ModelSamplingSD3" },
+    // Prompts
+    "5": { inputs: { text: prompt, clip: ["2", 0] }, class_type: "CLIPTextEncode" },
+    "6": { inputs: { text: negPrompt, clip: ["2", 0] }, class_type: "CLIPTextEncode" },
+    // Image source
+    "7": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
+    // Wan22ImageToVideoLatent — résolution adaptée à l'image
+    "8": { inputs: { width: W, height: H, length: frameCount, batch_size: 1, vae: ["3", 0], start_image: ["7", 0] }, class_type: "Wan22ImageToVideoLatent" },
+    // KSampler (20 steps, CFG 5, uni_pc, simple)
+    "9": {
+        inputs: {
+            seed: seed, control_after_generate: "randomize",
+            steps: 20, cfg: 5,
+            sampler_name: "uni_pc", scheduler: "simple",
+            denoise: 1,
+            model: ["4", 0],
+            positive: ["5", 0],
+            negative: ["6", 0],
+            latent_image: ["8", 0]
+        },
+        class_type: "KSampler"
+    },
+    // VAEDecode
+    "10": { inputs: { samples: ["9", 0], vae: ["3", 0] }, class_type: "VAEDecode" }
+};
 
-                // ModelSamplingSD3 shift=8
-                "4": { inputs: { shift: 8, model: ["1", 0] }, class_type: "ModelSamplingSD3" },
+let nodeId = 20;
+let lastOutput = ["10", 0];
 
-                // Prompts
-                "5": { inputs: { text: prompt, clip: ["2", 0] }, class_type: "CLIPTextEncode" },
-                "6": { inputs: { text: negPrompt, clip: ["2", 0] }, class_type: "CLIPTextEncode" },
+// RIFE pour 4s et 7s
+if (selectedDuration === '4s' || selectedDuration === '7s') {
+    workflow[String(nodeId)] = {
+        inputs: { frames: lastOutput, ckpt_name: "rife47.pth", clear_cache_after_n_frames: 10, multiplier: 2, fast_mode: true, ensemble: true, scale_factor: 1 },
+        class_type: "RIFE VFI"
+    };
+    lastOutput = [String(nodeId), 0];
+    nodeId++;
+}
 
-                // Image source
-                "7": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
+// CreateVideo (fps=24, sans audio)
+const createId = String(nodeId++);
+workflow[createId] = {
+    inputs: { fps: 24, images: lastOutput },
+    class_type: "CreateVideo"
+};
+const videoOutput = [createId, 0];
 
-                // Wan22ImageToVideoLatent — résolution adaptée à l'image
-                "8": { inputs: { width: W, height: H, length: frameCount, batch_size: 1, vae: ["3", 0], start_image: ["7", 0] }, class_type: "Wan22ImageToVideoLatent" },
-
-                // KSampler unique (20 steps, CFG 5, uni_pc, simple)
-                "9": {
-                    inputs: {
-                        seed: seed, control_after_generate: "randomize",
-                        steps: 20, cfg: 5,
-                        sampler_name: "uni_pc", scheduler: "simple",
-                        denoise: 1,
-                        model: ["4", 0],
-                        positive: ["5", 0],
-                        negative: ["6", 0],
-                        latent_image: ["8", 0]
-                    },
-                    class_type: "KSampler"
-                },
-
-                // VAEDecode
-                "10": { inputs: { samples: ["9", 0], vae: ["3", 0] }, class_type: "VAEDecode" }
-            };
-
-            let nodeId = 20;
-            let lastOutput = ["10", 0];
-
-            // RIFE pour 4s et 7s
-            if (selectedDuration === '4s' || selectedDuration === '7s') {
-                workflow[String(nodeId)] = {
-                    inputs: { frames: lastOutput, ckpt_name: "rife47.pth", clear_cache_after_n_frames: 10, multiplier: 2, fast_mode: true, ensemble: true, scale_factor: 1 },
-                    class_type: "RIFE VFI"
-                };
-                lastOutput = [String(nodeId), 0];
-                nodeId++;
-            }
+// SaveVideo (nouveau dans le workflow)
+const saveId = String(nodeId++);
+workflow[saveId] = {
+    inputs: {
+        video: videoOutput,
+        filename_prefix: "video/ComfyUI",
+        format: "auto",
+        codec: "auto"
+    },
+    class_type: "SaveVideo"
+};
 
             const createId = String(nodeId++);
             workflow[createId] = { inputs: { fps: 24, images: lastOutput }, class_type: "CreateVideo" };
