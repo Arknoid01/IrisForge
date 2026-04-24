@@ -565,6 +565,27 @@
     });
 
     // ── VIDEO WORKFLOWS ──────────────────────────────────────────────────────
+    const BUILTIN_VIDEO = [
+        {
+            id: 'vidbuiltin_wan22_default',
+            name: 'Wan 2.2 I2V — Défaut',
+            description: '25 steps · euler_ancestral · LightX2V 0.15',
+            category: 'Vidéo',
+            type: 'video',
+            modelHigh: 'Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors',
+            modelLow:  'Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors',
+            loras: [
+                { name: 'loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors', strength: 0.15, model: 'high' }
+            ],
+            steps: 25, cfg: 2.5, shift: 5.0, split: 12,
+            sampler: 'euler_ancestral', scheduler: 'normal',
+            width: 384, height: 672,
+            clip: 'umt5_xxl_fp8_e4m3fn_scaled.safetensors',
+            vae: 'wan_2.1_vae.safetensors',
+            negPrompt: 'blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping'
+        }
+    ];
+
     let videoWorkflows = [];
 
     function loadVideoWorkflows() {
@@ -577,14 +598,23 @@
 
     function renderVideoWorkflows() {
         const list = document.getElementById('videoList');
-        if (!videoWorkflows.length) {
-            list.innerHTML = `<div class="empty-state"><div class="icon">🎬</div><p>Aucun workflow vidéo sauvegardé.<br>Crée-en un depuis la page Vidéo !</p></div>`;
-            return;
+        let html = '';
+        // Builtin first
+        if (BUILTIN_VIDEO.length) {
+            html += `<div class="section-title">Pré-construits</div>`;
+            html += BUILTIN_VIDEO.map(wf => videoWfCard(wf, false)).join('');
         }
-        list.innerHTML = videoWorkflows.map(wf => videoWfCard(wf)).join('');
+        // Custom
+        if (videoWorkflows.length) {
+            html += `<div class="section-title" style="margin-top:20px;">Mes workflows</div>`;
+            html += videoWorkflows.map(wf => videoWfCard(wf, true)).join('');
+        } else if (!BUILTIN_VIDEO.length) {
+            html = `<div class="empty-state"><div class="icon">🎬</div><p>Aucun workflow vidéo sauvegardé.<br>Crée-en un depuis la page Vidéo !</p></div>`;
+        }
+        list.innerHTML = html;
     }
 
-    function videoWfCard(wf) {
+    function videoWfCard(wf, editable = true) {
         const loraHtml = wf.loras?.length
             ? `<div class="lora-pills">${wf.loras.map(l => `<span class="lora-pill">🎨 ${l.name.replace('.safetensors','').replace('.pt','')} ×${l.strength} (${l.model})</span>`).join('')}</div>`
             : '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">Aucun LoRA</div>';
@@ -609,14 +639,16 @@
             </div>
             ${loraHtml}
             <div class="wf-actions" style="margin-top:12px;">
-                <button class="btn btn-apply" style="flex:1;" onclick="applyVideoWorkflow('${wf.id}')">▶ Appliquer dans Vidéo</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteVideoWorkflow('${wf.id}')">🗑️</button>
+                <button class="btn btn-apply" style="flex:1;" onclick="applyVideoWorkflow('${wf.id}', ${editable})">▶ Appliquer dans Vidéo</button>
+                ${editable ? `<button class="btn btn-danger btn-sm" onclick="deleteVideoWorkflow('${wf.id}')">🗑️</button>` : ''}
             </div>
         </div>`;
     }
 
-    function applyVideoWorkflow(id) {
-        const wf = videoWorkflows.find(w => w.id === id);
+    function applyVideoWorkflow(id, isCustom = true) {
+        const wf = isCustom
+            ? videoWorkflows.find(w => w.id === id)
+            : BUILTIN_VIDEO.find(w => w.id === id);
         if (!wf) return;
         localStorage.setItem('pending_video_workflow', JSON.stringify(wf));
         showToast('✅ Workflow chargé, redirection...');
