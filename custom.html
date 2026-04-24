@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="IrisForge">
+    <title>IrisForge — Custom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --blue:   #667eea;
+            --violet: #a78bfa;
+            --pink:   #ec4899;
+            --dark:   #0f0f1e;
+            --green:  #4ade80;
+            --red:    #f87171;
+            --amber:  #fbbf24;
+        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--dark); min-height: 100vh; color: #fff; overflow-x: hidden; }
+        .bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 50% 40% at 20% 20%, rgba(102,126,234,0.12) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(236,72,153,0.08) 0%, transparent 60%), #0f0f1e; }
+        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(102,126,234,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,0.04) 1px, transparent 1px); background-size: 60px 60px; }
+
+        /* SIDEBAR */
+        .menu-btn { width: 36px; height: 36px; border-radius: 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s; }
+        .menu-btn:hover { background: rgba(102,126,234,.25); }
+        .menu-btn span { display: block; width: 14px; height: 2px; background: rgba(255,255,255,.8); border-radius: 2px; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #0f0f1e; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 24px 16px; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .sidebar-title { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar-close { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .sidebar-close:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
+        .sidebar-link:hover { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); color: #fff; }
+        .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
+        .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
+
+        /* TOPBAR */
+        .topbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(15,15,30,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-icon { font-size: 22px; }
+        .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-sub { font-size: 10px; color: rgba(255,255,255,0.35); display: block; margin-top: -2px; }
+        .page-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--violet); }
+
+        /* MAIN */
+        .main { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+
+        /* SECTION */
+        .section-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; margin-top: 24px; }
+
+        /* CARD */
+        .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+
+        /* INPUTS */
+        .field-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
+        .field-input:focus { outline: none; border-color: var(--violet); background: rgba(255,255,255,0.08); }
+        .field-input::placeholder { color: rgba(255,255,255,0.2); }
+        select.field-input { cursor: pointer; }
+        select.field-input option { background: #1a1a2e; }
+        textarea.field-input { resize: vertical; min-height: 80px; font-family: 'DM Sans', sans-serif; line-height: 1.5; }
+
+        /* GRID PARAMS */
+        .params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .param-block { display: flex; flex-direction: column; gap: 6px; }
+        .param-label { font-size: 11px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; }
+        .param-label span { color: var(--violet); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        input[type=range] { width: 100%; accent-color: var(--violet); }
+
+        /* LORA LIST */
+        .lora-list { display: flex; flex-direction: column; gap: 8px; }
+        .lora-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
+        .lora-name { flex: 1; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lora-strength-label { font-size: 11px; color: rgba(255,255,255,0.4); width: 28px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+        .lora-remove { width: 22px; height: 22px; border-radius: 6px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--red); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .lora-remove:hover { background: rgba(248,113,113,0.25); }
+        .add-lora-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+
+        /* SIZE PRESETS */
+        .size-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .size-btn { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
+        .size-btn:hover, .size-btn.active { background: rgba(167,139,250,0.2); border-color: var(--violet); color: var(--violet); }
+        .size-inputs { display: flex; gap: 8px; align-items: center; }
+        .size-sep { color: rgba(255,255,255,0.3); font-size: 18px; }
+
+        /* GENERATE BUTTON */
+        .gen-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--blue), var(--violet)); color: #fff; font-size: 16px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s; margin-top: 16px; }
+        .gen-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* STATUS */
+        .status-bar { display: none; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-top: 10px; }
+        .status-bar.show { display: flex; }
+        .status-bar.loading { background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.2); color: var(--blue); }
+        .status-bar.error  { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--red); }
+        .status-bar.success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: var(--green); }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(102,126,234,0.3); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESULT IMAGE */
+        .result-wrap { position: relative; margin-top: 16px; display: none; }
+        .result-wrap.show { display: block; }
+        .result-img { width: 100%; border-radius: 16px; display: block; }
+        .result-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .btn { padding: 10px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-ghost { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-violet { background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--violet); }
+        .btn-violet:hover { background: rgba(167,139,250,0.25); }
+        .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+
+        /* EMPTY LORA */
+        .empty-lora { text-align: center; padding: 16px; color: rgba(255,255,255,0.25); font-size: 12px; }
+
+        /* URL ROW */
+        .url-row { display: flex; gap: 8px; align-items: center; }
+        .url-status { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+        .url-status.ok { background: var(--green); box-shadow: 0 0 5px var(--green); }
+
+        @media (max-width: 600px) {
+            .sidebar { width: min(260px, 85vw); }
+            .params-grid { grid-template-columns: 1fr; }
+            .topbar { padding: 10px 14px; }
+            .field-input { font-size: 16px; }
+        }
+    </style>
+    <link rel="stylesheet" href="iris-shared.css">
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">🔥 IrisForge</div>
+        <div class="sidebar-close" onclick="toggleSidebar()">✕</div>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
+        <div class="sidebar-divider"></div>
+        <a href="forge.html" class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
+        <a href="base.html" class="sidebar-link"><span class="icon">⚡</span> IrisForge 3.0</a>
+        <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
+        <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
+        <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
+        <a href="custom.html" class="sidebar-link active"><span class="icon">🛠️</span> Custom</a>
+        <div class="sidebar-divider"></div>
+        <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
+        <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
+        <div class="sidebar-divider"></div>
+        <a href="studio.html" class="sidebar-link"><span class="icon">📦</span> Modèles</a>
+    </nav>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="menu-btn" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand-link">
+            <div class="brand-icon">🔥</div>
+            <div>
+                <span class="brand-name">IrisForge</span>
+                <span class="brand-sub">Graphics</span>
+            </div>
+        </a>
+    </div>
+    <div class="page-badge">🛠️ Custom</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- CONNEXION -->
+    <div class="section-title">Connexion ComfyUI</div>
+    <div class="card">
+        <div class="url-row">
+            <input type="text" id="comfyUrl" class="field-input" placeholder="http://xxx.runpod.io:xxxx">
+            <div class="url-status" id="urlStatus"></div>
+            <button class="btn btn-ghost btn-sm" onclick="connectAndLoad()">Connecter</button>
+        </div>
+    </div>
+
+    <!-- MODÈLE -->
+    <div class="section-title">Modèle</div>
+    <div class="card">
+        <select id="modelSelect" class="field-input">
+            <option value="">— Connecte-toi pour voir les modèles —</option>
+        </select>
+    </div>
+
+    <!-- PROMPTS -->
+    <div class="section-title">Prompts</div>
+    <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+            <div class="param-label" style="margin-bottom:6px;">Positif</div>
+            <textarea id="promptPos" class="field-input" placeholder="Décris ce que tu veux générer..."></textarea>
+        </div>
+        <div>
+            <div class="param-label" style="margin-bottom:6px;">Négatif</div>
+            <textarea id="promptNeg" class="field-input" style="min-height:60px;" placeholder="Ce que tu ne veux pas...">octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad anatomy, bad proportions, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured</textarea>
+        </div>
+    </div>
+
+    <!-- LORAS -->
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>LoRA</span>
+        <span id="loraCount" style="font-size:11px;color:rgba(255,255,255,0.3);">0 actif(s)</span>
+    </div>
+    <div class="card">
+        <div class="lora-list" id="loraList">
+            <div class="empty-lora">Aucun LoRA ajouté</div>
+        </div>
+        <div class="add-lora-row">
+            <select id="loraSelect" class="field-input" style="flex:1;">
+                <option value="">— Connecte-toi pour voir les LoRA —</option>
+            </select>
+            <button class="btn btn-violet btn-sm" onclick="addLora()">+ Ajouter</button>
+        </div>
+    </div>
+
+    <!-- SAMPLER & PARAMS -->
+    <div class="section-title">Paramètres</div>
+    <div class="card">
+        <div class="params-grid">
+            <div class="param-block">
+                <div class="param-label">Sampler</div>
+                <select id="samplerName" class="field-input">
+                    <option value="dpmpp_2m_sde_gpu">DPM++ 2M SDE GPU</option>
+                    <option value="dpmpp_2m">DPM++ 2M</option>
+                    <option value="dpmpp_sde_gpu">DPM++ SDE GPU</option>
+                    <option value="dpmpp_sde">DPM++ SDE</option>
+                    <option value="euler">Euler</option>
+                    <option value="euler_ancestral">Euler Ancestral</option>
+                    <option value="heun">Heun</option>
+                    <option value="dpm_2">DPM 2</option>
+                    <option value="dpm_2_ancestral">DPM 2 Ancestral</option>
+                    <option value="lms">LMS</option>
+                    <option value="ddim">DDIM</option>
+                    <option value="uni_pc">UniPC</option>
+                </select>
+            </div>
+            <div class="param-block">
+                <div class="param-label">Scheduler</div>
+                <select id="scheduler" class="field-input">
+                    <option value="karras">Karras</option>
+                    <option value="normal">Normal</option>
+                    <option value="exponential">Exponential</option>
+                    <option value="sgm_uniform">SGM Uniform</option>
+                    <option value="simple">Simple</option>
+                    <option value="ddim_uniform">DDIM Uniform</option>
+                </select>
+            </div>
+        </div>
+        <div style="margin-top:12px;" class="params-grid">
+            <div class="param-block">
+                <div class="param-label">Steps <span id="stepsVal">25</span></div>
+                <input type="range" id="steps" min="5" max="60" value="25" oninput="document.getElementById('stepsVal').textContent=this.value">
+            </div>
+            <div class="param-block">
+                <div class="param-label">CFG Scale <span id="cfgVal">7.0</span></div>
+                <input type="range" id="cfg" min="1" max="20" step="0.5" value="7" oninput="document.getElementById('cfgVal').textContent=parseFloat(this.value).toFixed(1)">
+            </div>
+        </div>
+    </div>
+
+    <!-- TAILLE -->
+    <div class="section-title">Résolution</div>
+    <div class="card">
+        <div class="size-presets">
+            <button class="size-btn" onclick="setSize(512,512,this)">512×512</button>
+            <button class="size-btn" onclick="setSize(768,768,this)">768×768</button>
+            <button class="size-btn active" onclick="setSize(1024,1024,this)">1024×1024</button>
+            <button class="size-btn" onclick="setSize(768,1344,this)">Portrait</button>
+            <button class="size-btn" onclick="setSize(1344,768,this)">Paysage</button>
+        </div>
+        <div class="size-inputs">
+            <input type="number" id="imgW" class="field-input" value="1024" min="64" max="2048" step="64" style="text-align:center;">
+            <div class="size-sep">×</div>
+            <input type="number" id="imgH" class="field-input" value="1024" min="64" max="2048" step="64" style="text-align:center;">
+        </div>
+    </div>
+
+    <!-- VAE -->
+    <div class="section-title">VAE (optionnel)</div>
+    <div class="card">
+        <select id="vaeSelect" class="field-input">
+            <option value="">— VAE intégré au modèle —</option>
+        </select>
+    </div>
+
+    <!-- SEED -->
+    <div class="section-title">Seed</div>
+    <div class="card">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <input type="number" id="seed" class="field-input" value="-1" placeholder="-1 = aléatoire">
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('seed').value=Math.floor(Math.random()*999999999)">🎲</button>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('seed').value=-1">∞</button>
+        </div>
+    </div>
+
+    <!-- GENERATE -->
+    <button class="gen-btn" id="genBtn" onclick="generateImage()">✨ Générer</button>
+
+    <!-- STATUS -->
+    <div class="status-bar" id="statusBar">
+        <div class="spinner" id="spinner"></div>
+        <span id="statusText"></span>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-wrap" id="resultWrap">
+        <img id="resultImg" class="result-img" alt="Résultat">
+        <div class="result-actions">
+            <a id="downloadBtn" class="btn btn-ghost" download="irisforge_custom.png">⬇️ Télécharger</a>
+            <button class="btn btn-violet" onclick="sendToEditor()">✏️ Éditeur</button>
+            <button class="btn btn-ghost" onclick="sendToVideo()">🎬 Vidéo</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const clientId = 'custom_' + Math.random().toString(36).substr(2, 9);
+    let isGenerating = false;
+    let activeLoras = []; // [{name, strength}]
+    let availableModels = [];
+    let availableLoras  = [];
+    let availableVAEs   = [];
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
+    }
+
+    // ── PERSISTENCE ──────────────────────────────────────────────────────────
+    function saveSettings() {
+        const s = {
+            comfyUrl:    document.getElementById('comfyUrl').value,
+            samplerName: document.getElementById('samplerName').value,
+            scheduler:   document.getElementById('scheduler').value,
+            steps:       document.getElementById('steps').value,
+            cfg:         document.getElementById('cfg').value,
+            imgW:        document.getElementById('imgW').value,
+            imgH:        document.getElementById('imgH').value,
+            promptNeg:   document.getElementById('promptNeg').value,
+            loras:       activeLoras
+        };
+        localStorage.setItem('custom_settings', JSON.stringify(s));
+        localStorage.setItem('comfyUrl', s.comfyUrl);
+    }
+
+    function loadSettings() {
+        const comfyUrl = localStorage.getItem('comfyUrl') || '';
+        document.getElementById('comfyUrl').value = comfyUrl;
+
+        try {
+            const s = JSON.parse(localStorage.getItem('custom_settings') || '{}');
+            if (s.samplerName) document.getElementById('samplerName').value = s.samplerName;
+            if (s.scheduler)   document.getElementById('scheduler').value   = s.scheduler;
+            if (s.steps)       { document.getElementById('steps').value = s.steps; document.getElementById('stepsVal').textContent = s.steps; }
+            if (s.cfg)         { document.getElementById('cfg').value = s.cfg; document.getElementById('cfgVal').textContent = parseFloat(s.cfg).toFixed(1); }
+            if (s.imgW)        document.getElementById('imgW').value = s.imgW;
+            if (s.imgH)        document.getElementById('imgH').value = s.imgH;
+            if (s.promptNeg)   document.getElementById('promptNeg').value = s.promptNeg;
+            if (s.loras)       { activeLoras = s.loras; renderLoras(); }
+        } catch(e) {}
+    }
+
+    // ── CONNECT & LOAD MODELS ─────────────────────────────────────────────────
+    async function connectAndLoad() {
+        const url = document.getElementById('comfyUrl').value.trim();
+        if (!url) return;
+        localStorage.setItem('comfyUrl', url);
+        document.getElementById('urlStatus').className = 'url-status';
+        showStatus('Connexion à ComfyUI...', 'loading');
+
+        try {
+            const res = await fetch(`${url}/object_info`, { signal: AbortSignal.timeout(8000) });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            availableModels = data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0] || [];
+            availableLoras  = data?.LoraLoader?.input?.required?.lora_name?.[0] || [];
+            availableVAEs   = data?.VAELoader?.input?.required?.vae_name?.[0] || [];
+
+            // Populate selects
+            populateSelect('modelSelect', availableModels, '— Choisir un modèle —');
+            populateSelect('loraSelect',  availableLoras,  '— Choisir un LoRA —');
+            populateVAE();
+
+            // Restore saved model selection
+            const s = JSON.parse(localStorage.getItem('custom_settings') || '{}');
+            if (s.model && availableModels.includes(s.model)) {
+                document.getElementById('modelSelect').value = s.model;
+            }
+
+            document.getElementById('urlStatus').className = 'url-status ok';
+            showStatus(`✅ ${availableModels.length} modèle(s), ${availableLoras.length} LoRA chargés`, 'success');
+            setTimeout(() => document.getElementById('statusBar').classList.remove('show'), 3000);
+        } catch(e) {
+            document.getElementById('urlStatus').className = 'url-status';
+            showStatus('❌ Erreur connexion : ' + e.message, 'error');
+        }
+    }
+
+    function populateSelect(id, items, placeholder) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = `<option value="">${placeholder}</option>` +
+            items.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    function populateVAE() {
+        const sel = document.getElementById('vaeSelect');
+        sel.innerHTML = `<option value="">— VAE intégré au modèle —</option>` +
+            availableVAEs.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+
+    // ── SIZE PRESETS ──────────────────────────────────────────────────────────
+    function setSize(w, h, btn) {
+        document.getElementById('imgW').value = w;
+        document.getElementById('imgH').value = h;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // ── LORA MANAGEMENT ───────────────────────────────────────────────────────
+    function addLora() {
+        const sel = document.getElementById('loraSelect');
+        const name = sel.value;
+        if (!name) return;
+        if (activeLoras.find(l => l.name === name)) return;
+        activeLoras.push({ name, strength: 0.8 });
+        renderLoras();
+        saveSettings();
+    }
+
+    function removeLora(idx) {
+        activeLoras.splice(idx, 1);
+        renderLoras();
+        saveSettings();
+    }
+
+    function updateLoraStrength(idx, val) {
+        activeLoras[idx].strength = parseFloat(val);
+        document.getElementById(`loraStrengthLabel_${idx}`).textContent = parseFloat(val).toFixed(2);
+        saveSettings();
+    }
+
+    function renderLoras() {
+        const list = document.getElementById('loraList');
+        document.getElementById('loraCount').textContent = `${activeLoras.length} actif(s)`;
+        if (!activeLoras.length) {
+            list.innerHTML = '<div class="empty-lora">Aucun LoRA ajouté</div>';
+            return;
+        }
+        list.innerHTML = activeLoras.map((l, i) => `
+            <div class="lora-item">
+                <div class="lora-name" title="${l.name}">🎨 ${l.name}</div>
+                <input type="range" min="0" max="2" step="0.05" value="${l.strength}"
+                    style="width:80px; accent-color: var(--violet);"
+                    oninput="updateLoraStrength(${i}, this.value)">
+                <span class="lora-strength-label" id="loraStrengthLabel_${i}">${l.strength.toFixed(2)}</span>
+                <button class="lora-remove" onclick="removeLora(${i})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    // ── TRANSLATION ───────────────────────────────────────────────────────────
+    async function translateToEnglish(text) {
+        if (!text || !text.trim()) return null;
+        try {
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            if (data.responseStatus === 200 && data.responseData?.translatedText) {
+                return data.responseData.translatedText;
+            }
+            return null;
+        } catch(e) { return null; }
+    }
+
+    // ── GENERATE ──────────────────────────────────────────────────────────────
+    async function generateImage() {
+        if (isGenerating) return;
+
+        const apiUrl = document.getElementById('comfyUrl').value.trim();
+        const model  = document.getElementById('modelSelect').value;
+        const userPrompt = document.getElementById('promptPos').value.trim();
+        const negPrompt  = document.getElementById('promptNeg').value.trim() || 'worst quality, low quality, blurry';
+
+        if (!apiUrl) { showStatus('⚠️ URL ComfyUI manquante', 'error'); return; }
+        if (!model)  { showStatus('⚠️ Choisis un modèle', 'error'); return; }
+        if (!userPrompt) { showStatus('⚠️ Prompt vide', 'error'); return; }
+
+        saveSettings();
+        isGenerating = true;
+        document.getElementById('genBtn').disabled = true;
+        document.getElementById('resultWrap').classList.remove('show');
+        showStatus('Traduction du prompt...', 'loading');
+
+        const translated = await translateToEnglish(userPrompt);
+        const finalPrompt = translated || userPrompt;
+
+        const steps = parseInt(document.getElementById('steps').value);
+        const cfg   = parseFloat(document.getElementById('cfg').value);
+        const sampler    = document.getElementById('samplerName').value;
+        const scheduler  = document.getElementById('scheduler').value;
+        const width  = parseInt(document.getElementById('imgW').value);
+        const height = parseInt(document.getElementById('imgH').value);
+        const vae    = document.getElementById('vaeSelect').value;
+        const seedVal = parseInt(document.getElementById('seed').value);
+        const seed = (seedVal === -1 || isNaN(seedVal)) ? Math.floor(Math.random() * 999999999) : seedVal;
+
+        // Build workflow dynamically
+        const workflow = {};
+
+        // Node 1 : CheckpointLoader
+        workflow["1"] = { inputs: { ckpt_name: model }, class_type: "CheckpointLoaderSimple" };
+        let modelOut  = ["1", 0];
+        let clipOut   = ["1", 1];
+        let vaeOut    = ["1", 2];
+
+        // Optional VAE node
+        if (vae) {
+            workflow["100"] = { inputs: { vae_name: vae }, class_type: "VAELoader" };
+            vaeOut = ["100", 0];
+        }
+
+        // LoRA chain
+        activeLoras.forEach((lora, i) => {
+            const nodeId = String(200 + i);
+            workflow[nodeId] = {
+                inputs: {
+                    lora_name: lora.name,
+                    strength_model: lora.strength,
+                    strength_clip: lora.strength,
+                    model: modelOut,
+                    clip: clipOut
+                },
+                class_type: "LoraLoader"
+            };
+            modelOut = [nodeId, 0];
+            clipOut  = [nodeId, 1];
+        });
+
+        // CLIPTextEncode positive / negative
+        workflow["5"] = { inputs: { text: finalPrompt, clip: clipOut }, class_type: "CLIPTextEncode" };
+        workflow["4"] = { inputs: { text: negPrompt,   clip: clipOut }, class_type: "CLIPTextEncode" };
+
+        // EmptyLatentImage
+        workflow["6"] = { inputs: { width, height, batch_size: 1 }, class_type: "EmptyLatentImage" };
+
+        // KSampler
+        workflow["7"] = {
+            inputs: {
+                seed, steps, cfg,
+                sampler_name: sampler,
+                scheduler,
+                denoise: 1,
+                model: modelOut,
+                positive: ["5", 0],
+                negative: ["4", 0],
+                latent_image: ["6", 0]
+            },
+            class_type: "KSampler"
+        };
+
+        // VAEDecode
+        workflow["8"] = { inputs: { samples: ["7", 0], vae: vaeOut }, class_type: "VAEDecode" };
+
+        // SaveImage
+        workflow["9"] = { inputs: { filename_prefix: "IrisForge_Custom", images: ["8", 0] }, class_type: "SaveImage" };
+
+        showStatus('Envoi du workflow...', 'loading');
+
+        try {
+            const queueRes = await fetch(`${apiUrl}/prompt`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: workflow, client_id: clientId })
+            });
+
+            if (!queueRes.ok) throw new Error(`Erreur API (${queueRes.status})`);
+            const { prompt_id: promptId } = await queueRes.json();
+
+            showStatus('Génération en cours...', 'loading');
+
+            const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
+
+            ws.onmessage = async (event) => {
+                if (typeof event.data !== 'string') return;
+                let msg;
+                try { msg = JSON.parse(event.data); } catch(e) { return; }
+
+                if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
+                    showStatus(`Génération... ${msg.data.value}/${msg.data.max}`, 'loading');
+                }
+
+                if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
+                    ws.close();
+                    showStatus('Récupération de l\'image...', 'loading');
+                    await new Promise(r => setTimeout(r, 500));
+
+                    try {
+                        const histRes = await fetch(`${apiUrl}/history/${promptId}`);
+                        const hist    = await histRes.json();
+                        const outputs = hist[promptId]?.outputs?.['9'];
+
+                        if (outputs?.images?.length) {
+                            const img = outputs.images[0];
+                            const imgUrl = `${apiUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder||'')}&type=${encodeURIComponent(img.type||'output')}`;
+                            const resultImg = document.getElementById('resultImg');
+                            resultImg.src = imgUrl;
+                            document.getElementById('resultWrap').classList.add('show');
+                            document.getElementById('downloadBtn').href = imgUrl;
+                            showStatus('✅ Image générée !', 'success');
+                        } else {
+                            throw new Error('Image introuvable dans l\'historique');
+                        }
+                    } catch(e) {
+                        showStatus('❌ Erreur récupération : ' + e.message, 'error');
+                    }
+
+                    isGenerating = false;
+                    document.getElementById('genBtn').disabled = false;
+                }
+            };
+
+            ws.onerror = () => {
+                showStatus('❌ Erreur WebSocket', 'error');
+                isGenerating = false;
+                document.getElementById('genBtn').disabled = false;
+            };
+
+        } catch(e) {
+            showStatus('❌ ' + e.message, 'error');
+            isGenerating = false;
+            document.getElementById('genBtn').disabled = false;
+        }
+    }
+
+    // ── SEND TO OTHER PAGES ───────────────────────────────────────────────────
+    function sendToEditor() {
+        const src = document.getElementById('resultImg').src;
+        if (!src) return;
+        localStorage.setItem('editorImage', src);
+        window.location.href = 'editor.html';
+    }
+
+    function sendToVideo() {
+        const src = document.getElementById('resultImg').src;
+        if (!src) return;
+        localStorage.setItem('videoSourceImage', src);
+        window.location.href = 'video.html';
+    }
+
+    // ── STATUS ────────────────────────────────────────────────────────────────
+    function showStatus(text, type) {
+        const bar = document.getElementById('statusBar');
+        const spinner = document.getElementById('spinner');
+        document.getElementById('statusText').textContent = text;
+        bar.className = 'status-bar show ' + type;
+        spinner.style.display = type === 'loading' ? 'block' : 'none';
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────────
+    loadSettings();
+    const savedUrl = localStorage.getItem('comfyUrl');
+    if (savedUrl) {
+        document.getElementById('comfyUrl').value = savedUrl;
+        connectAndLoad();
+    }
+
+    // Auto-save on change
+    ['samplerName','scheduler','promptNeg','modelSelect','vaeSelect'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', saveSettings);
+    });
+    ['steps','cfg','imgW','imgH'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', saveSettings);
+    });
+    document.getElementById('comfyUrl').addEventListener('change', saveSettings);
+</script>
+</body>
+</html>
