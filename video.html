@@ -1159,7 +1159,8 @@
         chainRemaining = chainCount;
         lastFrameImage = uploadedImage;
         const translatedPrompt = await translateToEnglish(prompt);
-        await runNextClip(apiUrl, translatedPrompt);
+        const finalPrompt = translatedPrompt || prompt;
+        await runNextClip(apiUrl, finalPrompt);
     }
 
     async function runNextClip(apiUrl, prompt) {
@@ -1220,7 +1221,8 @@
         if (!lastFrameImage) { showStatus('❌ Aucune frame source disponible', 'error'); return; }
         chainRemaining = 1;
         const translatedPrompt2 = await translateToEnglish(prompt);
-        await runNextClip(apiUrl, translatedPrompt2);
+        const finalPrompt2 = translatedPrompt2 || prompt;
+        await runNextClip(apiUrl, finalPrompt2);
     }
 
     // ── GALLERY ───────────────────────────────────────────────────────────────

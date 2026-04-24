@@ -698,6 +698,7 @@
             const apiUrl = document.getElementById('comfyUrl').value.trim();
             const userPrompt = document.getElementById('prompt').value.trim();
             const translatedPrompt = await translateToEnglish(userPrompt);
+            const finalPrompt = translatedPrompt || userPrompt;
             const btn = document.querySelector('button');
             const resultImg = document.getElementById('resultImg');
 
@@ -718,7 +719,7 @@
                     "4": { inputs: { ckpt_name: "intorealismUltra_v90.safetensors" }, class_type: "CheckpointLoaderSimple" },
                     "18": { inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" }, class_type: "CheckpointLoaderSimple" },
                     "19": { inputs: { model1: ["18", 0], model2: ["4", 0], ratio: 0.26 }, class_type: "ModelMergeSimple" },
-                    "6": { inputs: { text: translatedPrompt, clip: ["4", 1] }, class_type: "CLIPTextEncode" },
+                    "6": { inputs: { text: finalPrompt, clip: ["4", 1] }, class_type: "CLIPTextEncode" },
                     "7": { inputs: { text: "(worst quality:1.2), (low quality:1.2), lowres, bad anatomy, bad hands octane render, render, drawing, anime, bad photo, bad photography:1.3), (worst quality, low quality, blurry:1.2), (bad teeth, deformed teeth, deformed lips), (bad anatomy, bad proportions:1.1), (deformed iris, deformed pupils), (deformed eyes, bad eyes), (deformed face, ugly face, bad face), (deformed hands, bad hands, fused fingers), morbid, mutilated, mutation, disfigured soft lighning", clip: ["4", 1] }, class_type: "CLIPTextEncode" },
                     "5": { inputs: { width: 880, height: 1152, batch_size: 1 }, class_type: "EmptyLatentImage" },
                     "3": { inputs: { seed: seed, steps: 10, cfg: 1.5, sampler_name: "euler_ancestral", scheduler: "karras", denoise: 0.97, model: ["19", 0], positive: ["6", 0], negative: ["7", 0], latent_image: ["5", 0] }, class_type: "KSampler" },
