@@ -207,24 +207,43 @@
             <div class="field-group">
                 <div class="field-label">Sampler</div>
                 <select id="editSampler" class="field-input">
-                    <option value="dpmpp_2m_sde_gpu">DPM++ 2M SDE GPU</option>
-                    <option value="dpmpp_2m">DPM++ 2M</option>
-                    <option value="dpmpp_sde_gpu">DPM++ SDE GPU</option>
                     <option value="euler">Euler</option>
+                    <option value="euler_cfg_pp">Euler CFG++</option>
                     <option value="euler_ancestral">Euler Ancestral</option>
+                    <option value="euler_ancestral_cfg_pp">Euler Ancestral CFG++</option>
+                    <option value="er_sde">ER SDE</option>
+                    <option value="dpmpp_2m">DPM++ 2M</option>
+                    <option value="dpmpp_2m_sde">DPM++ 2M SDE</option>
+                    <option value="dpmpp_2m_sde_gpu">DPM++ 2M SDE GPU</option>
+                    <option value="dpmpp_sde">DPM++ SDE</option>
+                    <option value="dpmpp_sde_gpu">DPM++ SDE GPU</option>
+                    <option value="dpmpp_3m_sde">DPM++ 3M SDE</option>
+                    <option value="dpmpp_3m_sde_gpu">DPM++ 3M SDE GPU</option>
+                    <option value="dpmpp_2s_ancestral">DPM++ 2S Ancestral</option>
                     <option value="heun">Heun</option>
+                    <option value="heunpp2">Heun++2</option>
+                    <option value="dpm_2">DPM 2</option>
+                    <option value="dpm_2_ancestral">DPM 2 Ancestral</option>
+                    <option value="lms">LMS</option>
                     <option value="ddim">DDIM</option>
                     <option value="uni_pc">UniPC</option>
+                    <option value="lcm">LCM</option>
+                    <option value="tcd">TCD</option>
                 </select>
             </div>
             <div class="field-group">
                 <div class="field-label">Scheduler</div>
                 <select id="editScheduler" class="field-input">
                     <option value="karras">Karras</option>
-                    <option value="normal">Normal</option>
                     <option value="exponential">Exponential</option>
+                    <option value="sgm_uniform">SGM Uniform</option>
+                    <option value="normal">Normal</option>
                     <option value="simple">Simple</option>
                     <option value="ddim_uniform">DDIM Uniform</option>
+                    <option value="beta">Beta</option>
+                    <option value="align_your_steps">Align Your Steps</option>
+                    <option value="kl_optimal">KL Optimal</option>
+                    <option value="gits">GITS</option>
                 </select>
             </div>
             <div class="field-group">

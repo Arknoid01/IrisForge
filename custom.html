@@ -225,8 +225,30 @@ function defaultPass(i) {
 const PASS_COLORS = ['pc1','pc2','pc3','pc4'];
 const PASS_BADGES = ['pb1','pb2','pb3','pb4'];
 const PASS_ICONS  = ['🔵','🟣','🩷','🟡'];
-const SAMPLERS    = ['dpmpp_2m_sde_gpu','dpmpp_2m','dpmpp_sde_gpu','dpmpp_sde','euler','euler_ancestral','heun','dpm_2','dpm_2_ancestral','lms','ddim','uni_pc'];
-const SCHEDULERS  = ['karras','normal','exponential','sgm_uniform','simple','ddim_uniform'];
+const SAMPLERS = [
+    'euler','euler_cfg_pp','euler_ancestral','euler_ancestral_cfg_pp',
+    'er_sde',
+    'dpmpp_2m','dpmpp_2m_sde','dpmpp_2m_sde_gpu',
+    'dpmpp_sde','dpmpp_sde_gpu',
+    'dpmpp_3m_sde','dpmpp_3m_sde_gpu',
+    'dpmpp_2s_ancestral',
+    'heun','heunpp2',
+    'dpm_2','dpm_2_ancestral',
+    'dpm_fast','dpm_adaptive',
+    'lms','lms_ancestral',
+    'ipndm','ipndm_v',
+    'ddim','ddim_cfg_pp',
+    'plms','uni_pc','uni_pc_bh2',
+    'lcm','tcd'
+];
+const SCHEDULERS = [
+    'karras','exponential','sgm_uniform',
+    'normal','simple','ddim_uniform',
+    'beta','linear_quadratic',
+    'kl_optimal','align_your_steps',
+    'ays_11steps','ays_24steps','ays_32steps',
+    'gits'
+];
 
 function selOpts(arr, sel) { return arr.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join(''); }
 
