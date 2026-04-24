@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="IrisForge">
+    <title>IrisForge — Workflows</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --blue:   #667eea;
+            --violet: #a78bfa;
+            --pink:   #ec4899;
+            --dark:   #0f0f1e;
+            --green:  #4ade80;
+            --red:    #f87171;
+            --amber:  #fbbf24;
+        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--dark); min-height: 100vh; color: #fff; overflow-x: hidden; }
+        .bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 50% 40% at 20% 20%, rgba(102,126,234,0.12) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(236,72,153,0.08) 0%, transparent 60%), #0f0f1e; }
+        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(102,126,234,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,0.04) 1px, transparent 1px); background-size: 60px 60px; }
+
+        /* SIDEBAR */
+        .menu-btn { width: 36px; height: 36px; border-radius: 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .menu-btn span { display: block; width: 14px; height: 2px; background: rgba(255,255,255,.8); border-radius: 2px; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #0f0f1e; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 24px 16px; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .sidebar-title { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar-close { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .sidebar-close:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
+        .sidebar-link:hover { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); color: #fff; }
+        .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
+        .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
+
+        /* TOPBAR */
+        .topbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(15,15,30,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-icon { font-size: 22px; }
+        .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-sub { font-size: 10px; color: rgba(255,255,255,0.35); display: block; margin-top: -2px; }
+        .page-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: var(--amber); }
+
+        /* MAIN */
+        .main { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 9px; border-radius: 9px; border: none; background: transparent; color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .tab.active { background: rgba(102,126,234,0.2); color: #fff; }
+
+        /* SECTION TITLE */
+        .section-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; margin-top: 24px; }
+
+        /* WORKFLOW CARD */
+        .wf-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 12px; transition: border-color 0.2s; }
+        .wf-card:hover { border-color: rgba(167,139,250,0.25); }
+        .wf-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+        .wf-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+        .wf-desc { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 3px; line-height: 1.4; }
+        .wf-category { padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.25); color: var(--violet); flex-shrink: 0; }
+        .wf-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .wf-tag { padding: 3px 8px; border-radius: 6px; font-size: 11px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; }
+        .wf-tag.highlight { background: rgba(102,126,234,0.1); border-color: rgba(102,126,234,0.2); color: var(--blue); }
+        .wf-actions { display: flex; gap: 8px; align-items: center; }
+        .btn { padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-apply { background: linear-gradient(135deg, var(--blue), var(--violet)); color: #fff; }
+        .btn-apply:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn-ghost { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-danger { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--red); }
+        .btn-danger:hover { background: rgba(248,113,113,0.2); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+        /* LORA PILLS */
+        .lora-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+        .lora-pill { padding: 2px 8px; border-radius: 6px; font-size: 10px; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); color: var(--violet); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* EMPTY */
+        .empty-state { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3); }
+        .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+        .empty-state p { font-size: 13px; }
+
+        /* EDIT MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 16px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: #16162a; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+        .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 20px; }
+        .field-group { margin-bottom: 14px; }
+        .field-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .field-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
+        .field-input:focus { outline: none; border-color: var(--violet); }
+        textarea.field-input { resize: vertical; min-height: 60px; font-family: 'DM Sans', sans-serif; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+        .params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* TOAST */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); color: var(--green); padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 3000; transition: transform 0.3s; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.err { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+        @media (max-width: 600px) {
+            .sidebar { width: min(260px, 85vw); }
+            .topbar { padding: 10px 14px; }
+            .params-grid { grid-template-columns: 1fr; }
+            .wf-actions { flex-wrap: wrap; }
+        }
+    </style>
+    <link rel="stylesheet" href="iris-shared.css">
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">🔥 IrisForge</div>
+        <div class="sidebar-close" onclick="toggleSidebar()">✕</div>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
+        <div class="sidebar-divider"></div>
+        <a href="forge.html" class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
+        <a href="base.html" class="sidebar-link"><span class="icon">⚡</span> IrisForge 3.0</a>
+        <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
+        <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
+        <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
+        <a href="custom.html" class="sidebar-link"><span class="icon">🛠️</span> Custom</a>
+        <div class="sidebar-divider"></div>
+        <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
+        <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
+        <a href="workflows.html" class="sidebar-link active"><span class="icon">⚙️</span> Workflows</a>
+        <div class="sidebar-divider"></div>
+        <a href="studio.html" class="sidebar-link"><span class="icon">📦</span> Modèles</a>
+    </nav>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+        <a href="index.html" class="brand-link">
+            <div class="brand-icon">🔥</div>
+            <div><span class="brand-name">IrisForge</span><span class="brand-sub">Graphics</span></div>
+        </a>
+    </div>
+    <div class="page-badge">⚙️ Workflows</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div class="tabs">
+        <button class="tab active" id="tabBuiltin" onclick="switchTab('builtin')">🏗️ Pré-construits</button>
+        <button class="tab" id="tabCustom" onclick="switchTab('custom')">⭐ Mes workflows</button>
+    </div>
+
+    <!-- BUILTIN -->
+    <div id="panelBuiltin">
+        <div id="builtinList"></div>
+    </div>
+
+    <!-- CUSTOM -->
+    <div id="panelCustom" style="display:none;">
+        <div id="customList"></div>
+    </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-title" id="modalTitle">✏️ Modifier le workflow</div>
+        <input type="hidden" id="editId">
+
+        <div class="field-group">
+            <div class="field-label">Nom</div>
+            <input type="text" id="editName" class="field-input" placeholder="Nom du workflow">
+        </div>
+        <div class="field-group">
+            <div class="field-label">Description</div>
+            <input type="text" id="editDesc" class="field-input" placeholder="Description courte">
+        </div>
+        <div class="field-group">
+            <div class="field-label">Catégorie</div>
+            <input type="text" id="editCategory" class="field-input" placeholder="Portrait, Paysage, Général...">
+        </div>
+        <div class="field-group">
+            <div class="field-label">Modèle</div>
+            <input type="text" id="editModel" class="field-input" placeholder="nom_du_modele.safetensors">
+        </div>
+        <div class="params-grid">
+            <div class="field-group">
+                <div class="field-label">Sampler</div>
+                <select id="editSampler" class="field-input">
+                    <option value="dpmpp_2m_sde_gpu">DPM++ 2M SDE GPU</option>
+                    <option value="dpmpp_2m">DPM++ 2M</option>
+                    <option value="dpmpp_sde_gpu">DPM++ SDE GPU</option>
+                    <option value="euler">Euler</option>
+                    <option value="euler_ancestral">Euler Ancestral</option>
+                    <option value="heun">Heun</option>
+                    <option value="ddim">DDIM</option>
+                    <option value="uni_pc">UniPC</option>
+                </select>
+            </div>
+            <div class="field-group">
+                <div class="field-label">Scheduler</div>
+                <select id="editScheduler" class="field-input">
+                    <option value="karras">Karras</option>
+                    <option value="normal">Normal</option>
+                    <option value="exponential">Exponential</option>
+                    <option value="simple">Simple</option>
+                    <option value="ddim_uniform">DDIM Uniform</option>
+                </select>
+            </div>
+            <div class="field-group">
+                <div class="field-label">Steps</div>
+                <input type="number" id="editSteps" class="field-input" min="1" max="100" value="25">
+            </div>
+            <div class="field-group">
+                <div class="field-label">CFG</div>
+                <input type="number" id="editCfg" class="field-input" min="1" max="20" step="0.5" value="7">
+            </div>
+            <div class="field-group">
+                <div class="field-label">Largeur</div>
+                <input type="number" id="editW" class="field-input" min="64" max="2048" step="64" value="1024">
+            </div>
+            <div class="field-group">
+                <div class="field-label">Hauteur</div>
+                <input type="number" id="editH" class="field-input" min="64" max="2048" step="64" value="1024">
+            </div>
+        </div>
+        <div class="field-group">
+            <div class="field-label">Prompt négatif</div>
+            <textarea id="editNeg" class="field-input"></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-apply" style="flex:1;" onclick="saveEdit()">💾 Sauvegarder</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const BUILTIN = [
+        {
+            id: "irisforge_20",
+            name: "IrisForge 2.0",
+            description: "3 passes KSampler, 4 LoRA, ciblage yeux, portrait",
+            category: "Portrait",
+            model: "juggernaut_xl_v9.safetensors",
+            sampler: "dpmpp_2m_sde_gpu",
+            scheduler: "karras",
+            steps: 30,
+            cfg: 8,
+            width: 768,
+            height: 1536,
+            loras: [
+                { name: "SDXL_BetterFaces-LoRA_v1.safetensors", strength: 0.4 },
+                { name: "Eye_Detail_Flux_Lora_-_Inpainting.safetensors", strength: 0.89 }
+            ],
+            promptNeg: "octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad teeth, deformed teeth, deformed lips, bad anatomy, bad proportions, deformed iris, deformed pupils, deformed eyes, bad eyes, deformed face, ugly face, bad face, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured"
+        },
+        {
+            id: "irisforge_30",
+            name: "IrisForge 3.0",
+            description: "Fusion 2 modèles (ModelMerge), 1 passe légère",
+            category: "Réaliste",
+            model: "intorealismUltra_v90.safetensors",
+            sampler: "euler_ancestral",
+            scheduler: "karras",
+            steps: 10,
+            cfg: 1.5,
+            width: 880,
+            height: 1152,
+            loras: [],
+            promptNeg: "worst quality, low quality, lowres, bad anatomy, bad hands, octane render, render, drawing, anime, bad photo, bad photography, blurry, deformed hands, fused fingers, morbid, mutilated, mutation, disfigured"
+        },
+        {
+            id: "custom_simple",
+            name: "Custom Simple",
+            description: "Workflow basique 1 passe, 1024×1024, polyvalent",
+            category: "Général",
+            model: "",
+            sampler: "dpmpp_2m_sde_gpu",
+            scheduler: "karras",
+            steps: 25,
+            cfg: 7,
+            width: 1024,
+            height: 1024,
+            loras: [],
+            promptNeg: "octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad anatomy, bad proportions, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured"
+        }
+    ];
+
+    let customWorkflows = [];
+    let currentTab = 'builtin';
+    let editingId = null;
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
+    }
+
+    // ── STORAGE ───────────────────────────────────────────────────────────────
+    function loadCustom() {
+        try { customWorkflows = JSON.parse(localStorage.getItem('irisforge_workflows') || '[]'); } catch { customWorkflows = []; }
+    }
+
+    function saveCustom() {
+        localStorage.setItem('irisforge_workflows', JSON.stringify(customWorkflows));
+    }
+
+    // ── TABS ──────────────────────────────────────────────────────────────────
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('panelBuiltin').style.display = tab === 'builtin' ? 'block' : 'none';
+        document.getElementById('panelCustom').style.display  = tab === 'custom'  ? 'block' : 'none';
+        document.getElementById('tabBuiltin').classList.toggle('active', tab === 'builtin');
+        document.getElementById('tabCustom').classList.toggle('active',  tab === 'custom');
+        if (tab === 'custom') renderCustom();
+    }
+
+    // ── RENDER ────────────────────────────────────────────────────────────────
+    function renderBuiltin() {
+        document.getElementById('builtinList').innerHTML = BUILTIN.map(wf => wfCard(wf, false)).join('');
+    }
+
+    function renderCustom() {
+        const list = document.getElementById('customList');
+        if (!customWorkflows.length) {
+            list.innerHTML = `<div class="empty-state"><div class="icon">⭐</div><p>Aucun workflow sauvegardé.<br>Crée-en un depuis la page Custom !</p></div>`;
+            return;
+        }
+        list.innerHTML = customWorkflows.map(wf => wfCard(wf, true)).join('');
+    }
+
+    function wfCard(wf, editable) {
+        const loraHtml = wf.loras?.length
+            ? `<div class="lora-pills">${wf.loras.map(l => `<span class="lora-pill" title="${l.name}">🎨 ${l.name.replace('.safetensors','').replace('.pt','')} ×${l.strength}</span>`).join('')}</div>`
+            : '';
+
+        const editBtns = editable ? `
+            <button class="btn btn-ghost btn-sm" onclick="openEdit('${wf.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteWorkflow('${wf.id}')">🗑️</button>
+        ` : `
+            <button class="btn btn-ghost btn-sm" onclick="openEdit('${wf.id}', true)">✏️ Détails</button>
+        `;
+
+        return `
+        <div class="wf-card" id="wf_${wf.id}">
+            <div class="wf-header">
+                <div>
+                    <div class="wf-title">${wf.name}</div>
+                    <div class="wf-desc">${wf.description || ''}</div>
+                </div>
+                <span class="wf-category">${wf.category || 'Général'}</span>
+            </div>
+            <div class="wf-meta">
+                ${wf.model ? `<span class="wf-tag highlight">🧠 ${wf.model.replace('.safetensors','').replace('.pt','')}</span>` : '<span class="wf-tag">🧠 modèle libre</span>'}
+                <span class="wf-tag">${wf.sampler || 'dpmpp_2m'}</span>
+                <span class="wf-tag">${wf.steps || 25} steps</span>
+                <span class="wf-tag">CFG ${wf.cfg || 7}</span>
+                <span class="wf-tag">${wf.width || 1024}×${wf.height || 1024}</span>
+            </div>
+            ${loraHtml}
+            <div class="wf-actions" style="margin-top:12px;">
+                <button class="btn btn-apply" style="flex:1;" onclick="applyWorkflow('${wf.id}', ${editable ? 'false' : 'true'})">▶ Appliquer dans Custom</button>
+                ${editBtns}
+            </div>
+        </div>`;
+    }
+
+    // ── APPLY ─────────────────────────────────────────────────────────────────
+    function applyWorkflow(id, isBuiltin) {
+        const wf = isBuiltin
+            ? BUILTIN.find(w => w.id === id)
+            : customWorkflows.find(w => w.id === id);
+        if (!wf) return;
+
+        localStorage.setItem('pending_workflow', JSON.stringify(wf));
+        showToast('✅ Workflow chargé, redirection...');
+        setTimeout(() => window.location.href = 'custom.html', 800);
+    }
+
+    // ── EDIT / CREATE ─────────────────────────────────────────────────────────
+    function openEdit(id, readOnly = false) {
+        const wf = BUILTIN.find(w => w.id === id) || customWorkflows.find(w => w.id === id);
+        if (!wf) return;
+
+        editingId = readOnly ? null : id;
+        document.getElementById('modalTitle').textContent = readOnly ? '📋 Détails du workflow' : '✏️ Modifier le workflow';
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = wf.name || '';
+        document.getElementById('editDesc').value = wf.description || '';
+        document.getElementById('editCategory').value = wf.category || '';
+        document.getElementById('editModel').value = wf.model || '';
+        document.getElementById('editSampler').value = wf.sampler || 'dpmpp_2m_sde_gpu';
+        document.getElementById('editScheduler').value = wf.scheduler || 'karras';
+        document.getElementById('editSteps').value = wf.steps || 25;
+        document.getElementById('editCfg').value = wf.cfg || 7;
+        document.getElementById('editW').value = wf.width || 1024;
+        document.getElementById('editH').value = wf.height || 1024;
+        document.getElementById('editNeg').value = wf.promptNeg || '';
+
+        // Disable fields if read-only (builtin)
+        ['editName','editDesc','editCategory','editModel','editSampler','editScheduler','editSteps','editCfg','editW','editH','editNeg'].forEach(f => {
+            document.getElementById(f).disabled = readOnly;
+        });
+
+        document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('open');
+        editingId = null;
+    }
+
+    function saveEdit() {
+        const id = document.getElementById('editId').value;
+        const updated = {
+            id,
+            name:        document.getElementById('editName').value.trim() || 'Sans nom',
+            description: document.getElementById('editDesc').value.trim(),
+            category:    document.getElementById('editCategory').value.trim() || 'Général',
+            model:       document.getElementById('editModel').value.trim(),
+            sampler:     document.getElementById('editSampler').value,
+            scheduler:   document.getElementById('editScheduler').value,
+            steps:       parseInt(document.getElementById('editSteps').value),
+            cfg:         parseFloat(document.getElementById('editCfg').value),
+            width:       parseInt(document.getElementById('editW').value),
+            height:      parseInt(document.getElementById('editH').value),
+            promptNeg:   document.getElementById('editNeg').value.trim(),
+            loras:       (customWorkflows.find(w => w.id === id) || {}).loras || []
+        };
+
+        const idx = customWorkflows.findIndex(w => w.id === id);
+        if (idx >= 0) {
+            customWorkflows[idx] = updated;
+        } else {
+            customWorkflows.push(updated);
+        }
+
+        saveCustom();
+        closeModal();
+        renderCustom();
+        showToast('✅ Workflow sauvegardé');
+    }
+
+    function deleteWorkflow(id) {
+        if (!confirm('Supprimer ce workflow ?')) return;
+        customWorkflows = customWorkflows.filter(w => w.id !== id);
+        saveCustom();
+        renderCustom();
+        showToast('🗑️ Supprimé', true);
+    }
+
+    // ── TOAST ─────────────────────────────────────────────────────────────────
+    function showToast(msg, err = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show' + (err ? ' err' : '');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // Close modal on overlay click
+    document.getElementById('editModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('editModal')) closeModal();
+    });
+
+    // ── INIT ──────────────────────────────────────────────────────────────────
+    loadCustom();
+    renderBuiltin();
+</script>
+</body>
+</html>

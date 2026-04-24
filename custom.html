@@ -157,6 +157,7 @@
         <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
         <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
         <a href="custom.html" class="sidebar-link active"><span class="icon">🛠️</span> Custom</a>
+        <a href="workflows.html" class="sidebar-link"><span class="icon">⚙️</span> Workflows</a>
         <div class="sidebar-divider"></div>
         <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
         <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
@@ -315,6 +316,7 @@
 
     <!-- GENERATE -->
     <button class="gen-btn" id="genBtn" onclick="generateImage()">✨ Générer</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;justify-content:center;" onclick="saveAsWorkflow()">💾 Sauvegarder comme workflow</button>
 
     <!-- STATUS -->
     <div class="status-bar" id="statusBar">
@@ -679,8 +681,57 @@
         spinner.style.display = type === 'loading' ? 'block' : 'none';
     }
 
+
+    // ── SAVE AS WORKFLOW ──────────────────────────────────────────────────────
+    function saveAsWorkflow() {
+        const name = prompt('Nom du workflow :');
+        if (!name) return;
+        const wf = {
+            id: 'wf_' + Date.now(),
+            name: name.trim(),
+            description: 'Sauvegardé depuis Custom',
+            category: 'Mes workflows',
+            model: document.getElementById('modelSelect').value,
+            sampler: document.getElementById('samplerName').value,
+            scheduler: document.getElementById('scheduler').value,
+            steps: parseInt(document.getElementById('steps').value),
+            cfg: parseFloat(document.getElementById('cfg').value),
+            width: parseInt(document.getElementById('imgW').value),
+            height: parseInt(document.getElementById('imgH').value),
+            promptNeg: document.getElementById('promptNeg').value,
+            loras: [...activeLoras]
+        };
+        const existing = JSON.parse(localStorage.getItem('irisforge_workflows') || '[]');
+        existing.push(wf);
+        localStorage.setItem('irisforge_workflows', JSON.stringify(existing));
+        showStatus('✅ Workflow "' + name + '" sauvegardé !', 'success');
+        setTimeout(() => document.getElementById('statusBar').classList.remove('show'), 3000);
+    }
+
+    // ── LOAD PENDING WORKFLOW ─────────────────────────────────────────────────
+    function loadPendingWorkflow() {
+        const raw = localStorage.getItem('pending_workflow');
+        if (!raw) return;
+        localStorage.removeItem('pending_workflow');
+        try {
+            const wf = JSON.parse(raw);
+            if (wf.sampler)   document.getElementById('samplerName').value = wf.sampler;
+            if (wf.scheduler) document.getElementById('scheduler').value   = wf.scheduler;
+            if (wf.steps)     { document.getElementById('steps').value = wf.steps; document.getElementById('stepsVal').textContent = wf.steps; }
+            if (wf.cfg)       { document.getElementById('cfg').value = wf.cfg; document.getElementById('cfgVal').textContent = parseFloat(wf.cfg).toFixed(1); }
+            if (wf.width)     document.getElementById('imgW').value = wf.width;
+            if (wf.height)    document.getElementById('imgH').value = wf.height;
+            if (wf.promptNeg) document.getElementById('promptNeg').value = wf.promptNeg;
+            if (wf.loras)     { activeLoras = wf.loras; renderLoras(); }
+            // Model will be selected after connectAndLoad populates the list
+            if (wf.model) localStorage.setItem('pending_model', wf.model);
+            showStatus('✅ Workflow "' + wf.name + '" chargé !', 'success');
+            setTimeout(() => document.getElementById('statusBar').classList.remove('show'), 3000);
+        } catch(e) { console.error('pending_workflow parse error', e); }
+    }
     // ── INIT ──────────────────────────────────────────────────────────────────
     loadSettings();
+    loadPendingWorkflow();
     const savedUrl = localStorage.getItem('comfyUrl');
     if (savedUrl) {
         document.getElementById('comfyUrl').value = savedUrl;
