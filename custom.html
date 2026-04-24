@@ -405,10 +405,20 @@
             populateSelect('loraSelect',  availableLoras,  '— Choisir un LoRA —');
             populateVAE();
 
-            // Restore saved model selection
-            const s = JSON.parse(localStorage.getItem('custom_settings') || '{}');
-            if (s.model && availableModels.includes(s.model)) {
-                document.getElementById('modelSelect').value = s.model;
+            // Restore pending model from workflow (priority) or saved settings
+            const pendingModel = localStorage.getItem('pending_model');
+            if (pendingModel) {
+                localStorage.removeItem('pending_model');
+                if (availableModels.includes(pendingModel)) {
+                    document.getElementById('modelSelect').value = pendingModel;
+                } else {
+                    showStatus(`⚠️ Modèle "${pendingModel.replace('.safetensors','')}" non trouvé sur ce pod`, 'error');
+                }
+            } else {
+                const s = JSON.parse(localStorage.getItem('custom_settings') || '{}');
+                if (s.model && availableModels.includes(s.model)) {
+                    document.getElementById('modelSelect').value = s.model;
+                }
             }
 
             document.getElementById('urlStatus').className = 'url-status ok';
@@ -731,11 +741,11 @@
     }
     // ── INIT ──────────────────────────────────────────────────────────────────
     loadSettings();
-    loadPendingWorkflow();
+    loadPendingWorkflow(); // sets pending_model in localStorage before connectAndLoad reads it
     const savedUrl = localStorage.getItem('comfyUrl');
     if (savedUrl) {
         document.getElementById('comfyUrl').value = savedUrl;
-        connectAndLoad();
+        connectAndLoad(); // will read pending_model and apply it after populating the select
     }
 
     // Auto-save on change

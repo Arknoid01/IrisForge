@@ -278,7 +278,7 @@
     <!-- MODÈLES PRÉSENTS -->
     <div class="section-title" style="display:flex; align-items:center; justify-content:space-between;">
         <span>Modèles sur RunPod</span>
-        <button class="btn btn-ghost btn-sm" onclick="loadModels()">🔄 Actualiser</button>
+        <button class="btn btn-ghost btn-sm" onclick="refreshModels()">🔄 Actualiser</button>
     </div>
 
     <div class="tabs">
@@ -371,6 +371,20 @@
     }
 
     // ── LOAD MODELS ───────────────────────────────────────────────────────────
+    async function refreshModels() {
+        const url = document.getElementById('comfyUrl').value.trim();
+        if (!url) return;
+        // Ask ComfyUI to rescan models folder
+        try {
+            await fetch(`${url}/api/free`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ unload_models: false, free_memory: false })
+            });
+        } catch(e) { /* ignore, not all versions support this */ }
+        await loadModels();
+    }
+
     async function loadModels() {
         const url = document.getElementById('comfyUrl').value.trim();
         if (!url) return;
