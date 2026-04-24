@@ -260,54 +260,77 @@
 <div class="toast" id="toast"></div>
 
 <script>
+    const NEG_BASE = "octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad anatomy, bad proportions, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured";
+    const NEG_FACE = "octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad teeth, deformed teeth, deformed lips, bad anatomy, bad proportions, deformed iris, deformed pupils, deformed eyes, bad eyes, deformed face, ugly face, bad face, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured";
+
     const BUILTIN = [
         {
             id: "irisforge_20",
             name: "IrisForge 2.0",
             description: "3 passes KSampler, 4 LoRA, ciblage yeux, portrait",
             category: "Portrait",
-            model: "juggernaut_xl_v9.safetensors",
-            sampler: "dpmpp_2m_sde_gpu",
-            scheduler: "karras",
-            steps: 30,
-            cfg: 8,
             width: 768,
             height: 1536,
-            loras: [
-                { name: "SDXL_BetterFaces-LoRA_v1.safetensors", strength: 0.4 },
-                { name: "Eye_Detail_Flux_Lora_-_Inpainting.safetensors", strength: 0.89 }
-            ],
-            promptNeg: "octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad teeth, deformed teeth, deformed lips, bad anatomy, bad proportions, deformed iris, deformed pupils, deformed eyes, bad eyes, deformed face, ugly face, bad face, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured"
+            promptNeg: NEG_FACE,
+            passes: [
+                {
+                    model: "juggernaut_xl_v9.safetensors",
+                    loras: [
+                        { name: "Eye_Detail_Flux_Lora_-_Inpainting.safetensors", strength: 0.89 },
+                        { name: "SDXL_BetterFaces-LoRA_v1.safetensors", strength: 0.4 }
+                    ],
+                    sampler: "dpmpp_2m_sde_gpu", scheduler: "karras",
+                    steps: 30, cfg: 8, denoise: 1.0, promptPos: "", promptNeg: ""
+                },
+                {
+                    model: "perfectionSuperModelILXL_20 (1).safetensors",
+                    loras: [{ name: "DetailTweaker.safetensors", strength: 0.95 }],
+                    sampler: "dpmpp_2m_sde_gpu", scheduler: "karras",
+                    steps: 20, cfg: 5.4, denoise: 0.61, promptPos: "", promptNeg: ""
+                },
+                {
+                    model: "perfectionSuperModelILXL_20 (1).safetensors",
+                    loras: [{ name: "Eye_Detail_Flux_Lora_-_Inpainting.safetensors", strength: 0.9 }],
+                    sampler: "dpmpp_sde_gpu", scheduler: "karras",
+                    steps: 15, cfg: 5.9, denoise: 0.2,
+                    promptPos: "beautiful detailed eyes, natural eye shape, sharp iris texture, clear pupils, balanced highlights, soft catchlight, realistic reflections, clean sclera, natural eyelash definition, high micro-details",
+                    promptNeg: "cross-eye, lazy eye, deformed eyes, asymmetrical eyes, over-sharpened eyes, glowing eyes, anime eyes, plastic skin, blurry eyes, low detail eyes"
+                }
+            ]
         },
         {
             id: "irisforge_30",
             name: "IrisForge 3.0",
-            description: "Fusion 2 modèles (ModelMerge), 1 passe légère",
+            description: "1 passe légère, euler ancestral, 880×1152",
             category: "Réaliste",
-            model: "intorealismUltra_v90.safetensors",
-            sampler: "euler_ancestral",
-            scheduler: "karras",
-            steps: 10,
-            cfg: 1.5,
             width: 880,
             height: 1152,
-            loras: [],
-            promptNeg: "worst quality, low quality, lowres, bad anatomy, bad hands, octane render, render, drawing, anime, bad photo, bad photography, blurry, deformed hands, fused fingers, morbid, mutilated, mutation, disfigured"
+            promptNeg: "worst quality, low quality, lowres, bad anatomy, bad hands, octane render, render, drawing, anime, bad photo, bad photography, blurry, deformed hands, fused fingers, morbid, mutilated, mutation, disfigured",
+            passes: [
+                {
+                    model: "intorealismUltra_v90.safetensors",
+                    loras: [],
+                    sampler: "euler_ancestral", scheduler: "karras",
+                    steps: 10, cfg: 1.5, denoise: 1.0, promptPos: "", promptNeg: ""
+                }
+            ]
         },
         {
             id: "custom_simple",
             name: "Custom Simple",
             description: "Workflow basique 1 passe, 1024×1024, polyvalent",
             category: "Général",
-            model: "",
-            sampler: "dpmpp_2m_sde_gpu",
-            scheduler: "karras",
-            steps: 25,
-            cfg: 7,
             width: 1024,
             height: 1024,
-            loras: [],
-            promptNeg: "octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad anatomy, bad proportions, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured"
+            promptNeg: NEG_BASE,
+            passes: [
+                {
+                    model: "",
+                    loras: [],
+                    sampler: "dpmpp_2m_sde_gpu", scheduler: "karras",
+                    steps: 25, cfg: 7, denoise: 1.0, promptPos: "", promptNeg: ""
+                }
+            ]
         }
     ];
 
