@@ -253,18 +253,24 @@
                     <option value="controlnet">ControlNet</option>
                 </select>
             </div>
-            <input type="text" id="dlUrl" class="dl-input" placeholder="URL du modèle ou ID Civitai...">
+            <input type="text" id="dlUrl" class="dl-input" placeholder="URL du modèle...">
             <input type="text" id="dlFilename" class="dl-input" placeholder="Nom du fichier (ex: monmodel.safetensors)">
-            <button class="btn btn-primary" id="btnDownload" onclick="startDownload()">
-                ⬇️ Télécharger sur RunPod
+            <button class="btn btn-primary" onclick="generateCommand()">
+                ⚙️ Générer la commande
             </button>
         </div>
-        <div class="progress-wrap" id="dlProgress">
-            <div class="progress-label">
-                <span id="dlProgressLabel">Téléchargement en cours...</span>
-                <span id="dlProgressPct"></span>
+
+        <!-- COMMAND OUTPUT -->
+        <div id="cmdOutput" style="display:none; margin-top:12px;">
+            <div style="display:flex; gap:6px; margin-bottom:8px;">
+                <button class="btn btn-ghost btn-sm" id="btnWget" onclick="switchCmd('wget')" style="flex:1;">wget</button>
+                <button class="btn btn-ghost btn-sm" id="btnCurl" onclick="switchCmd('curl')" style="flex:1;">curl</button>
             </div>
-            <div class="progress-bar"><div class="progress-fill indeterminate" id="dlProgressFill"></div></div>
+            <div style="position:relative;">
+                <pre id="cmdText" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 44px 12px 12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#a78bfa; white-space:pre-wrap; word-break:break-all; line-height:1.5;"></pre>
+                <button onclick="copyCmd()" style="position:absolute;top:8px;right:8px;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--violet);border-radius:7px;padding:4px 8px;font-size:11px;cursor:pointer;" id="copyBtn">📋</button>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">📂 Destination : <span id="cmdDest" style="color:rgba(167,139,250,0.7);font-family:'JetBrains Mono',monospace;"></span></div>
         </div>
         <div id="dlStatus" class="status-msg"></div>
     </div>
@@ -429,118 +435,69 @@
         document.getElementById('dlUrl').placeholder = placeholders[src];
     }
 
-    async function startDownload() {
-        const url      = document.getElementById('comfyUrl').value.trim();
+    let currentCmd = 'wget';
+    let currentCmdText = { wget: '', curl: '' };
+
+    function generateCommand() {
         const dlUrl    = document.getElementById('dlUrl').value.trim();
         const dlType   = document.getElementById('dlType').value;
         const filename = document.getElementById('dlFilename').value.trim();
         const source   = document.getElementById('dlSource').value;
         const keys     = JSON.parse(localStorage.getItem('irisforge_apikeys') || '{}');
 
-        if (!url)      { showMsg('dlStatus', '⚠️ URL RunPod manquante', 'err'); return; }
         if (!dlUrl)    { showMsg('dlStatus', '⚠️ URL du modèle manquante', 'err'); return; }
         if (!filename) { showMsg('dlStatus', '⚠️ Nom du fichier manquant', 'err'); return; }
 
-        // Build the final download URL with auth headers
+        const destPath = `/workspace/ComfyUI/models/${dlType}/${filename}`;
+
+        // Build URL with auth token if needed
         let finalUrl = dlUrl;
         let authHeader = '';
 
         if (source === 'civitai' && keys.civitai) {
             finalUrl = dlUrl.includes('?') ? `${dlUrl}&token=${keys.civitai}` : `${dlUrl}?token=${keys.civitai}`;
         } else if (source === 'huggingface' && keys.hf) {
-            authHeader = `Bearer ${keys.hf}`;
+            authHeader = keys.hf;
         }
 
-        // The destination path on RunPod ComfyUI
-        const destPath = `/workspace/ComfyUI/models/${dlType}/${filename}`;
-
-        // We use ComfyUI's /upload endpoint isn't available for URLs
-        // Instead we send a bash command via the ComfyUI custom node API if available,
-        // or use a direct script endpoint
-        // Most RunPod ComfyUI setups expose a terminal via /api — we use a lightweight approach:
-        // POST to a custom ComfyUI queue prompt that runs a download script node if available,
-        // otherwise we fall back to instructions
-
-        // Try to use ComfyUI prompt queue with a DownloadAndSaveModel node if present
-        document.getElementById('btnDownload').disabled = true;
-        showProgress(true);
-        showMsg('dlStatus', '⏳ Envoi de la commande à RunPod...', 'info');
-
-        try {
-            // Check if we can use the ComfyUI API to trigger a download
-            // We'll use the /api/free or execute a terminal command via RunPod API if available
-            const runpodKey = keys.runpod;
-
-            if (runpodKey) {
-                // Use RunPod API to execute command on the pod
-                await downloadViaRunpodAPI(runpodKey, finalUrl, destPath, authHeader, filename);
-            } else {
-                // Fallback: try via ComfyUI workflow with DownloadModel node
-                await downloadViaComfyUI(url, finalUrl, destPath, authHeader);
-            }
-        } catch(e) {
-            showMsg('dlStatus', '❌ Erreur : ' + e.message, 'err');
-            showProgress(false);
-            document.getElementById('btnDownload').disabled = false;
+        // Build wget command
+        if (authHeader) {
+            currentCmdText.wget = `wget --header="Authorization: Bearer ${authHeader}" \\\n  -O "${destPath}" \\\n  "${finalUrl}"`;
+            currentCmdText.curl = `curl -L \\\n  -H "Authorization: Bearer ${authHeader}" \\\n  -o "${destPath}" \\\n  "${finalUrl}"`;
+        } else {
+            currentCmdText.wget = `wget -O "${destPath}" \\\n  "${finalUrl}"`;
+            currentCmdText.curl = `curl -L \\\n  -o "${destPath}" \\\n  "${finalUrl}"`;
         }
+
+        document.getElementById('cmdDest').textContent = destPath;
+        document.getElementById('cmdOutput').style.display = 'block';
+        switchCmd(currentCmd);
+
+        // Highlight active tab
+        document.getElementById('btnWget').classList.toggle('active', currentCmd === 'wget');
+        document.getElementById('btnCurl').classList.toggle('active', currentCmd === 'curl');
     }
 
-    async function downloadViaRunpodAPI(runpodKey, dlUrl, destPath, authHeader, filename) {
-        // Build wget/curl command
-        let cmd = authHeader
-            ? `wget --header="Authorization: ${authHeader}" -O "${destPath}" "${dlUrl}" && echo "DONE"`
-            : `wget -O "${destPath}" "${dlUrl}" && echo "DONE"`;
+    function switchCmd(type) {
+        currentCmd = type;
+        document.getElementById('cmdText').textContent = currentCmdText[type];
+        document.getElementById('btnWget').style.background = type === 'wget' ? 'rgba(167,139,250,0.2)' : '';
+        document.getElementById('btnWget').style.color = type === 'wget' ? 'var(--violet)' : '';
+        document.getElementById('btnCurl').style.background = type === 'curl' ? 'rgba(167,139,250,0.2)' : '';
+        document.getElementById('btnCurl').style.color = type === 'curl' ? 'var(--violet)' : '';
+    }
 
-        // Get pod ID from comfyUrl
-        const comfyUrl = document.getElementById('comfyUrl').value.trim();
-        // RunPod pod ID is in the URL: xxx-podid-xxx.proxy.runpod.net or runpod.io
-        // We need the pod ID to use exec API
-        const podIdMatch = comfyUrl.match(/([a-z0-9]{20,})/i);
-        if (!podIdMatch) throw new Error('Impossible de détecter le Pod ID depuis l\'URL');
-
-        const podId = podIdMatch[1];
-
-        const res = await fetch(`https://api.runpod.io/v2/${podId}/run`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${runpodKey}`
-            },
-            body: JSON.stringify({ input: { command: cmd } })
+    function copyCmd() {
+        const raw = currentCmdText[currentCmd];
+        const text = raw.replace(/\s*\\\s*\n\s*/g, ' ').replace(/\n/g, ' ').replace(/  +/g, ' ').trim();
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '✅';
+            setTimeout(() => btn.textContent = '📋', 2000);
         });
-
-        if (!res.ok) {
-            // Fallback to instructions if RunPod API fails
-            showProgress(false);
-            document.getElementById('btnDownload').disabled = false;
-            showMsg('dlStatus', `⚠️ API RunPod indisponible. Lance cette commande dans le terminal RunPod :\n${cmd}`, 'info');
-            return;
-        }
-
-        showMsg('dlStatus', `✅ Téléchargement lancé sur RunPod vers :\n${destPath}`, 'ok');
-        showProgress(false);
-        document.getElementById('btnDownload').disabled = false;
-
-        // Refresh models after a delay
-        setTimeout(loadModels, 5000);
     }
 
-    async function downloadViaComfyUI(comfyUrl, dlUrl, destPath, authHeader) {
-        // Fallback: show the terminal command
-        const cmd = authHeader
-            ? `wget --header="Authorization: ${authHeader}" -O "${destPath}" "${dlUrl}"`
-            : `wget -O "${destPath}" "${dlUrl}"`;
-
-        showProgress(false);
-        document.getElementById('btnDownload').disabled = false;
-        showMsg('dlStatus', `ℹ️ Lance cette commande dans le terminal RunPod :\n\n${cmd}`, 'info');
-    }
-
-    function showProgress(show) {
-        document.getElementById('dlProgress').classList.toggle('show', show);
-    }
-
-    // ── UTILS ─────────────────────────────────────────────────────────────────
+        // ── UTILS ─────────────────────────────────────────────────────────────────
     function showMsg(id, text, type) {
         const el = document.getElementById(id);
         el.textContent = text;
