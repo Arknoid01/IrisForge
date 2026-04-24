@@ -13,135 +13,106 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --blue:   #667eea;
-            --violet: #a78bfa;
-            --pink:   #ec4899;
-            --dark:   #0f0f1e;
-            --green:  #4ade80;
-            --red:    #f87171;
-            --amber:  #fbbf24;
-        }
-        body { font-family: 'DM Sans', sans-serif; background: var(--dark); min-height: 100vh; color: #fff; overflow-x: hidden; }
-        .bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 50% 40% at 20% 20%, rgba(102,126,234,0.12) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(236,72,153,0.08) 0%, transparent 60%), #0f0f1e; }
-        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(102,126,234,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,0.04) 1px, transparent 1px); background-size: 60px 60px; }
-
-        /* SIDEBAR */
-        .menu-btn { width: 36px; height: 36px; border-radius: 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s; }
-        .menu-btn:hover { background: rgba(102,126,234,.25); }
-        .menu-btn span { display: block; width: 14px; height: 2px; background: rgba(255,255,255,.8); border-radius: 2px; }
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .sidebar-overlay.open { opacity: 1; pointer-events: all; }
-        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #0f0f1e; border-right: 1px solid rgba(255,255,255,0.1); z-index: 1002; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 24px 16px; }
-        .sidebar.open { transform: translateX(0); }
-        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .sidebar-title { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .sidebar-close { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .sidebar-close:hover { background: rgba(239,68,68,0.2); color: #f87171; }
-        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
-        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
-        .sidebar-link:hover { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); color: #fff; }
-        .sidebar-link.active { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3); color: #a78bfa; }
-        .sidebar-link .icon { font-size: 18px; width: 24px; text-align: center; }
-        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; }
-
-        /* TOPBAR */
-        .topbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(15,15,30,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .topbar-left { display: flex; align-items: center; gap: 12px; }
-        .brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .brand-icon { font-size: 22px; }
-        .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; background: linear-gradient(135deg, #667eea, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .brand-sub { font-size: 10px; color: rgba(255,255,255,0.35); display: block; margin-top: -2px; }
-        .page-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--violet); }
-
-        /* MAIN */
-        .main { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
-
-        /* SECTION */
-        .section-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; margin-top: 24px; }
-
-        /* CARD */
-        .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-
-        /* INPUTS */
-        .field-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
-        .field-input:focus { outline: none; border-color: var(--violet); background: rgba(255,255,255,0.08); }
-        .field-input::placeholder { color: rgba(255,255,255,0.2); }
-        select.field-input { cursor: pointer; }
-        select.field-input option { background: #1a1a2e; }
-        textarea.field-input { resize: vertical; min-height: 80px; font-family: 'DM Sans', sans-serif; line-height: 1.5; }
-
-        /* GRID PARAMS */
-        .params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .param-block { display: flex; flex-direction: column; gap: 6px; }
-        .param-label { font-size: 11px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; }
-        .param-label span { color: var(--violet); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-        input[type=range] { width: 100%; accent-color: var(--violet); }
-
-        /* LORA LIST */
-        .lora-list { display: flex; flex-direction: column; gap: 8px; }
-        .lora-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
-        .lora-name { flex: 1; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lora-strength-label { font-size: 11px; color: rgba(255,255,255,0.4); width: 28px; text-align: right; font-family: 'JetBrains Mono', monospace; }
-        .lora-remove { width: 22px; height: 22px; border-radius: 6px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--red); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .lora-remove:hover { background: rgba(248,113,113,0.25); }
-        .add-lora-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-
-        /* SIZE PRESETS */
-        .size-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-        .size-btn { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
-        .size-btn:hover, .size-btn.active { background: rgba(167,139,250,0.2); border-color: var(--violet); color: var(--violet); }
-        .size-inputs { display: flex; gap: 8px; align-items: center; }
-        .size-sep { color: rgba(255,255,255,0.3); font-size: 18px; }
-
-        /* GENERATE BUTTON */
-        .gen-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--blue), var(--violet)); color: #fff; font-size: 16px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s; margin-top: 16px; }
-        .gen-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-        .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-        /* STATUS */
-        .status-bar { display: none; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-top: 10px; }
-        .status-bar.show { display: flex; }
-        .status-bar.loading { background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.2); color: var(--blue); }
-        .status-bar.error  { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--red); }
-        .status-bar.success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: var(--green); }
-        .spinner { width: 16px; height: 16px; border: 2px solid rgba(102,126,234,0.3); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* RESULT IMAGE */
-        .result-wrap { position: relative; margin-top: 16px; display: none; }
-        .result-wrap.show { display: block; }
-        .result-img { width: 100%; border-radius: 16px; display: block; }
-        .result-actions { display: flex; gap: 8px; margin-top: 10px; }
-        .btn { padding: 10px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-ghost { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
-        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .btn-violet { background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--violet); }
-        .btn-violet:hover { background: rgba(167,139,250,0.25); }
-        .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
-
-        /* EMPTY LORA */
-        .empty-lora { text-align: center; padding: 16px; color: rgba(255,255,255,0.25); font-size: 12px; }
-
-        /* URL ROW */
-        .url-row { display: flex; gap: 8px; align-items: center; }
-        .url-status { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; }
-        .url-status.ok { background: var(--green); box-shadow: 0 0 5px var(--green); }
-
-        @media (max-width: 600px) {
-            .sidebar { width: min(260px, 85vw); }
-            .params-grid { grid-template-columns: 1fr; }
-            .topbar { padding: 10px 14px; }
-            .field-input { font-size: 16px; }
-        }
+        :root { --blue:#667eea; --violet:#a78bfa; --pink:#ec4899; --dark:#0f0f1e; --green:#4ade80; --red:#f87171; --amber:#fbbf24; }
+        body { font-family:'DM Sans',sans-serif; background:var(--dark); min-height:100vh; color:#fff; overflow-x:hidden; }
+        .bg { position:fixed; inset:0; z-index:0; background:radial-gradient(ellipse 50% 40% at 20% 20%,rgba(102,126,234,0.12) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 85% 75%,rgba(236,72,153,0.08) 0%,transparent 60%),#0f0f1e; }
+        .bg-grid { position:fixed; inset:0; z-index:0; background-image:linear-gradient(rgba(102,126,234,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,0.04) 1px,transparent 1px); background-size:60px 60px; }
+        .menu-btn { width:36px; height:36px; border-radius:9px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+        .menu-btn span { display:block; width:14px; height:2px; background:rgba(255,255,255,.8); border-radius:2px; }
+        .sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:1001; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+        .sidebar-overlay.open { opacity:1; pointer-events:all; }
+        .sidebar { position:fixed; top:0; left:0; width:260px; height:100vh; background:#0f0f1e; border-right:1px solid rgba(255,255,255,0.1); z-index:1002; transform:translateX(-100%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; padding:24px 16px; }
+        .sidebar.open { transform:translateX(0); }
+        .sidebar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+        .sidebar-title { font-size:18px; font-weight:700; background:linear-gradient(135deg,#667eea,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .sidebar-close { width:28px; height:28px; border-radius:7px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .sidebar-nav { display:flex; flex-direction:column; gap:4px; }
+        .sidebar-link { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:10px; text-decoration:none; color:rgba(255,255,255,0.7); font-size:14px; font-weight:500; transition:all 0.2s; border:1px solid transparent; }
+        .sidebar-link:hover { background:rgba(167,139,250,0.1); border-color:rgba(167,139,250,0.2); color:#fff; }
+        .sidebar-link.active { background:rgba(102,126,234,0.15); border-color:rgba(102,126,234,0.3); color:#a78bfa; }
+        .sidebar-link .icon { font-size:18px; width:24px; text-align:center; }
+        .sidebar-divider { height:1px; background:rgba(255,255,255,0.07); margin:8px 0; }
+        .topbar { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:rgba(15,15,30,0.85); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.06); }
+        .topbar-left { display:flex; align-items:center; gap:12px; }
+        .brand-link { display:flex; align-items:center; gap:10px; text-decoration:none; }
+        .brand-icon { font-size:22px; }
+        .brand-name { font-family:'Syne',sans-serif; font-weight:800; font-size:16px; background:linear-gradient(135deg,#667eea,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .brand-sub { font-size:10px; color:rgba(255,255,255,0.35); display:block; margin-top:-2px; }
+        .page-badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(167,139,250,0.15); border:1px solid rgba(167,139,250,0.3); color:var(--violet); }
+        .main { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:24px 16px 80px; }
+        .section-title { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; margin-top:24px; }
+        .card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px; margin-bottom:12px; }
+        .field-input { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 14px; color:#fff; font-size:14px; }
+        .field-input:focus { outline:none; border-color:var(--violet); background:rgba(255,255,255,0.08); }
+        .field-input::placeholder { color:rgba(255,255,255,0.2); }
+        select.field-input { cursor:pointer; }
+        select.field-input option { background:#1a1a2e; }
+        textarea.field-input { resize:vertical; min-height:80px; font-family:'DM Sans',sans-serif; line-height:1.5; }
+        .params-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .param-block { display:flex; flex-direction:column; gap:6px; }
+        .param-label { font-size:11px; color:rgba(255,255,255,0.4); display:flex; justify-content:space-between; }
+        .param-label span { color:var(--violet); font-weight:600; font-family:'JetBrains Mono',monospace; }
+        input[type=range] { width:100%; accent-color:var(--violet); }
+        .size-presets { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+        .size-btn { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.6); cursor:pointer; transition:all 0.2s; }
+        .size-btn:hover,.size-btn.active { background:rgba(167,139,250,0.2); border-color:var(--violet); color:var(--violet); }
+        .size-inputs { display:flex; gap:8px; align-items:center; }
+        .size-sep { color:rgba(255,255,255,0.3); font-size:18px; }
+        .pass-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px; margin-bottom:10px; }
+        .pass-card.pc1 { border-color:rgba(102,126,234,0.35); }
+        .pass-card.pc2 { border-color:rgba(167,139,250,0.3); }
+        .pass-card.pc3 { border-color:rgba(236,72,153,0.25); }
+        .pass-card.pc4 { border-color:rgba(251,191,36,0.25); }
+        .pass-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .pass-label { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px; }
+        .pass-badge { padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+        .pb1 { background:rgba(102,126,234,0.2); color:var(--blue); border:1px solid rgba(102,126,234,0.3); }
+        .pb2 { background:rgba(167,139,250,0.2); color:var(--violet); border:1px solid rgba(167,139,250,0.3); }
+        .pb3 { background:rgba(236,72,153,0.2); color:var(--pink); border:1px solid rgba(236,72,153,0.3); }
+        .pb4 { background:rgba(251,191,36,0.2); color:var(--amber); border:1px solid rgba(251,191,36,0.3); }
+        .pass-remove { width:26px; height:26px; border-radius:7px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); color:var(--red); font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .pass-prompt-toggle { display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.4); cursor:pointer; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); user-select:none; }
+        .pass-prompt-toggle:hover { color:rgba(255,255,255,0.7); }
+        .pass-prompt-area { display:none; margin-top:8px; }
+        .lora-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+        .lora-item { display:flex; align-items:center; gap:8px; padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:9px; }
+        .lora-name { flex:1; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .lora-sv { font-size:11px; color:var(--violet); width:30px; text-align:right; font-family:'JetBrains Mono',monospace; flex-shrink:0; }
+        .lora-rm { width:20px; height:20px; border-radius:5px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); color:var(--red); font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .add-lora-row { display:flex; gap:6px; margin-top:8px; }
+        .btn { padding:10px 16px; border-radius:10px; border:none; cursor:pointer; font-size:13px; font-weight:600; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px; }
+        .btn-ghost { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.7); }
+        .btn-ghost:hover { background:rgba(255,255,255,0.1); color:#fff; }
+        .btn-violet { background:rgba(167,139,250,0.15); border:1px solid rgba(167,139,250,0.3); color:var(--violet); }
+        .btn-violet:hover { background:rgba(167,139,250,0.25); }
+        .btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
+        .btn-add-pass { width:100%; padding:12px; border-radius:12px; border:1px dashed rgba(167,139,250,0.3); background:rgba(167,139,250,0.05); color:var(--violet); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+        .btn-add-pass:hover { background:rgba(167,139,250,0.12); border-color:rgba(167,139,250,0.5); }
+        .btn-add-pass:disabled { opacity:0.3; cursor:not-allowed; }
+        .gen-btn { width:100%; padding:16px; border-radius:14px; border:none; background:linear-gradient(135deg,var(--blue),var(--violet)); color:#fff; font-size:16px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:all 0.2s; margin-top:16px; }
+        .gen-btn:hover { opacity:0.85; transform:translateY(-1px); }
+        .gen-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+        .status-bar { display:none; align-items:center; gap:10px; padding:12px 16px; border-radius:12px; font-size:13px; margin-top:10px; }
+        .status-bar.show { display:flex; }
+        .status-bar.loading { background:rgba(102,126,234,0.1); border:1px solid rgba(102,126,234,0.2); color:var(--blue); }
+        .status-bar.error  { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); color:var(--red); }
+        .status-bar.success { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.2); color:var(--green); }
+        .spinner { width:16px; height:16px; border:2px solid rgba(102,126,234,0.3); border-top-color:var(--blue); border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .result-wrap { display:none; margin-top:16px; }
+        .result-wrap.show { display:block; }
+        .result-img { width:100%; border-radius:16px; display:block; }
+        .result-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .url-row { display:flex; gap:8px; align-items:center; }
+        .url-status { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.15); flex-shrink:0; }
+        .url-status.ok { background:var(--green); box-shadow:0 0 5px var(--green); }
+        .pass-connector { text-align:center; font-size:18px; color:rgba(255,255,255,0.2); margin:4px 0; }
+        @media (max-width:600px) { .sidebar { width:min(260px,85vw); } .params-grid { grid-template-columns:1fr; } .topbar { padding:10px 14px; } .field-input { font-size:16px; } }
     </style>
     <link rel="stylesheet" href="iris-shared.css">
 </head>
 <body>
-<div class="bg"></div>
-<div class="bg-grid"></div>
-
-<!-- SIDEBAR -->
+<div class="bg"></div><div class="bg-grid"></div>
 <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -157,36 +128,25 @@
         <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
         <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
         <a href="custom.html" class="sidebar-link active"><span class="icon">🛠️</span> Custom</a>
-        <a href="workflows.html" class="sidebar-link"><span class="icon">⚙️</span> Workflows</a>
         <div class="sidebar-divider"></div>
         <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
         <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
+        <a href="workflows.html" class="sidebar-link"><span class="icon">⚙️</span> Workflows</a>
         <div class="sidebar-divider"></div>
         <a href="studio.html" class="sidebar-link"><span class="icon">📦</span> Modèles</a>
     </nav>
 </div>
-
-<!-- TOPBAR -->
 <div class="topbar">
     <div class="topbar-left">
-        <div class="menu-btn" onclick="toggleSidebar()">
-            <span></span><span></span><span></span>
-        </div>
+        <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
         <a href="index.html" class="brand-link">
             <div class="brand-icon">🔥</div>
-            <div>
-                <span class="brand-name">IrisForge</span>
-                <span class="brand-sub">Graphics</span>
-            </div>
+            <div><span class="brand-name">IrisForge</span><span class="brand-sub">Graphics</span></div>
         </a>
     </div>
     <div class="page-badge">🛠️ Custom</div>
 </div>
-
-<!-- MAIN -->
 <div class="main">
-
-    <!-- CONNEXION -->
     <div class="section-title">Connexion ComfyUI</div>
     <div class="card">
         <div class="url-row">
@@ -195,91 +155,17 @@
             <button class="btn btn-ghost btn-sm" onclick="connectAndLoad()">Connecter</button>
         </div>
     </div>
-
-    <!-- MODÈLE -->
-    <div class="section-title">Modèle</div>
-    <div class="card">
-        <select id="modelSelect" class="field-input">
-            <option value="">— Connecte-toi pour voir les modèles —</option>
-        </select>
-    </div>
-
-    <!-- PROMPTS -->
-    <div class="section-title">Prompts</div>
-    <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+    <div class="section-title">Prompt global</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
         <div>
             <div class="param-label" style="margin-bottom:6px;">Positif</div>
             <textarea id="promptPos" class="field-input" placeholder="Décris ce que tu veux générer..."></textarea>
         </div>
         <div>
             <div class="param-label" style="margin-bottom:6px;">Négatif</div>
-            <textarea id="promptNeg" class="field-input" style="min-height:60px;" placeholder="Ce que tu ne veux pas...">octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad anatomy, bad proportions, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured</textarea>
+            <textarea id="promptNeg" class="field-input" style="min-height:60px;">octane render, render, drawing, anime, bad photo, bad photography, worst quality, low quality, blurry, bad anatomy, bad proportions, deformed hands, bad hands, fused fingers, morbid, mutilated, mutation, disfigured</textarea>
         </div>
     </div>
-
-    <!-- LORAS -->
-    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>LoRA</span>
-        <span id="loraCount" style="font-size:11px;color:rgba(255,255,255,0.3);">0 actif(s)</span>
-    </div>
-    <div class="card">
-        <div class="lora-list" id="loraList">
-            <div class="empty-lora">Aucun LoRA ajouté</div>
-        </div>
-        <div class="add-lora-row">
-            <select id="loraSelect" class="field-input" style="flex:1;">
-                <option value="">— Connecte-toi pour voir les LoRA —</option>
-            </select>
-            <button class="btn btn-violet btn-sm" onclick="addLora()">+ Ajouter</button>
-        </div>
-    </div>
-
-    <!-- SAMPLER & PARAMS -->
-    <div class="section-title">Paramètres</div>
-    <div class="card">
-        <div class="params-grid">
-            <div class="param-block">
-                <div class="param-label">Sampler</div>
-                <select id="samplerName" class="field-input">
-                    <option value="dpmpp_2m_sde_gpu">DPM++ 2M SDE GPU</option>
-                    <option value="dpmpp_2m">DPM++ 2M</option>
-                    <option value="dpmpp_sde_gpu">DPM++ SDE GPU</option>
-                    <option value="dpmpp_sde">DPM++ SDE</option>
-                    <option value="euler">Euler</option>
-                    <option value="euler_ancestral">Euler Ancestral</option>
-                    <option value="heun">Heun</option>
-                    <option value="dpm_2">DPM 2</option>
-                    <option value="dpm_2_ancestral">DPM 2 Ancestral</option>
-                    <option value="lms">LMS</option>
-                    <option value="ddim">DDIM</option>
-                    <option value="uni_pc">UniPC</option>
-                </select>
-            </div>
-            <div class="param-block">
-                <div class="param-label">Scheduler</div>
-                <select id="scheduler" class="field-input">
-                    <option value="karras">Karras</option>
-                    <option value="normal">Normal</option>
-                    <option value="exponential">Exponential</option>
-                    <option value="sgm_uniform">SGM Uniform</option>
-                    <option value="simple">Simple</option>
-                    <option value="ddim_uniform">DDIM Uniform</option>
-                </select>
-            </div>
-        </div>
-        <div style="margin-top:12px;" class="params-grid">
-            <div class="param-block">
-                <div class="param-label">Steps <span id="stepsVal">25</span></div>
-                <input type="range" id="steps" min="5" max="60" value="25" oninput="document.getElementById('stepsVal').textContent=this.value">
-            </div>
-            <div class="param-block">
-                <div class="param-label">CFG Scale <span id="cfgVal">7.0</span></div>
-                <input type="range" id="cfg" min="1" max="20" step="0.5" value="7" oninput="document.getElementById('cfgVal').textContent=parseFloat(this.value).toFixed(1)">
-            </div>
-        </div>
-    </div>
-
-    <!-- TAILLE -->
     <div class="section-title">Résolution</div>
     <div class="card">
         <div class="size-presets">
@@ -295,36 +181,23 @@
             <input type="number" id="imgH" class="field-input" value="1024" min="64" max="2048" step="64" style="text-align:center;">
         </div>
     </div>
-
-    <!-- VAE -->
-    <div class="section-title">VAE (optionnel)</div>
-    <div class="card">
-        <select id="vaeSelect" class="field-input">
-            <option value="">— VAE intégré au modèle —</option>
-        </select>
-    </div>
-
-    <!-- SEED -->
     <div class="section-title">Seed</div>
     <div class="card">
-        <div style="display:flex; gap:8px; align-items:center;">
-            <input type="number" id="seed" class="field-input" value="-1" placeholder="-1 = aléatoire">
+        <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="seed" class="field-input" value="-1">
             <button class="btn btn-ghost btn-sm" onclick="document.getElementById('seed').value=Math.floor(Math.random()*999999999)">🎲</button>
             <button class="btn btn-ghost btn-sm" onclick="document.getElementById('seed').value=-1">∞</button>
         </div>
     </div>
-
-    <!-- GENERATE -->
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Passes de génération</span>
+        <span id="passCount" style="font-size:11px;color:rgba(255,255,255,0.3);">1 passe</span>
+    </div>
+    <div id="passList"></div>
+    <button class="btn-add-pass" id="btnAddPass" onclick="addPass()">+ Ajouter une passe</button>
     <button class="gen-btn" id="genBtn" onclick="generateImage()">✨ Générer</button>
     <button class="btn btn-ghost" style="width:100%;margin-top:8px;justify-content:center;" onclick="saveAsWorkflow()">💾 Sauvegarder comme workflow</button>
-
-    <!-- STATUS -->
-    <div class="status-bar" id="statusBar">
-        <div class="spinner" id="spinner"></div>
-        <span id="statusText"></span>
-    </div>
-
-    <!-- RESULT -->
+    <div class="status-bar" id="statusBar"><div class="spinner" id="spinner"></div><span id="statusText"></span></div>
     <div class="result-wrap" id="resultWrap">
         <img id="resultImg" class="result-img" alt="Résultat">
         <div class="result-actions">
@@ -333,429 +206,299 @@
             <button class="btn btn-ghost" onclick="sendToVideo()">🎬 Vidéo</button>
         </div>
     </div>
-
 </div>
-
 <script>
-    const clientId = 'custom_' + Math.random().toString(36).substr(2, 9);
-    let isGenerating = false;
-    let activeLoras = []; // [{name, strength}]
-    let availableModels = [];
-    let availableLoras  = [];
-    let availableVAEs   = [];
+const clientId = 'custom_' + Math.random().toString(36).substr(2,9);
+let isGenerating = false;
+let availableModels = [], availableLoras = [], availableVAEs = [];
+let passes = [];
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('open');
-    }
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+}
 
-    // ── PERSISTENCE ──────────────────────────────────────────────────────────
-    function saveSettings() {
-        const s = {
-            comfyUrl:    document.getElementById('comfyUrl').value,
-            samplerName: document.getElementById('samplerName').value,
-            scheduler:   document.getElementById('scheduler').value,
-            steps:       document.getElementById('steps').value,
-            cfg:         document.getElementById('cfg').value,
-            imgW:        document.getElementById('imgW').value,
-            imgH:        document.getElementById('imgH').value,
-            promptNeg:   document.getElementById('promptNeg').value,
-            loras:       activeLoras
-        };
-        localStorage.setItem('custom_settings', JSON.stringify(s));
-        localStorage.setItem('comfyUrl', s.comfyUrl);
-    }
+function defaultPass(i) {
+    return { model:'', loras:[], sampler:'dpmpp_2m_sde_gpu', scheduler:'karras', steps: i===0?25:15, cfg: i===0?7:5, denoise: i===0?1.0:0.6, promptPos:'', promptNeg:'' };
+}
 
-    function loadSettings() {
-        const comfyUrl = localStorage.getItem('comfyUrl') || '';
-        document.getElementById('comfyUrl').value = comfyUrl;
+const PASS_COLORS = ['pc1','pc2','pc3','pc4'];
+const PASS_BADGES = ['pb1','pb2','pb3','pb4'];
+const PASS_ICONS  = ['🔵','🟣','🩷','🟡'];
+const SAMPLERS    = ['dpmpp_2m_sde_gpu','dpmpp_2m','dpmpp_sde_gpu','dpmpp_sde','euler','euler_ancestral','heun','dpm_2','dpm_2_ancestral','lms','ddim','uni_pc'];
+const SCHEDULERS  = ['karras','normal','exponential','sgm_uniform','simple','ddim_uniform'];
 
-        try {
-            const s = JSON.parse(localStorage.getItem('custom_settings') || '{}');
-            if (s.samplerName) document.getElementById('samplerName').value = s.samplerName;
-            if (s.scheduler)   document.getElementById('scheduler').value   = s.scheduler;
-            if (s.steps)       { document.getElementById('steps').value = s.steps; document.getElementById('stepsVal').textContent = s.steps; }
-            if (s.cfg)         { document.getElementById('cfg').value = s.cfg; document.getElementById('cfgVal').textContent = parseFloat(s.cfg).toFixed(1); }
-            if (s.imgW)        document.getElementById('imgW').value = s.imgW;
-            if (s.imgH)        document.getElementById('imgH').value = s.imgH;
-            if (s.promptNeg)   document.getElementById('promptNeg').value = s.promptNeg;
-            if (s.loras)       { activeLoras = s.loras; renderLoras(); }
-        } catch(e) {}
-    }
+function selOpts(arr, sel) { return arr.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join(''); }
 
-    // ── CONNECT & LOAD MODELS ─────────────────────────────────────────────────
-    async function connectAndLoad() {
-        const url = document.getElementById('comfyUrl').value.trim();
-        if (!url) return;
-        localStorage.setItem('comfyUrl', url);
-        document.getElementById('urlStatus').className = 'url-status';
-        showStatus('Connexion à ComfyUI...', 'loading');
+function renderPassLoras(i) {
+    const loras = passes[i].loras;
+    if (!loras.length) return '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:4px 0;">Aucun LoRA</div>';
+    return loras.map((l,li)=>`
+        <div class="lora-item">
+            <div class="lora-name">🎨 ${l.name.replace('.safetensors','').replace('.pt','')}</div>
+            <input type="range" min="0" max="2" step="0.05" value="${l.strength}" style="width:70px;accent-color:var(--violet);"
+                oninput="updateLoraStr(${i},${li},this.value)">
+            <span class="lora-sv" id="lsv_${i}_${li}">${l.strength.toFixed(2)}</span>
+            <button class="lora-rm" onclick="removePassLora(${i},${li})">✕</button>
+        </div>`).join('');
+}
 
-        try {
-            const res = await fetch(`${url}/object_info`, { signal: AbortSignal.timeout(8000) });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-
-            availableModels = data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0] || [];
-            availableLoras  = data?.LoraLoader?.input?.required?.lora_name?.[0] || [];
-            availableVAEs   = data?.VAELoader?.input?.required?.vae_name?.[0] || [];
-
-            // Populate selects
-            populateSelect('modelSelect', availableModels, '— Choisir un modèle —');
-            populateSelect('loraSelect',  availableLoras,  '— Choisir un LoRA —');
-            populateVAE();
-
-            // Restore pending model from workflow (priority) or saved settings
-            const pendingModel = localStorage.getItem('pending_model');
-            if (pendingModel) {
-                localStorage.removeItem('pending_model');
-                if (availableModels.includes(pendingModel)) {
-                    document.getElementById('modelSelect').value = pendingModel;
-                } else {
-                    showStatus(`⚠️ Modèle "${pendingModel.replace('.safetensors','')}" non trouvé sur ce pod`, 'error');
-                }
-            } else {
-                const s = JSON.parse(localStorage.getItem('custom_settings') || '{}');
-                if (s.model && availableModels.includes(s.model)) {
-                    document.getElementById('modelSelect').value = s.model;
-                }
-            }
-
-            document.getElementById('urlStatus').className = 'url-status ok';
-            showStatus(`✅ ${availableModels.length} modèle(s), ${availableLoras.length} LoRA chargés`, 'success');
-            setTimeout(() => document.getElementById('statusBar').classList.remove('show'), 3000);
-        } catch(e) {
-            document.getElementById('urlStatus').className = 'url-status';
-            showStatus('❌ Erreur connexion : ' + e.message, 'error');
-        }
-    }
-
-    function populateSelect(id, items, placeholder) {
-        const sel = document.getElementById(id);
-        sel.innerHTML = `<option value="">${placeholder}</option>` +
-            items.map(m => `<option value="${m}">${m}</option>`).join('');
-    }
-
-    function populateVAE() {
-        const sel = document.getElementById('vaeSelect');
-        sel.innerHTML = `<option value="">— VAE intégré au modèle —</option>` +
-            availableVAEs.map(v => `<option value="${v}">${v}</option>`).join('');
-    }
-
-    // ── SIZE PRESETS ──────────────────────────────────────────────────────────
-    function setSize(w, h, btn) {
-        document.getElementById('imgW').value = w;
-        document.getElementById('imgH').value = h;
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
-
-    // ── LORA MANAGEMENT ───────────────────────────────────────────────────────
-    function addLora() {
-        const sel = document.getElementById('loraSelect');
-        const name = sel.value;
-        if (!name) return;
-        if (activeLoras.find(l => l.name === name)) return;
-        activeLoras.push({ name, strength: 0.8 });
-        renderLoras();
-        saveSettings();
-    }
-
-    function removeLora(idx) {
-        activeLoras.splice(idx, 1);
-        renderLoras();
-        saveSettings();
-    }
-
-    function updateLoraStrength(idx, val) {
-        activeLoras[idx].strength = parseFloat(val);
-        document.getElementById(`loraStrengthLabel_${idx}`).textContent = parseFloat(val).toFixed(2);
-        saveSettings();
-    }
-
-    function renderLoras() {
-        const list = document.getElementById('loraList');
-        document.getElementById('loraCount').textContent = `${activeLoras.length} actif(s)`;
-        if (!activeLoras.length) {
-            list.innerHTML = '<div class="empty-lora">Aucun LoRA ajouté</div>';
-            return;
-        }
-        list.innerHTML = activeLoras.map((l, i) => `
-            <div class="lora-item">
-                <div class="lora-name" title="${l.name}">🎨 ${l.name}</div>
-                <input type="range" min="0" max="2" step="0.05" value="${l.strength}"
-                    style="width:80px; accent-color: var(--violet);"
-                    oninput="updateLoraStrength(${i}, this.value)">
-                <span class="lora-strength-label" id="loraStrengthLabel_${i}">${l.strength.toFixed(2)}</span>
-                <button class="lora-remove" onclick="removeLora(${i})">✕</button>
+function renderPasses() {
+    const list = document.getElementById('passList');
+    list.innerHTML = passes.map((p,i) => `
+        ${i>0?`<div class="pass-connector">↓</div>`:''}
+        <div class="pass-card ${PASS_COLORS[i]}">
+            <div class="pass-header">
+                <div class="pass-label">${PASS_ICONS[i]} Passe ${i+1} <span class="pass-badge ${PASS_BADGES[i]}">${i===0?'Génération':'Refiner'}</span></div>
+                ${i>0?`<button class="pass-remove" onclick="removePass(${i})">✕</button>`:''}
             </div>
-        `).join('');
-    }
+            <div style="margin-bottom:10px;">
+                <div class="param-label" style="margin-bottom:5px;">Modèle</div>
+                <select class="field-input" onchange="passes[${i}].model=this.value">
+                    <option value="">— Choisir —</option>
+                    ${availableModels.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
+                </select>
+            </div>
+            <div style="margin-bottom:10px;">
+                <div class="param-label" style="margin-bottom:5px;">LoRA</div>
+                <div class="lora-list" id="pll_${i}">${renderPassLoras(i)}</div>
+                <div class="add-lora-row">
+                    <select class="field-input btn-sm" id="pls_${i}" style="flex:1;padding:6px 10px;font-size:12px;">
+                        <option value="">— Ajouter un LoRA —</option>
+                        ${availableLoras.map(l=>`<option value="${l}">${l}</option>`).join('')}
+                    </select>
+                    <button class="btn btn-violet btn-sm" onclick="addPassLora(${i})">+</button>
+                </div>
+            </div>
+            <div class="params-grid">
+                <div class="param-block"><div class="param-label">Sampler</div>
+                    <select class="field-input" onchange="passes[${i}].sampler=this.value">${selOpts(SAMPLERS,p.sampler)}</select></div>
+                <div class="param-block"><div class="param-label">Scheduler</div>
+                    <select class="field-input" onchange="passes[${i}].scheduler=this.value">${selOpts(SCHEDULERS,p.scheduler)}</select></div>
+            </div>
+            <div class="params-grid" style="margin-top:10px;">
+                <div class="param-block">
+                    <div class="param-label">Steps <span id="psv_${i}">${p.steps}</span></div>
+                    <input type="range" min="1" max="60" value="${p.steps}" oninput="passes[${i}].steps=parseInt(this.value);document.getElementById('psv_${i}').textContent=this.value">
+                </div>
+                <div class="param-block">
+                    <div class="param-label">CFG <span id="pcv_${i}">${parseFloat(p.cfg).toFixed(1)}</span></div>
+                    <input type="range" min="1" max="20" step="0.5" value="${p.cfg}" oninput="passes[${i}].cfg=parseFloat(this.value);document.getElementById('pcv_${i}').textContent=parseFloat(this.value).toFixed(1)">
+                </div>
+                <div class="param-block">
+                    <div class="param-label">Denoise <span id="pdv_${i}">${parseFloat(p.denoise).toFixed(2)}</span></div>
+                    <input type="range" min="0.01" max="1" step="0.01" value="${p.denoise}" oninput="passes[${i}].denoise=parseFloat(this.value);document.getElementById('pdv_${i}').textContent=parseFloat(this.value).toFixed(2)">
+                </div>
+            </div>
+            <div class="pass-prompt-toggle" onclick="togglePP(${i})">
+                <span id="ppa_${i}">▶</span> Prompt spécifique (optionnel)
+            </div>
+            <div id="pparea_${i}" style="display:${p.promptPos||p.promptNeg?'block':'none'};margin-top:8px;">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <textarea class="field-input" style="min-height:60px;font-size:13px;" placeholder="Positif (vide = global)" oninput="passes[${i}].promptPos=this.value">${p.promptPos||''}</textarea>
+                    <textarea class="field-input" style="min-height:50px;font-size:13px;" placeholder="Négatif (vide = global)" oninput="passes[${i}].promptNeg=this.value">${p.promptNeg||''}</textarea>
+                </div>
+            </div>
+        </div>`).join('');
+    document.getElementById('passCount').textContent = `${passes.length} passe${passes.length>1?'s':''}`;
+    document.getElementById('btnAddPass').disabled = passes.length >= 4;
+}
 
-    // ── TRANSLATION ───────────────────────────────────────────────────────────
-    async function translateToEnglish(text) {
-        if (!text || !text.trim()) return null;
-        try {
-            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            if (data.responseStatus === 200 && data.responseData?.translatedText) {
-                return data.responseData.translatedText;
+function addPass() { if(passes.length>=4)return; passes.push(defaultPass(passes.length)); renderPasses(); }
+function removePass(i) { passes.splice(i,1); renderPasses(); }
+function addPassLora(i) {
+    const sel = document.getElementById(`pls_${i}`);
+    if(!sel.value||passes[i].loras.find(l=>l.name===sel.value))return;
+    passes[i].loras.push({name:sel.value,strength:0.8});
+    document.getElementById(`pll_${i}`).innerHTML = renderPassLoras(i);
+}
+function removePassLora(pi,li) { passes[pi].loras.splice(li,1); document.getElementById(`pll_${pi}`).innerHTML=renderPassLoras(pi); }
+function updateLoraStr(pi,li,v) { passes[pi].loras[li].strength=parseFloat(v); const el=document.getElementById(`lsv_${pi}_${li}`); if(el)el.textContent=parseFloat(v).toFixed(2); }
+function togglePP(i) {
+    const area=document.getElementById(`pparea_${i}`);
+    const open=area.style.display==='none'||!area.style.display;
+    area.style.display=open?'block':'none';
+    document.getElementById(`ppa_${i}`).textContent=open?'▼':'▶';
+}
+function setSize(w,h,btn) {
+    document.getElementById('imgW').value=w; document.getElementById('imgH').value=h;
+    document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+}
+
+async function connectAndLoad() {
+    const url=document.getElementById('comfyUrl').value.trim(); if(!url)return;
+    localStorage.setItem('comfyUrl',url);
+    document.getElementById('urlStatus').className='url-status';
+    showStatus('Connexion...','loading');
+    try {
+        const res=await fetch(`${url}/object_info`,{signal:AbortSignal.timeout(8000)});
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        const data=await res.json();
+        availableModels=data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]||[];
+        availableLoras =data?.LoraLoader?.input?.required?.lora_name?.[0]||[];
+        availableVAEs  =data?.VAELoader?.input?.required?.vae_name?.[0]||[];
+        // Apply pending models from workflow
+        const pm=localStorage.getItem('pending_models');
+        if(pm) {
+            try {
+                const models=JSON.parse(pm); localStorage.removeItem('pending_models');
+                models.forEach((m,i)=>{ if(passes[i])passes[i].model=m; });
+            } catch(e){}
+        } else {
+            const pm2=localStorage.getItem('pending_model');
+            if(pm2){localStorage.removeItem('pending_model'); if(availableModels.includes(pm2))passes[0].model=pm2;}
+        }
+        renderPasses();
+        document.getElementById('urlStatus').className='url-status ok';
+        showStatus(`✅ ${availableModels.length} modèles, ${availableLoras.length} LoRA`,'success');
+        setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
+    } catch(e) { document.getElementById('urlStatus').className='url-status'; showStatus('❌ '+e.message,'error'); }
+}
+
+async function translateToEnglish(text) {
+    if(!text||!text.trim())return null;
+    try {
+        const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`);
+        const data=await res.json();
+        return data.responseStatus===200?data.responseData?.translatedText||null:null;
+    } catch(e){return null;}
+}
+
+async function generateImage() {
+    if(isGenerating)return;
+    const apiUrl=document.getElementById('comfyUrl').value.trim();
+    const globalPos=document.getElementById('promptPos').value.trim();
+    const globalNeg=document.getElementById('promptNeg').value.trim();
+    const width=parseInt(document.getElementById('imgW').value);
+    const height=parseInt(document.getElementById('imgH').value);
+    const seedVal=parseInt(document.getElementById('seed').value);
+    const baseSeed=(seedVal===-1||isNaN(seedVal))?Math.floor(Math.random()*999999999):seedVal;
+    if(!apiUrl){showStatus('⚠️ URL ComfyUI manquante','error');return;}
+    if(!globalPos){showStatus('⚠️ Prompt vide','error');return;}
+    if(passes.some(p=>!p.model)){showStatus('⚠️ Chaque passe doit avoir un modèle','error');return;}
+    isGenerating=true;
+    document.getElementById('genBtn').disabled=true;
+    document.getElementById('resultWrap').classList.remove('show');
+    showStatus('Traduction...','loading');
+    const transGlobalPos=await translateToEnglish(globalPos)||globalPos;
+    const wf={};
+    let nid=1;
+    const alloc=()=>String(nid++);
+    const latNode=alloc();
+    wf[latNode]={inputs:{width,height,batch_size:1},class_type:"EmptyLatentImage"};
+    let prevLat=[latNode,0], lastVae=null;
+    for(let i=0;i<passes.length;i++) {
+        const p=passes[i];
+        const ckpt=alloc();
+        wf[ckpt]={inputs:{ckpt_name:p.model},class_type:"CheckpointLoaderSimple"};
+        lastVae=[ckpt,2];
+        let mOut=[ckpt,0], cOut=[ckpt,1];
+        for(const lora of p.loras) {
+            const ln=alloc();
+            wf[ln]={inputs:{lora_name:lora.name,strength_model:lora.strength,strength_clip:lora.strength,model:mOut,clip:cOut},class_type:"LoraLoader"};
+            mOut=[ln,0]; cOut=[ln,1];
+        }
+        const posText=p.promptPos?.trim()?(await translateToEnglish(p.promptPos)||p.promptPos):transGlobalPos;
+        const negText=p.promptNeg?.trim()||globalNeg;
+        const posN=alloc(), negN=alloc(), ksN=alloc();
+        wf[posN]={inputs:{text:posText,clip:cOut},class_type:"CLIPTextEncode"};
+        wf[negN]={inputs:{text:negText,clip:cOut},class_type:"CLIPTextEncode"};
+        wf[ksN]={inputs:{seed:baseSeed+i,steps:p.steps,cfg:p.cfg,sampler_name:p.sampler,scheduler:p.scheduler,denoise:p.denoise,model:mOut,positive:[posN,0],negative:[negN,0],latent_image:prevLat},class_type:"KSampler"};
+        prevLat=[ksN,0];
+    }
+    const decN=alloc(), saveN=alloc();
+    wf[decN]={inputs:{samples:prevLat,vae:lastVae},class_type:"VAEDecode"};
+    wf[saveN]={inputs:{filename_prefix:"IrisForge_Custom",images:[decN,0]},class_type:"SaveImage"};
+    showStatus('Envoi du workflow...','loading');
+    try {
+        const qr=await fetch(`${apiUrl}/prompt`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:wf,client_id:clientId})});
+        if(!qr.ok)throw new Error(`Erreur API (${qr.status})`);
+        const {prompt_id:promptId}=await qr.json();
+        const totalSteps=passes.reduce((s,p)=>s+p.steps,0);
+        showStatus(`Génération... (${passes.length} passe${passes.length>1?'s':''}, ${totalSteps} steps)`,'loading');
+        const ws=new WebSocket(`${apiUrl.replace('http','ws')}/ws?clientId=${clientId}`);
+        ws.onmessage=async(event)=>{
+            if(typeof event.data!=='string')return;
+            let msg; try{msg=JSON.parse(event.data);}catch(e){return;}
+            if(msg.type==='progress'&&msg.data.prompt_id===promptId)
+                showStatus(`Génération... ${msg.data.value}/${msg.data.max}`,'loading');
+            if(msg.type==='executing'&&msg.data.prompt_id===promptId&&msg.data.node===null){
+                ws.close();
+                showStatus("Récupération de l'image...",'loading');
+                await new Promise(r=>setTimeout(r,500));
+                try {
+                    const hr=await fetch(`${apiUrl}/history/${promptId}`);
+                    const hist=await hr.json();
+                    const out=hist[promptId]?.outputs?.[saveN];
+                    if(out?.images?.length){
+                        const img=out.images[0];
+                        const imgUrl=`${apiUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder||'')}&type=${encodeURIComponent(img.type||'output')}`;
+                        document.getElementById('resultImg').src=imgUrl;
+                        document.getElementById('resultWrap').classList.add('show');
+                        document.getElementById('downloadBtn').href=imgUrl;
+                        showStatus(`✅ Généré en ${passes.length} passe${passes.length>1?'s':''} !`,'success');
+                    } else throw new Error('Image introuvable');
+                } catch(e){showStatus('❌ '+e.message,'error');}
+                isGenerating=false; document.getElementById('genBtn').disabled=false;
             }
-            return null;
-        } catch(e) { return null; }
-    }
-
-    // ── GENERATE ──────────────────────────────────────────────────────────────
-    async function generateImage() {
-        if (isGenerating) return;
-
-        const apiUrl = document.getElementById('comfyUrl').value.trim();
-        const model  = document.getElementById('modelSelect').value;
-        const userPrompt = document.getElementById('promptPos').value.trim();
-        const negPrompt  = document.getElementById('promptNeg').value.trim() || 'worst quality, low quality, blurry';
-
-        if (!apiUrl) { showStatus('⚠️ URL ComfyUI manquante', 'error'); return; }
-        if (!model)  { showStatus('⚠️ Choisis un modèle', 'error'); return; }
-        if (!userPrompt) { showStatus('⚠️ Prompt vide', 'error'); return; }
-
-        saveSettings();
-        isGenerating = true;
-        document.getElementById('genBtn').disabled = true;
-        document.getElementById('resultWrap').classList.remove('show');
-        showStatus('Traduction du prompt...', 'loading');
-
-        const translated = await translateToEnglish(userPrompt);
-        const finalPrompt = translated || userPrompt;
-
-        const steps = parseInt(document.getElementById('steps').value);
-        const cfg   = parseFloat(document.getElementById('cfg').value);
-        const sampler    = document.getElementById('samplerName').value;
-        const scheduler  = document.getElementById('scheduler').value;
-        const width  = parseInt(document.getElementById('imgW').value);
-        const height = parseInt(document.getElementById('imgH').value);
-        const vae    = document.getElementById('vaeSelect').value;
-        const seedVal = parseInt(document.getElementById('seed').value);
-        const seed = (seedVal === -1 || isNaN(seedVal)) ? Math.floor(Math.random() * 999999999) : seedVal;
-
-        // Build workflow dynamically
-        const workflow = {};
-
-        // Node 1 : CheckpointLoader
-        workflow["1"] = { inputs: { ckpt_name: model }, class_type: "CheckpointLoaderSimple" };
-        let modelOut  = ["1", 0];
-        let clipOut   = ["1", 1];
-        let vaeOut    = ["1", 2];
-
-        // Optional VAE node
-        if (vae) {
-            workflow["100"] = { inputs: { vae_name: vae }, class_type: "VAELoader" };
-            vaeOut = ["100", 0];
-        }
-
-        // LoRA chain
-        activeLoras.forEach((lora, i) => {
-            const nodeId = String(200 + i);
-            workflow[nodeId] = {
-                inputs: {
-                    lora_name: lora.name,
-                    strength_model: lora.strength,
-                    strength_clip: lora.strength,
-                    model: modelOut,
-                    clip: clipOut
-                },
-                class_type: "LoraLoader"
-            };
-            modelOut = [nodeId, 0];
-            clipOut  = [nodeId, 1];
-        });
-
-        // CLIPTextEncode positive / negative
-        workflow["5"] = { inputs: { text: finalPrompt, clip: clipOut }, class_type: "CLIPTextEncode" };
-        workflow["4"] = { inputs: { text: negPrompt,   clip: clipOut }, class_type: "CLIPTextEncode" };
-
-        // EmptyLatentImage
-        workflow["6"] = { inputs: { width, height, batch_size: 1 }, class_type: "EmptyLatentImage" };
-
-        // KSampler
-        workflow["7"] = {
-            inputs: {
-                seed, steps, cfg,
-                sampler_name: sampler,
-                scheduler,
-                denoise: 1,
-                model: modelOut,
-                positive: ["5", 0],
-                negative: ["4", 0],
-                latent_image: ["6", 0]
-            },
-            class_type: "KSampler"
         };
+        ws.onerror=()=>{showStatus('❌ Erreur WebSocket','error');isGenerating=false;document.getElementById('genBtn').disabled=false;};
+    } catch(e){showStatus('❌ '+e.message,'error');isGenerating=false;document.getElementById('genBtn').disabled=false;}
+}
 
-        // VAEDecode
-        workflow["8"] = { inputs: { samples: ["7", 0], vae: vaeOut }, class_type: "VAEDecode" };
+function saveAsWorkflow() {
+    const name=prompt('Nom du workflow :'); if(!name)return;
+    const wf={id:'wf_'+Date.now(),name:name.trim(),description:`${passes.length} passe${passes.length>1?'s':''} — Custom`,category:'Mes workflows',
+        width:parseInt(document.getElementById('imgW').value),height:parseInt(document.getElementById('imgH').value),
+        promptNeg:document.getElementById('promptNeg').value,passes:JSON.parse(JSON.stringify(passes))};
+    const existing=JSON.parse(localStorage.getItem('irisforge_workflows')||'[]');
+    existing.push(wf); localStorage.setItem('irisforge_workflows',JSON.stringify(existing));
+    showStatus(`✅ Workflow "${name}" sauvegardé !`,'success');
+    setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
+}
 
-        // SaveImage
-        workflow["9"] = { inputs: { filename_prefix: "IrisForge_Custom", images: ["8", 0] }, class_type: "SaveImage" };
-
-        showStatus('Envoi du workflow...', 'loading');
-
-        try {
-            const queueRes = await fetch(`${apiUrl}/prompt`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: workflow, client_id: clientId })
-            });
-
-            if (!queueRes.ok) throw new Error(`Erreur API (${queueRes.status})`);
-            const { prompt_id: promptId } = await queueRes.json();
-
-            showStatus('Génération en cours...', 'loading');
-
-            const ws = new WebSocket(`${apiUrl.replace('http', 'ws')}/ws?clientId=${clientId}`);
-
-            ws.onmessage = async (event) => {
-                if (typeof event.data !== 'string') return;
-                let msg;
-                try { msg = JSON.parse(event.data); } catch(e) { return; }
-
-                if (msg.type === 'progress' && msg.data.prompt_id === promptId) {
-                    showStatus(`Génération... ${msg.data.value}/${msg.data.max}`, 'loading');
-                }
-
-                if (msg.type === 'executing' && msg.data.prompt_id === promptId && msg.data.node === null) {
-                    ws.close();
-                    showStatus('Récupération de l\'image...', 'loading');
-                    await new Promise(r => setTimeout(r, 500));
-
-                    try {
-                        const histRes = await fetch(`${apiUrl}/history/${promptId}`);
-                        const hist    = await histRes.json();
-                        const outputs = hist[promptId]?.outputs?.['9'];
-
-                        if (outputs?.images?.length) {
-                            const img = outputs.images[0];
-                            const imgUrl = `${apiUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder||'')}&type=${encodeURIComponent(img.type||'output')}`;
-                            const resultImg = document.getElementById('resultImg');
-                            resultImg.src = imgUrl;
-                            document.getElementById('resultWrap').classList.add('show');
-                            document.getElementById('downloadBtn').href = imgUrl;
-                            showStatus('✅ Image générée !', 'success');
-                        } else {
-                            throw new Error('Image introuvable dans l\'historique');
-                        }
-                    } catch(e) {
-                        showStatus('❌ Erreur récupération : ' + e.message, 'error');
-                    }
-
-                    isGenerating = false;
-                    document.getElementById('genBtn').disabled = false;
-                }
-            };
-
-            ws.onerror = () => {
-                showStatus('❌ Erreur WebSocket', 'error');
-                isGenerating = false;
-                document.getElementById('genBtn').disabled = false;
-            };
-
-        } catch(e) {
-            showStatus('❌ ' + e.message, 'error');
-            isGenerating = false;
-            document.getElementById('genBtn').disabled = false;
+function loadPendingWorkflow() {
+    const raw=localStorage.getItem('pending_workflow'); if(!raw)return;
+    localStorage.removeItem('pending_workflow');
+    try {
+        const wf=JSON.parse(raw);
+        if(wf.width)document.getElementById('imgW').value=wf.width;
+        if(wf.height)document.getElementById('imgH').value=wf.height;
+        if(wf.promptNeg)document.getElementById('promptNeg').value=wf.promptNeg;
+        if(wf.passes&&wf.passes.length){
+            passes=wf.passes;
+            localStorage.setItem('pending_models',JSON.stringify(passes.map(p=>p.model)));
+        } else {
+            passes=[defaultPass(0)];
+            if(wf.sampler)passes[0].sampler=wf.sampler;
+            if(wf.scheduler)passes[0].scheduler=wf.scheduler;
+            if(wf.steps)passes[0].steps=wf.steps;
+            if(wf.cfg)passes[0].cfg=wf.cfg;
+            if(wf.loras)passes[0].loras=wf.loras;
+            if(wf.model)localStorage.setItem('pending_model',wf.model);
         }
-    }
+        renderPasses();
+        showStatus(`✅ Workflow "${wf.name}" chargé !`,'success');
+        setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
+    } catch(e){console.error(e);}
+}
 
-    // ── SEND TO OTHER PAGES ───────────────────────────────────────────────────
-    function sendToEditor() {
-        const src = document.getElementById('resultImg').src;
-        if (!src) return;
-        localStorage.setItem('editorImage', src);
-        window.location.href = 'editor.html';
-    }
+function sendToEditor(){const s=document.getElementById('resultImg').src;if(s){localStorage.setItem('editorImage',s);window.location.href='editor.html';}}
+function sendToVideo(){const s=document.getElementById('resultImg').src;if(s){localStorage.setItem('videoSourceImage',s);window.location.href='video.html';}}
 
-    function sendToVideo() {
-        const src = document.getElementById('resultImg').src;
-        if (!src) return;
-        localStorage.setItem('videoSourceImage', src);
-        window.location.href = 'video.html';
-    }
+function showStatus(text,type){
+    const bar=document.getElementById('statusBar');
+    document.getElementById('statusText').textContent=text;
+    bar.className='status-bar show '+type;
+    document.getElementById('spinner').style.display=type==='loading'?'block':'none';
+}
 
-    // ── STATUS ────────────────────────────────────────────────────────────────
-    function showStatus(text, type) {
-        const bar = document.getElementById('statusBar');
-        const spinner = document.getElementById('spinner');
-        document.getElementById('statusText').textContent = text;
-        bar.className = 'status-bar show ' + type;
-        spinner.style.display = type === 'loading' ? 'block' : 'none';
-    }
-
-
-    // ── SAVE AS WORKFLOW ──────────────────────────────────────────────────────
-    function saveAsWorkflow() {
-        const name = prompt('Nom du workflow :');
-        if (!name) return;
-        const wf = {
-            id: 'wf_' + Date.now(),
-            name: name.trim(),
-            description: 'Sauvegardé depuis Custom',
-            category: 'Mes workflows',
-            model: document.getElementById('modelSelect').value,
-            sampler: document.getElementById('samplerName').value,
-            scheduler: document.getElementById('scheduler').value,
-            steps: parseInt(document.getElementById('steps').value),
-            cfg: parseFloat(document.getElementById('cfg').value),
-            width: parseInt(document.getElementById('imgW').value),
-            height: parseInt(document.getElementById('imgH').value),
-            promptNeg: document.getElementById('promptNeg').value,
-            loras: [...activeLoras]
-        };
-        const existing = JSON.parse(localStorage.getItem('irisforge_workflows') || '[]');
-        existing.push(wf);
-        localStorage.setItem('irisforge_workflows', JSON.stringify(existing));
-        showStatus('✅ Workflow "' + name + '" sauvegardé !', 'success');
-        setTimeout(() => document.getElementById('statusBar').classList.remove('show'), 3000);
-    }
-
-    // ── LOAD PENDING WORKFLOW ─────────────────────────────────────────────────
-    function loadPendingWorkflow() {
-        const raw = localStorage.getItem('pending_workflow');
-        if (!raw) return;
-        localStorage.removeItem('pending_workflow');
-        try {
-            const wf = JSON.parse(raw);
-            if (wf.sampler)   document.getElementById('samplerName').value = wf.sampler;
-            if (wf.scheduler) document.getElementById('scheduler').value   = wf.scheduler;
-            if (wf.steps)     { document.getElementById('steps').value = wf.steps; document.getElementById('stepsVal').textContent = wf.steps; }
-            if (wf.cfg)       { document.getElementById('cfg').value = wf.cfg; document.getElementById('cfgVal').textContent = parseFloat(wf.cfg).toFixed(1); }
-            if (wf.width)     document.getElementById('imgW').value = wf.width;
-            if (wf.height)    document.getElementById('imgH').value = wf.height;
-            if (wf.promptNeg) document.getElementById('promptNeg').value = wf.promptNeg;
-            if (wf.loras)     { activeLoras = wf.loras; renderLoras(); }
-            // Model will be selected after connectAndLoad populates the list
-            if (wf.model) localStorage.setItem('pending_model', wf.model);
-            showStatus('✅ Workflow "' + wf.name + '" chargé !', 'success');
-            setTimeout(() => document.getElementById('statusBar').classList.remove('show'), 3000);
-        } catch(e) { console.error('pending_workflow parse error', e); }
-    }
-    // ── INIT ──────────────────────────────────────────────────────────────────
-    loadSettings();
-    loadPendingWorkflow(); // sets pending_model in localStorage before connectAndLoad reads it
-    const savedUrl = localStorage.getItem('comfyUrl');
-    if (savedUrl) {
-        document.getElementById('comfyUrl').value = savedUrl;
-        connectAndLoad(); // will read pending_model and apply it after populating the select
-    }
-
-    // Auto-save on change
-    ['samplerName','scheduler','promptNeg','modelSelect','vaeSelect'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', saveSettings);
-    });
-    ['steps','cfg','imgW','imgH'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', saveSettings);
-    });
-    document.getElementById('comfyUrl').addEventListener('change', saveSettings);
+// INIT
+passes=[defaultPass(0)];
+renderPasses();
+loadPendingWorkflow();
+const savedUrl=localStorage.getItem('comfyUrl');
+if(savedUrl){document.getElementById('comfyUrl').value=savedUrl;connectAndLoad();}
 </script>
 </body>
 </html>
