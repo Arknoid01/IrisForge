@@ -245,6 +245,8 @@
         .lora-del-btn:hover { background: rgba(239,68,68,0.35); transform: none; box-shadow: none; }
         .lora-empty { color: rgba(255,255,255,0.25); font-size: 12px; text-align: center; padding: 10px 0; }
         .load-status { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 6px; text-align: center; min-height: 14px; }
+        .res-btn { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
+        .res-btn:hover, .res-btn.active { background: rgba(167,139,250,0.2); border-color: #a78bfa; color: #a78bfa; }
     
         /* ── Barre de progression Style C ── */
         .iris-progress {
@@ -495,6 +497,105 @@
         <div class="load-status" id="loadStatus"></div>
     </div>
 
+    <!-- PARAMÈTRES AVANCÉS -->
+    <div class="models-section" style="margin-top:16px;">
+        <div class="models-header">
+            <span class="models-title">🎛️ Paramètres avancés</span>
+            <button type="button" class="load-btn" onclick="toggleAdvanced()" id="advToggleBtn">▼ Afficher</button>
+        </div>
+        <div id="advancedParams" style="display:none;">
+
+            <!-- CLIP & VAE -->
+            <div class="model-row" style="margin-top:10px;">
+                <div class="model-col">
+                    <label>CLIP</label>
+                    <input type="text" id="clipName" class="model-select" value="umt5_xxl_fp8_e4m3fn_scaled.safetensors" style="font-size:11px;">
+                </div>
+                <div class="model-col">
+                    <label>VAE</label>
+                    <input type="text" id="vaeName" class="model-select" value="wan_2.1_vae.safetensors" style="font-size:11px;">
+                </div>
+            </div>
+
+            <!-- RÉSOLUTION -->
+            <div style="margin-top:12px;">
+                <label style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;">Résolution</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                    <button class="res-btn active" onclick="setResolution(384,672,this)">Portrait 384×672</button>
+                    <button class="res-btn" onclick="setResolution(672,384,this)">Paysage 672×384</button>
+                    <button class="res-btn" onclick="setResolution(480,480,this)">Carré 480×480</button>
+                    <button class="res-btn" onclick="setResolution(576,1024,this)">HD Portrait 576×1024</button>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="number" id="vidW" value="384" min="64" max="1280" step="64" class="model-select" style="text-align:center;width:80px;">
+                    <span style="color:rgba(255,255,255,0.3);">×</span>
+                    <input type="number" id="vidH" value="672" min="64" max="1280" step="64" class="model-select" style="text-align:center;width:80px;">
+                </div>
+            </div>
+
+            <!-- SAMPLER PARAMS -->
+            <div class="model-row" style="margin-top:12px;">
+                <div class="model-col">
+                    <label>Sampler</label>
+                    <select id="vidSampler" class="model-select">
+                        <option value="euler_ancestral" selected>euler_ancestral</option>
+                        <option value="euler">euler</option>
+                        <option value="er_sde">er_sde</option>
+                        <option value="dpmpp_2m">dpmpp_2m</option>
+                        <option value="dpmpp_2m_sde">dpmpp_2m_sde</option>
+                        <option value="dpmpp_3m_sde">dpmpp_3m_sde</option>
+                        <option value="heun">heun</option>
+                        <option value="ddim">ddim</option>
+                        <option value="uni_pc">uni_pc</option>
+                    </select>
+                </div>
+                <div class="model-col">
+                    <label>Scheduler</label>
+                    <select id="vidScheduler" class="model-select">
+                        <option value="normal" selected>normal</option>
+                        <option value="karras">karras</option>
+                        <option value="simple">simple</option>
+                        <option value="exponential">exponential</option>
+                        <option value="sgm_uniform">sgm_uniform</option>
+                        <option value="beta">beta</option>
+                        <option value="align_your_steps">align_your_steps</option>
+                    </select>
+                </div>
+            </div>
+            <div class="model-row" style="margin-top:10px;">
+                <div class="model-col">
+                    <label>Steps <span id="vidStepsVal" style="color:#a78bfa;font-weight:700;">25</span></label>
+                    <input type="range" min="5" max="50" value="25" style="width:100%;accent-color:#a78bfa;"
+                        oninput="document.getElementById('vidStepsVal').textContent=this.value">
+                </div>
+                <div class="model-col">
+                    <label>CFG <span id="vidCfgVal" style="color:#a78bfa;font-weight:700;">2.5</span></label>
+                    <input type="range" min="1" max="10" step="0.5" value="2.5" style="width:100%;accent-color:#a78bfa;"
+                        oninput="document.getElementById('vidCfgVal').textContent=parseFloat(this.value).toFixed(1)">
+                </div>
+            </div>
+            <div class="model-row" style="margin-top:10px;">
+                <div class="model-col">
+                    <label>Shift ModelSampling <span id="vidShiftVal" style="color:#a78bfa;font-weight:700;">5.0</span></label>
+                    <input type="range" min="1" max="20" step="0.5" value="5" style="width:100%;accent-color:#a78bfa;"
+                        oninput="document.getElementById('vidShiftVal').textContent=parseFloat(this.value).toFixed(1)">
+                </div>
+                <div class="model-col">
+                    <label>Split passe haute/basse <span id="vidSplitVal" style="color:#a78bfa;font-weight:700;">12/25</span></label>
+                    <input type="range" min="1" max="49" value="12" id="vidSplit" style="width:100%;accent-color:#a78bfa;"
+                        oninput="updateSplit(this.value)">
+                </div>
+            </div>
+
+            <!-- PROMPT NÉGATIF -->
+            <div style="margin-top:12px;">
+                <label style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;">Prompt négatif</label>
+                <textarea id="vidNegPrompt" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px;color:#fff;font-size:12px;resize:vertical;min-height:60px;font-family:inherit;">blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping</textarea>
+            </div>
+
+        </div>
+    </div>
+
     <button onclick="startGeneration()" id="generateBtn">🎬 Générer</button>
 
 
@@ -686,10 +787,7 @@
     // ── MODELS & LORAS ────────────────────────────────────────────────────────
     let availableUnets = [];
     let availableLoras = [];
-    let loraList = [
-        { name: "loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors", strength: 0.15, model: "high" },
-        { name: "DetailTweaker.safetensors", strength: 0.15, model: "low" }
-    ];
+    let loraList = JSON.parse(localStorage.getItem('iris_video_loras') || '[]');
 
     async function loadComfyAssets() {
         const apiUrl = document.getElementById('comfyUrl').value.trim();
@@ -742,6 +840,7 @@
 
     function addLora() {
         loraList.push({ name: availableLoras[0] || '', strength: 0.5, model: 'high' });
+        saveLoraList();
         renderLoras();
     }
 
@@ -767,9 +866,55 @@
                     <input type="range" class="lora-strength-slider" min="0" max="1" step="0.05" value="${l.strength}"
                         oninput="loraList[${i}].strength=parseFloat(this.value);document.getElementById('lsv${i}').textContent=parseFloat(this.value).toFixed(2)">
                 </div>
-                <button class="lora-del-btn" onclick="loraList.splice(${i},1);renderLoras()">🗑</button>
+                <button class="lora-del-btn" onclick="loraList.splice(${i},1);saveLoraList();renderLoras()">🗑</button>
             </div>`;
         }).join('');
+    }
+
+    function saveLoraList() {
+        localStorage.setItem('iris_video_loras', JSON.stringify(loraList));
+    }
+
+    // Save lora strength changes too
+    function updateLoraStrength(i, val) {
+        loraList[i].strength = parseFloat(val);
+        document.getElementById('lsv' + i).textContent = parseFloat(val).toFixed(2);
+        saveLoraList();
+    }
+
+    function toggleAdvanced() {
+        const panel = document.getElementById('advancedParams');
+        const btn = document.getElementById('advToggleBtn');
+        const open = panel.style.display === 'none';
+        panel.style.display = open ? 'block' : 'none';
+        btn.textContent = open ? '▲ Masquer' : '▼ Afficher';
+    }
+
+    function setResolution(w, h, btn) {
+        document.getElementById('vidW').value = w;
+        document.getElementById('vidH').value = h;
+        document.querySelectorAll('.res-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function updateSplit(val) {
+        const steps = parseInt(document.querySelector('[oninput*="vidStepsVal"]').value) || 25;
+        document.getElementById('vidSplitVal').textContent = `${val}/${steps}`;
+    }
+
+    function getVideoParams() {
+        const steps   = parseInt(document.querySelector('[oninput*="vidStepsVal"]').value) || 25;
+        const cfg     = parseFloat(document.querySelector('[oninput*="vidCfgVal"]').value) || 2.5;
+        const shift   = parseFloat(document.querySelector('[oninput*="vidShiftVal"]').value) || 5.0;
+        const split   = parseInt(document.getElementById('vidSplit')?.value) || 12;
+        const sampler = document.getElementById('vidSampler')?.value || 'euler_ancestral';
+        const sched   = document.getElementById('vidScheduler')?.value || 'normal';
+        const w       = parseInt(document.getElementById('vidW')?.value) || 384;
+        const h       = parseInt(document.getElementById('vidH')?.value) || 672;
+        const clip    = document.getElementById('clipName')?.value || 'umt5_xxl_fp8_e4m3fn_scaled.safetensors';
+        const vae     = document.getElementById('vaeName')?.value || 'wan_2.1_vae.safetensors';
+        const negPrompt = document.getElementById('vidNegPrompt')?.value || '';
+        return { steps, cfg, shift, split, sampler, sched, w, h, clip, vae, negPrompt };
     }
 
     // Restore cached assets on load
@@ -1016,14 +1161,14 @@
             const modelLowName  = document.getElementById('modelLow').value;
 
             const workflow = {
-                "84": { inputs: { clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors", type: "wan" }, class_type: "CLIPLoader" },
-                "90": { inputs: { vae_name: "wan_2.1_vae.safetensors" }, class_type: "VAELoader" },
+"84": { inputs: { clip_name: vp.clip, type: "wan" }, class_type: "CLIPLoader" },
+                "90": { inputs: { vae_name: vp.vae }, class_type: "VAELoader" },
                 "95": { inputs: { unet_name: modelHighName, weight_dtype: "default" }, class_type: "UNETLoader" },
                 "96": { inputs: { unet_name: modelLowName,  weight_dtype: "default" }, class_type: "UNETLoader" },
                 "97": { inputs: { image: imageName, upload: "image" }, class_type: "LoadImage" },
-                "120": { inputs: { upscale_method: "lanczos", width: 384, height: 672, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
+                "120": { inputs: { upscale_method: "lanczos", width: vp.w, height: vp.h, crop: "disabled", image: ["97", 0] }, class_type: "ImageScale" },
                 "93": { inputs: { text: prompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
-                "89": { inputs: { text: "blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping", clip: ["84", 0] }, class_type: "CLIPTextEncode" },
+                "89": { inputs: { text: vp.negPrompt, clip: ["84", 0] }, class_type: "CLIPTextEncode" },
                 "87": { inputs: { samples: ["85", 0], vae: ["90", 0] }, class_type: "VAEDecode" }
             };
 
@@ -1043,12 +1188,12 @@
             });
 
             // ModelSamplingSD3 avec les modèles finaux (après LoRAs)
-            workflow["103"] = { inputs: { shift: 5.0, model: lowChain  }, class_type: "ModelSamplingSD3" };
-            workflow["104"] = { inputs: { shift: 5.0, model: highChain }, class_type: "ModelSamplingSD3" };
+            workflow["103"] = { inputs: { shift: vp.shift, model: lowChain  }, class_type: "ModelSamplingSD3" };
+            workflow["104"] = { inputs: { shift: vp.shift, model: highChain }, class_type: "ModelSamplingSD3" };
 
-            workflow["98"] = { inputs: { width: 384, height: 672, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" };
-            workflow["86"] = { inputs: { add_noise: "enable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 0, end_at_step: 12, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" };
-            workflow["85"] = { inputs: { add_noise: "disable", noise_seed: seed, steps: 25, cfg: 2.5, sampler_name: "euler_ancestral", scheduler: "normal", start_at_step: 12, end_at_step: 25, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" };
+            workflow["98"] = { inputs: { width: vp.w, height: vp.h, length: frameCount, batch_size: 1, positive: ["93", 0], negative: ["89", 0], vae: ["90", 0], start_image: ["120", 0] }, class_type: "WanImageToVideo" };
+            workflow["86"] = { inputs: { add_noise: "enable", noise_seed: seed, steps: vp.steps, cfg: vp.cfg, sampler_name: vp.sampler, scheduler: vp.sched, start_at_step: 0, end_at_step: vp.split, return_with_leftover_noise: "enable", model: ["104", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["98", 2] }, class_type: "KSamplerAdvanced" };
+            workflow["85"] = { inputs: { add_noise: "disable", noise_seed: seed, steps: vp.steps, cfg: vp.cfg, sampler_name: vp.sampler, scheduler: vp.sched, start_at_step: vp.split, end_at_step: vp.steps, return_with_leftover_noise: "disable", model: ["103", 0], positive: ["98", 0], negative: ["98", 1], latent_image: ["86", 0] }, class_type: "KSamplerAdvanced" };
 
             let nodeId = 200;
             let lastOutput = ["87", 0];
