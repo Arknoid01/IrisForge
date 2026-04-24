@@ -1159,9 +1159,10 @@
             // Read selected models from UI
             const modelHighName = document.getElementById('modelHigh').value;
             const modelLowName  = document.getElementById('modelLow').value;
+            const vp = getVideoParams();
 
             const workflow = {
-"84": { inputs: { clip_name: vp.clip, type: "wan" }, class_type: "CLIPLoader" },
+                "84": { inputs: { clip_name: vp.clip, type: "wan" }, class_type: "CLIPLoader" },
                 "90": { inputs: { vae_name: vp.vae }, class_type: "VAELoader" },
                 "95": { inputs: { unet_name: modelHighName, weight_dtype: "default" }, class_type: "UNETLoader" },
                 "96": { inputs: { unet_name: modelLowName,  weight_dtype: "default" }, class_type: "UNETLoader" },
