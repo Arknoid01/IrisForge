@@ -354,9 +354,40 @@
     }
 
     function wfCard(wf, editable) {
-        const loraHtml = wf.loras?.length
-            ? `<div class="lora-pills">${wf.loras.map(l => `<span class="lora-pill" title="${l.name}">🎨 ${l.name.replace('.safetensors','').replace('.pt','')} ×${l.strength}</span>`).join('')}</div>`
-            : '';
+        // Multi-pass workflow
+        const isMultiPass = wf.passes && wf.passes.length > 0;
+        const passCount = isMultiPass ? wf.passes.length : 1;
+        const passIcons = ['🔵','🟣','🩷','🟡'];
+
+        let metaHtml = '';
+        if (isMultiPass) {
+            // Show each pass summary
+            metaHtml = wf.passes.map((p, i) => {
+                const modelName = p.model ? p.model.replace('.safetensors','').replace('.pt','') : 'modèle libre';
+                const loraCount = p.loras?.length || 0;
+                return `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;align-items:center;">
+                    <span style="font-size:10px;color:rgba(255,255,255,0.3);width:52px;flex-shrink:0;">Passe ${i+1}</span>
+                    <span class="wf-tag highlight">🧠 ${modelName}</span>
+                    <span class="wf-tag">${p.sampler||'dpmpp_2m'}</span>
+                    <span class="wf-tag">${p.steps||25} steps</span>
+                    <span class="wf-tag">CFG ${p.cfg||7}</span>
+                    <span class="wf-tag">dn ${parseFloat(p.denoise||1).toFixed(2)}</span>
+                    ${loraCount ? `<span class="wf-tag">🎨 ×${loraCount}</span>` : ''}
+                </div>`;
+            }).join('');
+        } else {
+            const modelName = wf.model ? wf.model.replace('.safetensors','').replace('.pt','') : 'modèle libre';
+            const loraHtml = wf.loras?.length
+                ? `<div class="lora-pills">${wf.loras.map(l=>`<span class="lora-pill">🎨 ${l.name.replace('.safetensors','').replace('.pt','')} ×${l.strength}</span>`).join('')}</div>`
+                : '';
+            metaHtml = `<div class="wf-meta">
+                ${wf.model ? `<span class="wf-tag highlight">🧠 ${modelName}</span>` : '<span class="wf-tag">🧠 modèle libre</span>'}
+                <span class="wf-tag">${wf.sampler||'dpmpp_2m'}</span>
+                <span class="wf-tag">${wf.steps||25} steps</span>
+                <span class="wf-tag">CFG ${wf.cfg||7}</span>
+                <span class="wf-tag">${wf.width||1024}×${wf.height||1024}</span>
+            </div>${loraHtml}`;
+        }
 
         const editBtns = editable ? `
             <button class="btn btn-ghost btn-sm" onclick="openEdit('${wf.id}')">✏️</button>
@@ -365,6 +396,8 @@
             <button class="btn btn-ghost btn-sm" onclick="openEdit('${wf.id}', true)">✏️ Détails</button>
         `;
 
+        const passLabel = passCount > 1 ? `${passCount} passes` : '1 passe';
+
         return `
         <div class="wf-card" id="wf_${wf.id}">
             <div class="wf-header">
@@ -372,16 +405,12 @@
                     <div class="wf-title">${wf.name}</div>
                     <div class="wf-desc">${wf.description || ''}</div>
                 </div>
-                <span class="wf-category">${wf.category || 'Général'}</span>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <span class="wf-category">${wf.category || 'Général'}</span>
+                    <span style="font-size:10px;color:rgba(255,255,255,0.3);">${passLabel} · ${wf.width||1024}×${wf.height||1024}</span>
+                </div>
             </div>
-            <div class="wf-meta">
-                ${wf.model ? `<span class="wf-tag highlight">🧠 ${wf.model.replace('.safetensors','').replace('.pt','')}</span>` : '<span class="wf-tag">🧠 modèle libre</span>'}
-                <span class="wf-tag">${wf.sampler || 'dpmpp_2m'}</span>
-                <span class="wf-tag">${wf.steps || 25} steps</span>
-                <span class="wf-tag">CFG ${wf.cfg || 7}</span>
-                <span class="wf-tag">${wf.width || 1024}×${wf.height || 1024}</span>
-            </div>
-            ${loraHtml}
+            ${metaHtml}
             <div class="wf-actions" style="margin-top:12px;">
                 <button class="btn btn-apply" style="flex:1;" onclick="applyWorkflow('${wf.id}', ${editable ? 'false' : 'true'})">▶ Appliquer dans Custom</button>
                 ${editBtns}

@@ -254,7 +254,7 @@ function renderPasses() {
             </div>
             <div style="margin-bottom:10px;">
                 <div class="param-label" style="margin-bottom:5px;">Modèle</div>
-                <select class="field-input" onchange="passes[${i}].model=this.value">
+                <select class="field-input" id="pm_${i}" onchange="passes[${i}].model=this.value">
                     <option value="">— Choisir —</option>
                     ${availableModels.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
                 </select>
@@ -366,6 +366,7 @@ async function translateToEnglish(text) {
 
 async function generateImage() {
     if(isGenerating)return;
+    syncPassesFromDOM();
     const apiUrl=document.getElementById('comfyUrl').value.trim();
     const globalPos=document.getElementById('promptPos').value.trim();
     const globalNeg=document.getElementById('promptNeg').value.trim();
@@ -446,7 +447,15 @@ async function generateImage() {
     } catch(e){showStatus('❌ '+e.message,'error');isGenerating=false;document.getElementById('genBtn').disabled=false;}
 }
 
+function syncPassesFromDOM() {
+    passes.forEach((p, i) => {
+        const modelSel = document.getElementById(`pm_${i}`);
+        if (modelSel) p.model = modelSel.value;
+    });
+}
+
 function saveAsWorkflow() {
+    syncPassesFromDOM();
     const name=prompt('Nom du workflow :'); if(!name)return;
     const wf={id:'wf_'+Date.now(),name:name.trim(),description:`${passes.length} passe${passes.length>1?'s':''} — Custom`,category:'Mes workflows',
         width:parseInt(document.getElementById('imgW').value),height:parseInt(document.getElementById('imgH').value),
