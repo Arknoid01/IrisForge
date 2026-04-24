@@ -1019,7 +1019,7 @@
         } catch(e) {}
 
         // Cas 2 : encore en cours → rebrancher WS
-        irisETA.hide(); irisETA.setTotal(25);
+        irisETA.hide(); irisETA.setTotal(getVideoParams().steps);
         isGenerating = true;
         const btn = document.getElementById('generateBtn');
         if (btn) btn.disabled = true;
@@ -1336,7 +1336,7 @@
         try {
             showStatus(`📤 Upload image source (clip ${clipIndex}/${totalExpected})...`, 'loading');
             const imageName = await uploadImageToComfyUI(apiUrl, lastFrameImage);
-            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(25);
+            showStatus(`🎬 Génération clip ${clipIndex}/${totalExpected}...`, 'loading'); irisETA.reset(); irisETA.setTotal(getVideoParams().steps);
             const { videoBlob } = await generateWithInterpolation(apiUrl, imageName, prompt);
 
             // Revoke previous result URL to free memory
