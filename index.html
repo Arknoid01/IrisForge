@@ -360,14 +360,14 @@
             <div class="nav-section">
                 <div class="section-title">Navigation</div>
                 <div class="tiles-col">
-                    <a class="page-tile disabled" id="card-index" href="forge.html">
-                        <div class="tile-icon">🎨</div>
-                        <div class="tile-info"><div class="tile-name">IrisForge 2.0</div><div class="tile-desc">Génération avancée</div></div>
+                    <a class="page-tile disabled" id="card-custom" href="custom.html">
+                        <div class="tile-icon">🛠️</div>
+                        <div class="tile-info"><div class="tile-name">Custom</div><div class="tile-desc">Génération multi-passes</div></div>
                         <span class="tile-arrow">›</span>
                     </a>
-                    <a class="page-tile disabled" id="card-base" href="base.html">
-                        <div class="tile-icon">⚡</div>
-                        <div class="tile-info"><div class="tile-name">IrisForge 3.0</div><div class="tile-desc">Génération rapide</div></div>
+                    <a class="page-tile disabled" id="card-workflows" href="workflows.html">
+                        <div class="tile-icon">⚙️</div>
+                        <div class="tile-info"><div class="tile-name">Workflows</div><div class="tile-desc">Bibliothèque de workflows</div></div>
                         <span class="tile-arrow">›</span>
                     </a>
                     <a class="page-tile disabled" id="card-editor" href="editor.html">
@@ -420,8 +420,8 @@
                         <span class="tile-arrow">›</span>
                     </a>
                     <a class="page-tile disabled" id="card-studio" href="studio.html">
-                        <div class="tile-icon">🤖</div>
-                        <div class="tile-info"><div class="tile-name">Studio IA</div><div class="tile-desc">Éditeur assisté par Claude</div></div>
+                        <div class="tile-icon">📦</div>
+                        <div class="tile-info"><div class="tile-name">Modèles</div><div class="tile-desc">Télécharger & gérer</div></div>
                         <span class="tile-arrow">›</span>
                     </a>
                     <a class="page-tile disabled" id="card-prompt" href="prompt.html">
@@ -453,7 +453,7 @@
 </div>
 
 <script>
-    const PAGES = ['card-index','card-base','card-editor','card-video','card-assemblage','card-historique','card-prompt','card-studio'];
+    const PAGES = ['card-custom','card-workflows','card-editor','card-video','card-assemblage','card-historique','card-prompt','card-studio'];
 
     function setCardsEnabled(enabled) {
         PAGES.forEach(id => {

@@ -372,19 +372,19 @@
             <div class="sidebar-close" onclick="toggleSidebar()">✕</div>
         </div>
         <nav class="sidebar-nav">
-            <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
-            <div class="sidebar-divider"></div>
-            <a href="forge.html" class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
-            <a href="base.html" class="sidebar-link"><span class="icon">⚡</span> IrisForge 3.0</a>
-            <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
-            <a href="video.html" class="sidebar-link active"><span class="icon">🎬</span> Vidéo</a>
-            <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
-            <div class="sidebar-divider"></div>
-            <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
-            <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
-            <div class="sidebar-divider"></div>
-            <a href="studio.html" class="sidebar-link"><span class="icon">🤖</span> Studio IA</a>
-        </nav>
+        <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
+        <div class="sidebar-divider"></div>
+        <a href="custom.html" class="sidebar-link"><span class="icon">🛠️</span> Custom</a>
+        <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
+        <a href="video.html" class="sidebar-link active"><span class="icon">🎬</span> Vidéo</a>
+        <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
+        <div class="sidebar-divider"></div>
+        <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
+        <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
+        <a href="workflows.html" class="sidebar-link"><span class="icon">⚙️</span> Workflows</a>
+        <div class="sidebar-divider"></div>
+        <a href="studio.html" class="sidebar-link"><span class="icon">📦</span> Modèles</a>
+    </nav>
     </div>
 <div class="container">
     
@@ -565,8 +565,8 @@
             <div class="model-row" style="margin-top:10px;">
                 <div class="model-col">
                     <label>Steps <span id="vidStepsVal" style="color:#a78bfa;font-weight:700;">25</span></label>
-                    <input type="range" min="5" max="50" value="25" style="width:100%;accent-color:#a78bfa;"
-                        oninput="document.getElementById('vidStepsVal').textContent=this.value">
+                    <input type="range" min="1" max="50" value="25" id="vidSteps" style="width:100%;accent-color:#a78bfa;"
+                        oninput="onStepsChange(this.value)">
                 </div>
                 <div class="model-col">
                     <label>CFG <span id="vidCfgVal" style="color:#a78bfa;font-weight:700;">2.5</span></label>
@@ -583,7 +583,7 @@
                 <div class="model-col">
                     <label>Split passe haute/basse <span id="vidSplitVal" style="color:#a78bfa;font-weight:700;">12/25</span></label>
                     <input type="range" min="1" max="49" value="12" id="vidSplit" style="width:100%;accent-color:#a78bfa;"
-                        oninput="updateSplit(this.value)">
+                        oninput="updateSplit(parseInt(this.value))">
                 </div>
             </div>
 
@@ -897,13 +897,26 @@
         btn.classList.add('active');
     }
 
+    function onStepsChange(val) {
+        const steps = parseInt(val);
+        document.getElementById('vidStepsVal').textContent = steps;
+        // Auto-adjust split to 50% of steps, capped at steps-1
+        const splitEl = document.getElementById('vidSplit');
+        const autoSplit = Math.max(1, Math.round(steps / 2));
+        splitEl.max = steps - 1;
+        splitEl.value = autoSplit;
+        document.getElementById('vidSplitVal').textContent = `${autoSplit}/${steps}`;
+    }
+
     function updateSplit(val) {
-        const steps = parseInt(document.querySelector('[oninput*="vidStepsVal"]').value) || 25;
-        document.getElementById('vidSplitVal').textContent = `${val}/${steps}`;
+        const steps = parseInt(document.getElementById('vidSteps')?.value) || 25;
+        const split = Math.min(val, steps - 1);
+        document.getElementById('vidSplit').value = split;
+        document.getElementById('vidSplitVal').textContent = `${split}/${steps}`;
     }
 
     function getVideoParams() {
-        const steps   = parseInt(document.querySelector('[oninput*="vidStepsVal"]').value) || 25;
+        const steps   = parseInt(document.getElementById('vidSteps')?.value) || 25;
         const cfg     = parseFloat(document.querySelector('[oninput*="vidCfgVal"]').value) || 2.5;
         const shift   = parseFloat(document.querySelector('[oninput*="vidShiftVal"]').value) || 5.0;
         const split   = parseInt(document.getElementById('vidSplit')?.value) || 12;

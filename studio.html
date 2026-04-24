@@ -165,15 +165,14 @@
     <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-link"><span class="icon">🏠</span> Accueil</a>
         <div class="sidebar-divider"></div>
-        <a href="forge.html" class="sidebar-link"><span class="icon">🎨</span> IrisForge 2.0</a>
-        <a href="base.html" class="sidebar-link"><span class="icon">⚡</span> IrisForge 3.0</a>
+        <a href="custom.html" class="sidebar-link"><span class="icon">🛠️</span> Custom</a>
         <a href="editor.html" class="sidebar-link"><span class="icon">✏️</span> Éditeur</a>
         <a href="video.html" class="sidebar-link"><span class="icon">🎬</span> Vidéo</a>
         <a href="assemblage.html" class="sidebar-link"><span class="icon">🎞️</span> Assemblage</a>
-        <a href="custom.html" class="sidebar-link"><span class="icon">🛠️</span> Custom</a>
         <div class="sidebar-divider"></div>
         <a href="historique.html" class="sidebar-link"><span class="icon">📜</span> Historique</a>
         <a href="prompt.html" class="sidebar-link"><span class="icon">💬</span> Prompts</a>
+        <a href="workflows.html" class="sidebar-link"><span class="icon">⚙️</span> Workflows</a>
         <div class="sidebar-divider"></div>
         <a href="studio.html" class="sidebar-link active"><span class="icon">📦</span> Modèles</a>
     </nav>
@@ -452,15 +451,35 @@
     let currentCmd = 'wget';
     let currentCmdText = { wget: '', curl: '' };
 
+    const DEFAULT_EXT = {
+        checkpoints:    '.safetensors',
+        loras:          '.safetensors',
+        vae:            '.safetensors',
+        upscale_models: '.pth',
+        controlnet:     '.safetensors'
+    };
+    const KNOWN_EXTS = ['.safetensors', '.pt', '.pth', '.ckpt', '.bin'];
+
+    function autoExtension(filename, dlType) {
+        const hasExt = KNOWN_EXTS.some(ext => filename.toLowerCase().endsWith(ext));
+        if (hasExt) return filename;
+        return filename + (DEFAULT_EXT[dlType] || '.safetensors');
+    }
+
     function generateCommand() {
         const dlUrl    = document.getElementById('dlUrl').value.trim();
         const dlType   = document.getElementById('dlType').value;
-        const filename = document.getElementById('dlFilename').value.trim();
+        const rawName  = document.getElementById('dlFilename').value.trim();
         const source   = document.getElementById('dlSource').value;
         const keys     = JSON.parse(localStorage.getItem('irisforge_apikeys') || '{}');
 
-        if (!dlUrl)    { showMsg('dlStatus', '⚠️ URL du modèle manquante', 'err'); return; }
-        if (!filename) { showMsg('dlStatus', '⚠️ Nom du fichier manquant', 'err'); return; }
+        if (!dlUrl)   { showMsg('dlStatus', '⚠️ URL du modèle manquante', 'err'); return; }
+        if (!rawName) { showMsg('dlStatus', '⚠️ Nom du fichier manquant', 'err'); return; }
+
+        const filename = autoExtension(rawName, dlType);
+
+        // Update the input field to show the corrected name
+        document.getElementById('dlFilename').value = filename;
 
         const destPath = `/workspace/ComfyUI/models/${dlType}/${filename}`;
 
