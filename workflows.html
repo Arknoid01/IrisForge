@@ -165,6 +165,7 @@
     <div class="tabs">
         <button class="tab active" id="tabBuiltin" onclick="switchTab('builtin')">🏗️ Pré-construits</button>
         <button class="tab" id="tabCustom" onclick="switchTab('custom')">⭐ Mes workflows</button>
+        <button class="tab" id="tabVideo" onclick="switchTab('video')">🎬 Vidéo</button>
     </div>
 
     <!-- BUILTIN -->
@@ -175,6 +176,11 @@
     <!-- CUSTOM -->
     <div id="panelCustom" style="display:none;">
         <div id="customList"></div>
+    </div>
+
+    <!-- VIDEO -->
+    <div id="panelVideo" style="display:none;">
+        <div id="videoList"></div>
     </div>
 
 </div>
@@ -374,9 +380,12 @@
         currentTab = tab;
         document.getElementById('panelBuiltin').style.display = tab === 'builtin' ? 'block' : 'none';
         document.getElementById('panelCustom').style.display  = tab === 'custom'  ? 'block' : 'none';
+        document.getElementById('panelVideo').style.display   = tab === 'video'   ? 'block' : 'none';
         document.getElementById('tabBuiltin').classList.toggle('active', tab === 'builtin');
         document.getElementById('tabCustom').classList.toggle('active',  tab === 'custom');
+        document.getElementById('tabVideo').classList.toggle('active',   tab === 'video');
         if (tab === 'custom') renderCustom();
+        if (tab === 'video')  renderVideoWorkflows();
     }
 
     // ── RENDER ────────────────────────────────────────────────────────────────
@@ -555,8 +564,76 @@
         if (e.target === document.getElementById('editModal')) closeModal();
     });
 
-    // ── INIT ──────────────────────────────────────────────────────────────────
+    // ── VIDEO WORKFLOWS ──────────────────────────────────────────────────────
+    let videoWorkflows = [];
+
+    function loadVideoWorkflows() {
+        try { videoWorkflows = JSON.parse(localStorage.getItem('irisforge_video_workflows') || '[]'); } catch { videoWorkflows = []; }
+    }
+
+    function saveVideoWorkflows() {
+        localStorage.setItem('irisforge_video_workflows', JSON.stringify(videoWorkflows));
+    }
+
+    function renderVideoWorkflows() {
+        const list = document.getElementById('videoList');
+        if (!videoWorkflows.length) {
+            list.innerHTML = `<div class="empty-state"><div class="icon">🎬</div><p>Aucun workflow vidéo sauvegardé.<br>Crée-en un depuis la page Vidéo !</p></div>`;
+            return;
+        }
+        list.innerHTML = videoWorkflows.map(wf => videoWfCard(wf)).join('');
+    }
+
+    function videoWfCard(wf) {
+        const loraHtml = wf.loras?.length
+            ? `<div class="lora-pills">${wf.loras.map(l => `<span class="lora-pill">🎨 ${l.name.replace('.safetensors','').replace('.pt','')} ×${l.strength} (${l.model})</span>`).join('')}</div>`
+            : '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">Aucun LoRA</div>';
+
+        return `
+        <div class="wf-card" id="vwf_${wf.id}">
+            <div class="wf-header">
+                <div>
+                    <div class="wf-title">${wf.name}</div>
+                    <div class="wf-desc">${wf.description || ''}</div>
+                </div>
+                <span class="wf-category" style="background:rgba(236,72,153,0.15);border-color:rgba(236,72,153,0.3);color:#ec4899;">🎬 Vidéo</span>
+            </div>
+            <div class="wf-meta">
+                <span class="wf-tag highlight">⬆️ ${(wf.modelHigh||'').replace('.safetensors','').substring(0,25)}</span>
+                <span class="wf-tag">⬇️ ${(wf.modelLow||'').replace('.safetensors','').substring(0,20)}</span>
+                <span class="wf-tag">${wf.sampler||'euler_a'}</span>
+                <span class="wf-tag">${wf.steps||25} steps</span>
+                <span class="wf-tag">CFG ${wf.cfg||2.5}</span>
+                <span class="wf-tag">shift ${wf.shift||5}</span>
+                <span class="wf-tag">${wf.width||384}×${wf.height||672}</span>
+            </div>
+            ${loraHtml}
+            <div class="wf-actions" style="margin-top:12px;">
+                <button class="btn btn-apply" style="flex:1;" onclick="applyVideoWorkflow('${wf.id}')">▶ Appliquer dans Vidéo</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteVideoWorkflow('${wf.id}')">🗑️</button>
+            </div>
+        </div>`;
+    }
+
+    function applyVideoWorkflow(id) {
+        const wf = videoWorkflows.find(w => w.id === id);
+        if (!wf) return;
+        localStorage.setItem('pending_video_workflow', JSON.stringify(wf));
+        showToast('✅ Workflow chargé, redirection...');
+        setTimeout(() => window.location.href = 'video.html', 800);
+    }
+
+    function deleteVideoWorkflow(id) {
+        if (!confirm('Supprimer ce workflow vidéo ?')) return;
+        videoWorkflows = videoWorkflows.filter(w => w.id !== id);
+        saveVideoWorkflows();
+        renderVideoWorkflows();
+        showToast('🗑️ Supprimé', true);
+    }
+
+        // ── INIT ──────────────────────────────────────────────────────────────────
     loadCustom();
+    loadVideoWorkflows();
     renderBuiltin();
 </script>
 </body>

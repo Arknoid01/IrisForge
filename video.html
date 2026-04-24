@@ -597,6 +597,7 @@
     </div>
 
     <button onclick="startGeneration()" id="generateBtn">🎬 Générer</button>
+    <button onclick="saveVideoWorkflow()" style="width:100%;margin-top:8px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;cursor:pointer;">💾 Sauvegarder comme workflow</button>
 
 
 
@@ -809,6 +810,11 @@
 
             populateModelSelect('modelHigh', availableUnets, 'HIGH');
             populateModelSelect('modelLow', availableUnets, 'LOW');
+            // Apply pending models from workflow
+            const pmH = localStorage.getItem('pending_vidModelHigh');
+            const pmL = localStorage.getItem('pending_vidModelLow');
+            if (pmH) { localStorage.removeItem('pending_vidModelHigh'); if (availableUnets.includes(pmH)) document.getElementById('modelHigh').value = pmH; }
+            if (pmL) { localStorage.removeItem('pending_vidModelLow');  if (availableUnets.includes(pmL)) document.getElementById('modelLow').value  = pmL; }
             renderLoras();
             setLoadStatus(`✅ ${availableUnets.length} modèles · ${availableLoras.length} LoRAs chargés`, 'success');
             localStorage.setItem('iris_unets', JSON.stringify(availableUnets));
@@ -930,7 +936,60 @@
         return { steps, cfg, shift, split, sampler, sched, w, h, clip, vae, negPrompt };
     }
 
-    // Restore cached assets on load
+    function saveVideoWorkflow() {
+        const name = prompt('Nom du workflow vidéo :');
+        if (!name) return;
+        const vp = getVideoParams();
+        const wf = {
+            id: 'vidwf_' + Date.now(),
+            name: name.trim(),
+            description: `${vp.steps} steps · ${vp.w}×${vp.h} · ${loraList.length} LoRA`,
+            category: 'Vidéo',
+            type: 'video',
+            modelHigh: document.getElementById('modelHigh').value,
+            modelLow:  document.getElementById('modelLow').value,
+            loras: JSON.parse(JSON.stringify(loraList)),
+            steps: vp.steps, cfg: vp.cfg, shift: vp.shift, split: vp.split,
+            sampler: vp.sampler, scheduler: vp.sched,
+            width: vp.w, height: vp.h,
+            clip: vp.clip, vae: vp.vae,
+            negPrompt: vp.negPrompt
+        };
+        const existing = JSON.parse(localStorage.getItem('irisforge_video_workflows') || '[]');
+        existing.push(wf);
+        localStorage.setItem('irisforge_video_workflows', JSON.stringify(existing));
+        alert(`✅ Workflow "${name}" sauvegardé !`);
+    }
+
+    function loadPendingVideoWorkflow() {
+        const raw = localStorage.getItem('pending_video_workflow');
+        if (!raw) return;
+        localStorage.removeItem('pending_video_workflow');
+        try {
+            const wf = JSON.parse(raw);
+            // Open advanced params panel
+            const panel = document.getElementById('advancedParams');
+            if (panel) panel.style.display = 'block';
+            const btn = document.getElementById('advToggleBtn');
+            if (btn) btn.textContent = '▲ Masquer';
+
+            if (wf.steps)    { document.getElementById('vidSteps').value = wf.steps; onStepsChange(wf.steps); }
+            if (wf.cfg)      { document.querySelector('[oninput*="vidCfgVal"]').value = wf.cfg; document.getElementById('vidCfgVal').textContent = parseFloat(wf.cfg).toFixed(1); }
+            if (wf.shift)    { document.querySelector('[oninput*="vidShiftVal"]').value = wf.shift; document.getElementById('vidShiftVal').textContent = parseFloat(wf.shift).toFixed(1); }
+            if (wf.sampler)  document.getElementById('vidSampler').value = wf.sampler;
+            if (wf.scheduler) document.getElementById('vidScheduler').value = wf.scheduler;
+            if (wf.width)    { document.getElementById('vidW').value = wf.width; document.getElementById('vidH').value = wf.height; }
+            if (wf.clip)     document.getElementById('clipName').value = wf.clip;
+            if (wf.vae)      document.getElementById('vaeName').value = wf.vae;
+            if (wf.negPrompt) document.getElementById('vidNegPrompt').value = wf.negPrompt;
+            if (wf.loras)    { loraList = wf.loras; renderLoras(); }
+            // Store model names to apply after assets load
+            if (wf.modelHigh) localStorage.setItem('pending_vidModelHigh', wf.modelHigh);
+            if (wf.modelLow)  localStorage.setItem('pending_vidModelLow',  wf.modelLow);
+        } catch(e) { console.error(e); }
+    }
+
+        // Restore cached assets on load
     (function restoreCachedAssets() {
         try {
             const u = localStorage.getItem('iris_unets');
@@ -940,6 +999,7 @@
         } catch(e) {}
         renderLoras();
     })();
+    loadPendingVideoWorkflow();
 
     // ── STATE ─────────────────────────────────────────────────────────────────
     let uploadedImage = null;
