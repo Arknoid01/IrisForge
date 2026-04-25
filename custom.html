@@ -217,7 +217,7 @@ function toggleSidebar() {
 }
 
 function defaultPass(i) {
-    return { model:'', loras:[], sampler:'dpmpp_2m_sde_gpu', scheduler:'karras', steps: i===0?25:15, cfg: i===0?7:5, denoise: i===0?1.0:0.6, promptPos:'', promptNeg:'' };
+    return { model:'', model2:'', mergeRatio:0.5, useMerge:false, loras:[], sampler:'dpmpp_2m_sde_gpu', scheduler:'karras', steps: i===0?25:15, cfg: i===0?7:5, denoise: i===0?1.0:0.6, promptPos:'', promptNeg:'' };
 }
 
 const PASS_COLORS = ['pc1','pc2','pc3','pc4'];
@@ -273,11 +273,33 @@ function renderPasses() {
                 ${i>0?`<button class="pass-remove" onclick="removePass(${i})">✕</button>`:''}
             </div>
             <div style="margin-bottom:10px;">
-                <div class="param-label" style="margin-bottom:5px;">Modèle</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+                    <div class="param-label">Modèle 1</div>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.5);cursor:pointer;">
+                        <input type="checkbox" id="pmerge_${i}" ${p.useMerge?'checked':''} onchange="toggleMerge(${i},this.checked)" style="accent-color:var(--violet);">
+                        Fusionner
+                    </label>
+                </div>
                 <select class="field-input" id="pm_${i}" onchange="passes[${i}].model=this.value">
                     <option value="">— Choisir —</option>
                     ${availableModels.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
                 </select>
+                <div id="pmergeBlock_${i}" style="display:${p.useMerge?'block':'none'};margin-top:8px;">
+                    <div class="param-label" style="margin-bottom:5px;">Modèle 2</div>
+                    <select class="field-input" id="pm2_${i}" onchange="passes[${i}].model2=this.value" style="margin-bottom:8px;">
+                        <option value="">— Choisir —</option>
+                        ${availableModels.map(m=>`<option value="${m}"${p.model2===m?' selected':''}>${m}</option>`).join('')}
+                    </select>
+                    <div class="param-label">
+                        Intensité fusion
+                        <span style="font-family:'JetBrains Mono',monospace;color:var(--violet);" id="pmergeLabel_${i}">
+                            M1 ${Math.round((1-(p.mergeRatio||0.5))*100)}% / M2 ${Math.round((p.mergeRatio||0.5)*100)}%
+                        </span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.05" value="${p.mergeRatio||0.5}"
+                        style="width:100%;accent-color:var(--violet);margin-top:4px;"
+                        oninput="updateMergeRatio(${i},this.value)">
+                </div>
             </div>
             <div style="margin-bottom:10px;">
                 <div class="param-label" style="margin-bottom:5px;">LoRA</div>
@@ -322,6 +344,18 @@ function renderPasses() {
         </div>`).join('');
     document.getElementById('passCount').textContent = `${passes.length} passe${passes.length>1?'s':''}`;
     document.getElementById('btnAddPass').disabled = passes.length >= 4;
+}
+
+function toggleMerge(i, val) {
+    passes[i].useMerge = val;
+    document.getElementById(`pmergeBlock_${i}`).style.display = val ? 'block' : 'none';
+}
+
+function updateMergeRatio(i, val) {
+    passes[i].mergeRatio = parseFloat(val);
+    const m1 = Math.round((1-parseFloat(val))*100);
+    const m2 = Math.round(parseFloat(val)*100);
+    document.getElementById(`pmergeLabel_${i}`).textContent = `M1 ${m1}% / M2 ${m2}%`;
 }
 
 function addPass() { if(passes.length>=4)return; passes.push(defaultPass(passes.length)); renderPasses(); }
@@ -414,6 +448,15 @@ async function generateImage() {
         wf[ckpt]={inputs:{ckpt_name:p.model},class_type:"CheckpointLoaderSimple"};
         lastVae=[ckpt,2];
         let mOut=[ckpt,0], cOut=[ckpt,1];
+        // Merge with second model if enabled
+        if(p.useMerge && p.model2) {
+            const ckpt2=alloc();
+            const merge=alloc();
+            wf[ckpt2]={inputs:{ckpt_name:p.model2},class_type:"CheckpointLoaderSimple"};
+            wf[merge]={inputs:{model1:[ckpt,0],model2:[ckpt2,0],ratio:p.mergeRatio||0.5},class_type:"ModelMergeSimple"};
+            mOut=[merge,0];
+            // Use CLIP from model1, VAE from model1
+        }
         for(const lora of p.loras) {
             const ln=alloc();
             wf[ln]={inputs:{lora_name:lora.name,strength_model:lora.strength,strength_clip:lora.strength,model:mOut,clip:cOut},class_type:"LoraLoader"};
@@ -469,8 +512,14 @@ async function generateImage() {
 
 function syncPassesFromDOM() {
     passes.forEach((p, i) => {
-        const modelSel = document.getElementById(`pm_${i}`);
-        if (modelSel) p.model = modelSel.value;
+        const m1 = document.getElementById(`pm_${i}`);
+        const m2 = document.getElementById(`pm2_${i}`);
+        const merge = document.getElementById(`pmerge_${i}`);
+        const ratio = document.getElementById(`pmergeBlock_${i}`)?.querySelector('input[type=range]');
+        if (m1)    p.model      = m1.value;
+        if (m2)    p.model2     = m2.value;
+        if (merge) p.useMerge   = merge.checked;
+        if (ratio) p.mergeRatio = parseFloat(ratio.value);
     });
 }
 
