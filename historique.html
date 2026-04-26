@@ -354,10 +354,14 @@ function renderGallery() {
 }
 
 function galleryCard(f) {
-    const url = `${comfyBase}/view?filename=${encodeURIComponent(f.name)}&type=output&subfolder=`;
+    const subfolder = f.subfolder && f.subfolder !== '.' ? f.subfolder : '';
+    const url = `${comfyBase}/view?filename=${encodeURIComponent(f.name)}&type=output&subfolder=${encodeURIComponent(subfolder)}`;
     const isVid = isVideo(f.name);
     const media = isVid
-        ? `<video src="${url}" preload="metadata"></video><div class="video-badge">🎬 MP4</div>`
+        ? `<div style="aspect-ratio:9/16;background:linear-gradient(135deg,#1a0a2e,#0f0f1e);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px 12px 0 0;">
+            <div style="font-size:32px;">▶️</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:monospace;">${f.name.replace(/.*[\/\\]/, '').substring(0,20)}</div>
+           </div><div class="video-badge">🎬 MP4</div>`
         : `<img src="${url}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23111%22 width=%22100%25%22 height=%22100%25%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23555%22 text-anchor=%22middle%22 dy=%22.3em%22>⚠️</text></svg>'">`;
     const actions = isVid
         ? `<button class="item-btn item-btn-dl" onclick="event.stopPropagation();dlFile('${url}','${f.name}')">⬇️</button>`
