@@ -494,7 +494,7 @@ async function generateImage() {
         if(p.useUnet && p.model) {
             // UNET mode — Flux / Klein / Cosmos
             const unetN = alloc();
-            wf[unetN] = {inputs:{unet_name:p.model},class_type:"UNETLoader"};
+            wf[unetN] = {inputs:{unet_name:p.model, weight_dtype:'default'},class_type:"UNETLoader"};
             mOut = [unetN, 0];
             const vaeN = alloc();
             wf[vaeN] = {inputs:{vae_name:p.unetVae||'ae.safetensors'},class_type:"VAELoader"};
