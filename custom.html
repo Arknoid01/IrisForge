@@ -217,7 +217,7 @@ function toggleSidebar() {
 }
 
 function defaultPass(i) {
-    return { model:'', model2:'', mergeRatio:0.5, useMerge:false, loras:[], sampler:'dpmpp_2m_sde_gpu', scheduler:'karras', steps: i===0?25:15, cfg: i===0?7:5, denoise: i===0?1.0:0.6, promptPos:'', promptNeg:'' };
+    return { model:'', model2:'', mergeRatio:0.5, useMerge:false, useUnet:false, arch:'flux', unetClipL:'clip_l.safetensors', unetT5:'t5xxl_fp8_e4m3fn.safetensors', unetVae:'ae.safetensors', loras:[], sampler:'dpmpp_2m_sde_gpu', scheduler:'karras', steps: i===0?25:15, cfg: i===0?7:5, denoise: i===0?1.0:0.6, promptPos:'', promptNeg:'' };
 }
 
 const PASS_COLORS = ['pc1','pc2','pc3','pc4'];
@@ -284,6 +284,33 @@ function renderPasses() {
                     <option value="">— Choisir —</option>
                     ${availableModels.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
                 </select>
+                <!-- UNET MODE TOGGLE -->
+                <div style="margin-top:6px;">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.4);cursor:pointer;">
+                        <input type="checkbox" id="punet_${i}" ${p.useUnet?'checked':''} onchange="toggleUnet(${i},this.checked)" style="accent-color:var(--pink);">
+                        <span style="color:rgba(236,72,153,0.8);">⚡ Mode UNET (Flux / Klein / Cosmos)</span>
+                    </label>
+                    <div id="punetBlock_${i}" style="display:${p.useUnet?'block':'none'};margin-top:8px;padding:10px;background:rgba(236,72,153,0.05);border:1px solid rgba(236,72,153,0.15);border-radius:10px;">
+                        <div class="param-label" style="margin-bottom:6px;">Architecture</div>
+                        <select class="field-input" style="margin-bottom:8px;font-size:12px;" onchange="passes[${i}].arch=this.value;renderPasses()">
+                            <option value="flux" ${p.arch==='flux'?'selected':''}>Flux / Klein / Z-Image (DualCLIP)</option>
+                            <option value="cosmos" ${p.arch==='cosmos'?'selected':''}>Cosmos / Anima (CLIPLoader simple)</option>
+                        </select>
+                        ${p.arch==='flux' ? `
+                        <div class="param-label" style="margin-bottom:4px;">CLIP L</div>
+                        <input type="text" class="field-input" style="margin-bottom:6px;font-size:12px;" value="${p.unetClipL||'clip_l.safetensors'}" placeholder="clip_l.safetensors" oninput="passes[${i}].unetClipL=this.value">
+                        <div class="param-label" style="margin-bottom:4px;">T5XXL</div>
+                        <input type="text" class="field-input" style="margin-bottom:6px;font-size:12px;" value="${p.unetT5||'t5xxl_fp8_e4m3fn.safetensors'}" placeholder="t5xxl_fp8_e4m3fn.safetensors" oninput="passes[${i}].unetT5=this.value">
+                        ` : `
+                        <div class="param-label" style="margin-bottom:4px;">CLIP</div>
+                        <input type="text" class="field-input" style="margin-bottom:6px;font-size:12px;" value="${p.unetClipL||'clip_l.safetensors'}" placeholder="nom_du_clip.safetensors" oninput="passes[${i}].unetClipL=this.value">
+                        `}
+                        <div class="param-label" style="margin-bottom:4px;">VAE</div>
+                        <input type="text" class="field-input" style="font-size:12px;" value="${p.unetVae||'ae.safetensors'}" placeholder="ae.safetensors" oninput="passes[${i}].unetVae=this.value">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;">Le modèle sélectionné ci-dessus sera chargé via UNETLoader</div>
+                    </div>
+                </div>
+
                 <div id="pmergeBlock_${i}" style="display:${p.useMerge?'block':'none'};margin-top:8px;">
                     <div class="param-label" style="margin-bottom:5px;">Modèle 2</div>
                     <select class="field-input" id="pm2_${i}" onchange="passes[${i}].model2=this.value" style="margin-bottom:8px;">
@@ -344,6 +371,18 @@ function renderPasses() {
         </div>`).join('');
     document.getElementById('passCount').textContent = `${passes.length} passe${passes.length>1?'s':''}`;
     document.getElementById('btnAddPass').disabled = passes.length >= 4;
+}
+
+function toggleUnet(i, val) {
+    passes[i].useUnet = val;
+    document.getElementById(`punetBlock_${i}`).style.display = val ? 'block' : 'none';
+    // Disable merge when unet mode is on
+    if (val) {
+        passes[i].useMerge = false;
+        const cb = document.getElementById(`pmerge_${i}`);
+        if (cb) cb.checked = false;
+        document.getElementById(`pmergeBlock_${i}`).style.display = 'none';
+    }
 }
 
 function toggleMerge(i, val) {
@@ -444,18 +483,39 @@ async function generateImage() {
     let prevLat=[latNode,0], lastVae=null;
     for(let i=0;i<passes.length;i++) {
         const p=passes[i];
-        const ckpt=alloc();
-        wf[ckpt]={inputs:{ckpt_name:p.model},class_type:"CheckpointLoaderSimple"};
-        lastVae=[ckpt,2];
-        let mOut=[ckpt,0], cOut=[ckpt,1];
-        // Merge with second model if enabled
-        if(p.useMerge && p.model2) {
-            const ckpt2=alloc();
-            const merge=alloc();
-            wf[ckpt2]={inputs:{ckpt_name:p.model2},class_type:"CheckpointLoaderSimple"};
-            wf[merge]={inputs:{model1:[ckpt,0],model2:[ckpt2,0],ratio:p.mergeRatio||0.5},class_type:"ModelMergeSimple"};
-            mOut=[merge,0];
-            // Use CLIP from model1, VAE from model1
+        let mOut, cOut;
+        if(p.useUnet && p.model) {
+            // UNET mode — Flux / Klein / Cosmos
+            const unetN = alloc();
+            wf[unetN] = {inputs:{unet_name:p.model},class_type:"UNETLoader"};
+            mOut = [unetN, 0];
+            const vaeN = alloc();
+            wf[vaeN] = {inputs:{vae_name:p.unetVae||'ae.safetensors'},class_type:"VAELoader"};
+            lastVae = [vaeN, 0];
+            if(p.arch === 'flux') {
+                // DualCLIPLoader for Flux
+                const clipN = alloc();
+                wf[clipN] = {inputs:{clip_name1:p.unetClipL||'clip_l.safetensors', clip_name2:p.unetT5||'t5xxl_fp8_e4m3fn.safetensors', type:'flux'},class_type:"DualCLIPLoader"};
+                cOut = [clipN, 0];
+            } else {
+                // CLIPLoader for Cosmos/Anima
+                const clipN = alloc();
+                wf[clipN] = {inputs:{clip_name:p.unetClipL||'clip_l.safetensors', type:'wan'},class_type:"CLIPLoader"};
+                cOut = [clipN, 0];
+            }
+        } else {
+            const ckpt=alloc();
+            wf[ckpt]={inputs:{ckpt_name:p.model},class_type:"CheckpointLoaderSimple"};
+            lastVae=[ckpt,2];
+            mOut=[ckpt,0]; cOut=[ckpt,1];
+            // Merge with second model if enabled
+            if(p.useMerge && p.model2) {
+                const ckpt2=alloc();
+                const merge=alloc();
+                wf[ckpt2]={inputs:{ckpt_name:p.model2},class_type:"CheckpointLoaderSimple"};
+                wf[merge]={inputs:{model1:[ckpt,0],model2:[ckpt2,0],ratio:p.mergeRatio||0.5},class_type:"ModelMergeSimple"};
+                mOut=[merge,0];
+            }
         }
         for(const lora of p.loras) {
             const ln=alloc();
@@ -520,6 +580,10 @@ function syncPassesFromDOM() {
         if (m2)    p.model2     = m2.value;
         if (merge) p.useMerge   = merge.checked;
         if (ratio) p.mergeRatio = parseFloat(ratio.value);
+        const unetCb = document.getElementById(`punet_${i}`);
+        if (unetCb) p.useUnet = unetCb.checked;
+        const archSel = document.getElementById(`punetBlock_${i}`)?.querySelector('select');
+        if (archSel) p.arch = archSel.value;
     });
 }
 
