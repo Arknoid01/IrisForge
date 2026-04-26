@@ -483,6 +483,35 @@
                         </div>
                     </div>
 
+                    <!-- DENOISE -->
+                    <div style="margin-bottom:12px;">
+                        <label style="display:flex;justify-content:space-between;">
+                            Denoise passe 1
+                            <span id="denoiseVal" style="color:#a78bfa;font-weight:700;">0.75</span>
+                        </label>
+                        <input type="range" id="denoiseSlider" min="0.1" max="1" step="0.05" value="0.75"
+                            style="width:100%;accent-color:#a78bfa;"
+                            oninput="document.getElementById('denoiseVal').textContent=parseFloat(this.value).toFixed(2)">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">0.5-0.7 = conservateur · 0.75-0.85 = équilibré · 1.0 = régénération totale</div>
+                    </div>
+
+                    <!-- LORAS -->
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                            <label>LoRA</label>
+                            <span id="editorLoraCount" style="font-size:11px;color:rgba(255,255,255,0.3);">0 actif(s)</span>
+                        </div>
+                        <div id="editorLoraList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+                            <div style="font-size:11px;color:rgba(255,255,255,0.25);">Aucun LoRA</div>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <select id="editorLoraSelect" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;color:#fff;font-size:12px;">
+                                <option value="">— Charger les LoRA —</option>
+                            </select>
+                            <button type="button" onclick="addEditorLora()" style="padding:6px 12px;border-radius:8px;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;font-size:12px;font-weight:600;cursor:pointer;">+</button>
+                        </div>
+                    </div>
+
                     <button onclick="generateInpainting()">✨ Générer</button>
                 </div>
             </div>
@@ -732,11 +761,14 @@
                 const el = document.getElementById('apiUrl');
                 if (el) el.value = savedUrl;
                 autoPreheat(savedUrl);
+                loadEditorLoras();
             }
             checkRecovery();
         });
 
         // Mise à jour de la taille du pinceau
+        document.getElementById('apiUrl').addEventListener('blur', () => loadEditorLoras());
+
         document.getElementById('brushSize').addEventListener('input', (e) => {
             brushSize = parseInt(e.target.value);
             document.getElementById('brushValue').textContent = brushSize;
@@ -967,6 +999,59 @@
 
 
     
+        // ── EDITOR LORAS ──────────────────────────────────────────────────────
+        let editorLoras = [];
+        let editorAvailableLoras = [];
+
+        async function loadEditorLoras() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            if (!apiUrl) return;
+            try {
+                const res = await fetch(`${apiUrl}/object_info`, { signal: AbortSignal.timeout(5000) });
+                const data = await res.json();
+                editorAvailableLoras = data?.LoraLoader?.input?.required?.lora_name?.[0] || [];
+                const sel = document.getElementById('editorLoraSelect');
+                sel.innerHTML = '<option value="">— Choisir un LoRA —</option>' +
+                    editorAvailableLoras.map(l => `<option value="${l}">${l}</option>`).join('');
+            } catch(e) {}
+        }
+
+        function addEditorLora() {
+            const sel = document.getElementById('editorLoraSelect');
+            const name = sel.value;
+            if (!name || editorLoras.find(l => l.name === name)) return;
+            editorLoras.push({ name, strength: 0.8 });
+            renderEditorLoras();
+        }
+
+        function removeEditorLora(i) {
+            editorLoras.splice(i, 1);
+            renderEditorLoras();
+        }
+
+        function updateEditorLoraStr(i, val) {
+            editorLoras[i].strength = parseFloat(val);
+            const el = document.getElementById(`elsv_${i}`);
+            if (el) el.textContent = parseFloat(val).toFixed(2);
+        }
+
+        function renderEditorLoras() {
+            const list = document.getElementById('editorLoraList');
+            document.getElementById('editorLoraCount').textContent = `${editorLoras.length} actif(s)`;
+            if (!editorLoras.length) {
+                list.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);">Aucun LoRA</div>';
+                return;
+            }
+            list.innerHTML = editorLoras.map((l, i) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:9px;">
+                    <div style="flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🎨 ${l.name.replace('.safetensors','').replace('.pt','')}</div>
+                    <input type="range" min="0" max="2" step="0.05" value="${l.strength}" style="width:70px;accent-color:#a78bfa;"
+                        oninput="updateEditorLoraStr(${i},this.value)">
+                    <span id="elsv_${i}" style="font-size:11px;color:#a78bfa;width:30px;text-align:right;font-family:monospace;">${l.strength.toFixed(2)}</span>
+                    <button onclick="removeEditorLora(${i})" style="width:20px;height:20px;border-radius:5px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);color:#f87171;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+                </div>`).join('');
+        }
+
         async function generateInpainting() {
             if (!sourceImage) {
                 showStatus('Chargez une image d\'abord', 'error');
@@ -1044,42 +1129,39 @@
                 const seed = Math.floor(Math.random() * 1000000000000000);
 
                 // Workflow complet avec inpainting intégré
+                // Build dynamic lora chain
+                const denoise1 = parseFloat(document.getElementById('denoiseSlider')?.value) || 0.75;
+                let wfLoras = {};
+                let loraModelOut = ["1", 0];
+                let loraClipOut  = ["1", 1];
+                let loraNodeId   = 200;
+                editorLoras.forEach(lora => {
+                    const id = String(loraNodeId++);
+                    wfLoras[id] = {
+                        inputs: { lora_name: lora.name, strength_model: lora.strength, strength_clip: lora.strength, model: loraModelOut, clip: loraClipOut },
+                        class_type: "LoraLoader"
+                    };
+                    loraModelOut = [id, 0];
+                    loraClipOut  = [id, 1];
+                });
+
                 const workflow = {
                     "1": {
                         inputs: { ckpt_name: "juggernaut_xl_v9.safetensors" },
                         class_type: "CheckpointLoaderSimple"
                     },
-                    "2": {
-                        inputs: {
-                            lora_name: "SDXL_BetterFaces-LoRA_v1.safetensors",
-                            strength_model: 0.4,
-                            strength_clip: 0.4,
-                            model: ["3", 0],
-                            clip: ["3", 1]
-                        },
-                        class_type: "LoraLoader"
-                    },
-                    "3": {
-                        inputs: {
-                            lora_name: "Eye_Detail_Flux_Lora_-_Inpainting.safetensors",
-                            strength_model: 0.89,
-                            strength_clip: 0.89,
-                            model: ["1", 0],
-                            clip: ["1", 1]
-                        },
-                        class_type: "LoraLoader"
-                    },
+                    ...wfLoras,
                     "4": {
                         inputs: {
                             text: "octane render, render, drawing, anime, bad photo, bad photography:1.3), (worst quality, low quality, blurry:1.2), (bad teeth, deformed teeth, deformed lips), (bad anatomy, bad proportions:1.1), (deformed iris, deformed pupils), (deformed eyes, bad eyes), (deformed face, ugly face, bad face), (deformed hands, bad hands, fused fingers), morbid, mutilated, mutation, disfigured soft lighning",
-                            clip: ["2", 1]
+                            clip: loraClipOut
                         },
                         class_type: "CLIPTextEncode"
                     },
                     "5": {
                         inputs: {
                             text: translatedPrompt,
-                            clip: ["2", 1]
+                            clip: loraClipOut
                         },
                         class_type: "CLIPTextEncode"
                     },
@@ -1119,8 +1201,8 @@
                             cfg: 8,
                             sampler_name: "dpmpp_2m_sde_gpu",
                             scheduler: "karras",
-                            denoise: 1,
-                            model: ["2", 0],
+                            denoise: denoise1,
+                            model: loraModelOut,
                             positive: ["5", 0],
                             negative: ["4", 0],
                             latent_image: ["54", 0]
