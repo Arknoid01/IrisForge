@@ -335,6 +335,7 @@ function filterGallery() { renderGallery(); }
 function getFiltered() {
     const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
     return allFiles.filter(f => {
+        if (f.name.toLowerCase().startsWith('warmup')) return false;
         if (currentFilter === 'image' && !isImage(f.name)) return false;
         if (currentFilter === 'video' && !isVideo(f.name)) return false;
         if (search && !f.name.toLowerCase().includes(search)) return false;
