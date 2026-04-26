@@ -235,6 +235,10 @@ async function loadArchData(comfyUrl) {
             fetch(listUrl + '/models').then(r => r.json())
         ]);
         archCache = { ...loraRes, ...modelRes };
+        // Re-render passes to show badges now that arch data is loaded
+        renderPasses();
+        // Update model badges
+        passes.forEach((p, i) => updateModelBadge(i));
     } catch(e) { /* script not running, no badges */ }
 }
 let passes = [];
@@ -283,7 +287,7 @@ function renderPassLoras(i) {
     if (!loras.length) return '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:4px 0;">Aucun LoRA</div>';
     return loras.map((l,li)=>`
         <div class="lora-item">
-            <div class="lora-name">🎨 ${l.name.replace('.safetensors','').replace('.pt','')}</div>
+            <div class="lora-name" style="display:flex;align-items:center;gap:4px;min-width:0;">🎨 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.name.replace('.safetensors','').replace('.pt','')}</span> ${archBadge(archCache[l.name]||archCache[l.name.split('/').pop()]||'unknown')}</div>
             <input type="range" min="0" max="2" step="0.05" value="${l.strength}" style="width:70px;accent-color:var(--violet);"
                 oninput="updateLoraStr(${i},${li},this.value)">
             <span class="lora-sv" id="lsv_${i}_${li}">${l.strength.toFixed(2)}</span>
