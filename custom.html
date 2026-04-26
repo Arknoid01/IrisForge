@@ -208,7 +208,7 @@
 <script>
 const clientId = 'custom_' + Math.random().toString(36).substr(2,9);
 let isGenerating = false;
-let availableModels = [], availableLoras = [], availableVAEs = [];
+let availableModels = [], availableLoras = [], availableVAEs = [], availableUnets = [];
 let passes = [];
 
 function toggleSidebar() {
@@ -307,7 +307,12 @@ function renderPasses() {
                         `}
                         <div class="param-label" style="margin-bottom:4px;">VAE</div>
                         <input type="text" class="field-input" style="font-size:12px;" value="${p.unetVae||'ae.safetensors'}" placeholder="ae.safetensors" oninput="passes[${i}].unetVae=this.value">
-                        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;">Le modèle sélectionné ci-dessus sera chargé via UNETLoader</div>
+                        <div class="param-label" style="margin-bottom:4px;margin-top:8px;">Modèle UNET</div>
+                        <select class="field-input" style="font-size:12px;margin-bottom:4px;" id="punetModel_${i}" onchange="passes[${i}].model=this.value">
+                            <option value="">— Choisir le modèle UNET —</option>
+                            ${availableUnets.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
+                        </select>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.25);">Chargé via UNETLoader depuis /models/unet/</div>
                     </div>
                 </div>
 
@@ -430,6 +435,7 @@ async function connectAndLoad() {
         availableModels=data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]||[];
         availableLoras =data?.LoraLoader?.input?.required?.lora_name?.[0]||[];
         availableVAEs  =data?.VAELoader?.input?.required?.vae_name?.[0]||[];
+        availableUnets =data?.UNETLoader?.input?.required?.unet_name?.[0]||[];
         // Apply pending models from workflow
         const pm=localStorage.getItem('pending_models');
         if(pm) {
@@ -443,7 +449,7 @@ async function connectAndLoad() {
         }
         renderPasses();
         document.getElementById('urlStatus').className='url-status ok';
-        showStatus(`✅ ${availableModels.length} modèles, ${availableLoras.length} LoRA`,'success');
+        showStatus(`✅ ${availableModels.length} checkpoints, ${availableUnets.length} UNET, ${availableLoras.length} LoRA`,'success');
         setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
     } catch(e) { document.getElementById('urlStatus').className='url-status'; showStatus('❌ '+e.message,'error'); }
 }
@@ -582,6 +588,8 @@ function syncPassesFromDOM() {
         if (ratio) p.mergeRatio = parseFloat(ratio.value);
         const unetCb = document.getElementById(`punet_${i}`);
         if (unetCb) p.useUnet = unetCb.checked;
+        const unetModel = document.getElementById(`punetModel_${i}`);
+        if (unetModel && p.useUnet) p.model = unetModel.value;
         const archSel = document.getElementById(`punetBlock_${i}`)?.querySelector('select');
         if (archSel) p.arch = archSel.value;
     });
