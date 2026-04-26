@@ -575,7 +575,7 @@
             modelHigh: 'Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors',
             modelLow:  'Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors',
             loras: [
-                { name: 'loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors', strength: 0.15, model: 'high' }
+                { name: 'Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors', strength: 0.15, model: 'high' }
             ],
             steps: 25, cfg: 2.5, shift: 5.0, split: 12,
             sampler: 'euler_ancestral', scheduler: 'normal',
@@ -583,6 +583,22 @@
             clip: 'umt5_xxl_fp8_e4m3fn_scaled.safetensors',
             vae: 'wan_2.1_vae.safetensors',
             negPrompt: 'blurry, blur, out of focus, soft focus, unfocused, low quality, low resolution, pixelated, compression artifacts, jpeg artifacts, hazy, foggy, static, still image, frozen, no movement, worst quality, bad quality, ugly, distorted, deformed, flickering face, facial distortion, morphing face, inconsistent features, face deformation, glitching, temporal inconsistency, melting face, warping'
+        },
+        {
+            id: 'vidbuiltin_wan22_60fps',
+            name: 'Wan 2.2 I2V — 60FPS',
+            description: '20 steps · euler/simple · shift 11 · 704×1280 · RIFE interpolation',
+            category: 'Vidéo',
+            type: 'video',
+            modelHigh: 'wan2.2_i2v_high_noise_14B_fp16.safetensors',
+            modelLow:  'wan2.2_i2v_low_noise_14B_fp16.safetensors',
+            loras: [],
+            steps: 20, cfg: 3.5, shift: 11, split: 10,
+            sampler: 'euler', scheduler: 'simple',
+            width: 704, height: 1280,
+            clip: 'umt5_xxl_fp8_e4m3fn_scaled.safetensors',
+            vae: 'wan_2.1_vae.safetensors',
+            negPrompt: 'Overexposure, static, blurred details, subtitles, paintings, pictures, still, overall gray, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, too many fingers, long neck, mutant, poorly drawn, bad anatomy, bad hands'
         }
     ];
 
