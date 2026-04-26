@@ -225,10 +225,10 @@ function archBadge(arch) {
 }
 
 async function loadArchData(comfyUrl) {
-    const listBase = comfyUrl.replace(':8188','8189').replace('8188','8189');
-    // Remove the port part and add 8189
-    const base = comfyUrl.replace(/:\d+$/, '');
-    const listUrl = base + ':8189';
+    const listUrl = comfyUrl.replace(/:\d+(\.proxy\.runpod\.net)?/, (match, proxy) => {
+        if (proxy) return ':8189' + proxy;
+        return ':8189';
+    }).replace(':8188', ':8189');
     try {
         const [loraRes, modelRes] = await Promise.all([
             fetch(listUrl + '/loras').then(r => r.json()),
