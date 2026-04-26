@@ -475,6 +475,7 @@ async function generateImage() {
     const baseSeed=(seedVal===-1||isNaN(seedVal))?Math.floor(Math.random()*999999999):seedVal;
     if(!apiUrl){showStatus('⚠️ URL ComfyUI manquante','error');return;}
     if(!globalPos){showStatus('⚠️ Prompt vide','error');return;}
+    syncPassesFromDOM();
     if(passes.some(p=>!p.model)){showStatus('⚠️ Chaque passe doit avoir un modèle','error');return;}
     isGenerating=true;
     document.getElementById('genBtn').disabled=true;
@@ -501,7 +502,7 @@ async function generateImage() {
             if(p.arch === 'flux') {
                 // DualCLIPLoader for Flux
                 const clipN = alloc();
-                wf[clipN] = {inputs:{clip_name1:p.unetClipL||'clip_l.safetensors', clip_name2:p.unetT5||'t5xxl_fp8_e4m3fn.safetensors', type:'flux'},class_type:"DualCLIPLoader"};
+                wf[clipN] = {inputs:{clip_name1:p.unetClipL||'clip_l.safetensors', clip_name2:p.unetT5||'t5xxl_fp8_e4m3fn.safetensors', type:'flux', device:'default'},class_type:"DualCLIPLoader"};
                 cOut = [clipN, 0];
             } else {
                 // CLIPLoader for Cosmos/Anima
