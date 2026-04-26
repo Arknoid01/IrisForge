@@ -209,6 +209,34 @@
 const clientId = 'custom_' + Math.random().toString(36).substr(2,9);
 let isGenerating = false;
 let availableModels = [], availableLoras = [], availableVAEs = [], availableUnets = [];
+let archCache = {}; // { filename: 'flux'|'sdxl'|'sd15'|'wan'|'unknown' }
+
+const ARCH_BADGE = {
+    flux:    { label:'Flux',   color:'#667eea', bg:'rgba(102,126,234,0.2)' },
+    sdxl:    { label:'SDXL',   color:'#a78bfa', bg:'rgba(167,139,250,0.2)' },
+    sd15:    { label:'SD1.5',  color:'#fbbf24', bg:'rgba(251,191,36,0.2)'  },
+    wan:     { label:'Wan',    color:'#ec4899', bg:'rgba(236,72,153,0.2)'  },
+    unknown: { label:'?',      color:'rgba(255,255,255,0.4)', bg:'rgba(255,255,255,0.06)' }
+};
+
+function archBadge(arch) {
+    const b = ARCH_BADGE[arch] || ARCH_BADGE.unknown;
+    return `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;background:${b.bg};color:${b.color};flex-shrink:0;">${b.label}</span>`;
+}
+
+async function loadArchData(comfyUrl) {
+    const listBase = comfyUrl.replace(':8188','8189').replace('8188','8189');
+    // Remove the port part and add 8189
+    const base = comfyUrl.replace(/:\d+$/, '');
+    const listUrl = base + ':8189';
+    try {
+        const [loraRes, modelRes] = await Promise.all([
+            fetch(listUrl + '/loras').then(r => r.json()),
+            fetch(listUrl + '/models').then(r => r.json())
+        ]);
+        archCache = { ...loraRes, ...modelRes };
+    } catch(e) { /* script not running, no badges */ }
+}
 let passes = [];
 
 function toggleSidebar() {
@@ -280,10 +308,13 @@ function renderPasses() {
                         Fusionner
                     </label>
                 </div>
-                <select class="field-input" id="pm_${i}" onchange="passes[${i}].model=this.value">
-                    <option value="">— Choisir —</option>
-                    ${availableModels.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
-                </select>
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <select class="field-input" id="pm_${i}" onchange="passes[${i}].model=this.value;updateModelBadge(${i})">
+                        <option value="">— Choisir —</option>
+                        ${availableModels.map(m=>`<option value="${m}"${p.model===m?' selected':''}>${m}</option>`).join('')}
+                    </select>
+                    <span id="pmBadge_${i}">${p.model ? archBadge(archCache[p.model]||'unknown') : ''}</span>
+                </div>
                 <!-- UNET MODE TOGGLE -->
                 <div style="margin-top:6px;">
                     <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.4);cursor:pointer;">
@@ -402,6 +433,12 @@ function updateMergeRatio(i, val) {
     document.getElementById(`pmergeLabel_${i}`).textContent = `M1 ${m1}% / M2 ${m2}%`;
 }
 
+function updateModelBadge(i) {
+    const sel = document.getElementById(`pm_${i}`);
+    const badge = document.getElementById(`pmBadge_${i}`);
+    if (sel && badge) badge.innerHTML = sel.value ? archBadge(archCache[sel.value]||'unknown') : '';
+}
+
 function addPass() { if(passes.length>=4)return; passes.push(defaultPass(passes.length)); renderPasses(); }
 function removePass(i) { passes.splice(i,1); renderPasses(); }
 function addPassLora(i) {
@@ -449,6 +486,7 @@ async function connectAndLoad() {
         }
         renderPasses();
         document.getElementById('urlStatus').className='url-status ok';
+        loadArchData(url);
         showStatus(`✅ ${availableModels.length} checkpoints, ${availableUnets.length} UNET, ${availableLoras.length} LoRA`,'success');
         setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
     } catch(e) { document.getElementById('urlStatus').className='url-status'; showStatus('❌ '+e.message,'error'); }
