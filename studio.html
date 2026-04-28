@@ -388,16 +388,17 @@
         const url = document.getElementById('comfyUrl').value.trim();
         if (!url) return;
         try {
-            const res = await fetch(`${url}/object_info`);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-
-            // Extract models from CheckpointLoaderSimple, LoraLoader, VAELoader, UpscaleModelLoader
+            const [ckptRes, loraRes, vaeRes, upscaleRes] = await Promise.all([
+                fetch(`${url}/api/models/checkpoints`).then(r=>r.json()).catch(()=>[]),
+                fetch(`${url}/api/models/loras`).then(r=>r.json()).catch(()=>[]),
+                fetch(`${url}/api/models/vae`).then(r=>r.json()).catch(()=>[]),
+                fetch(`${url}/api/models/upscale_models`).then(r=>r.json()).catch(()=>[]),
+            ]);
             allModels = {
-                checkpoints:    data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0] || [],
-                loras:          data?.LoraLoader?.input?.required?.lora_name?.[0] || [],
-                vae:            data?.VAELoader?.input?.required?.vae_name?.[0] || [],
-                upscale_models: data?.UpscaleModelLoader?.input?.required?.model_name?.[0] || []
+                checkpoints:    ckptRes,
+                loras:          loraRes,
+                vae:            vaeRes,
+                upscale_models: upscaleRes
             };
             renderModels();
         } catch(e) {

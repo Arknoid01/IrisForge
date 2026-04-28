@@ -797,16 +797,14 @@
         btn.disabled = true; btn.textContent = '⏳ Chargement...';
         setLoadStatus('Connexion à ComfyUI...');
         try {
-            const [unetRes, loraRes] = await Promise.all([
-                fetch(`${apiUrl}/object_info/UNETLoader`),
-                fetch(`${apiUrl}/object_info/LoraLoaderModelOnly`)
+            const [unetData, loraData] = await Promise.all([
+                fetch(`${apiUrl}/api/models/unet`).then(r=>r.json()).catch(()=>[]),
+                fetch(`${apiUrl}/api/models/loras`).then(r=>r.json()).catch(()=>[])
             ]);
-            if (!unetRes.ok || !loraRes.ok) throw new Error('ComfyUI inaccessible');
-            const unetData = await unetRes.json();
-            const loraData = await loraRes.json();
+            if (!unetData || !loraData) throw new Error('ComfyUI inaccessible');
 
-            availableUnets = unetData?.UNETLoader?.input?.required?.unet_name?.[0] || [];
-            availableLoras = loraData?.LoraLoaderModelOnly?.input?.required?.lora_name?.[0] || [];
+            availableUnets = unetData;
+            availableLoras = loraData;
 
             populateModelSelect('modelHigh', availableUnets, 'HIGH');
             populateModelSelect('modelLow', availableUnets, 'LOW');
