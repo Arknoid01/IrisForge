@@ -472,13 +472,17 @@ async function connectAndLoad(retries=3) {
     for(let attempt=1; attempt<=retries; attempt++) {
         try {
             if(attempt>1) showStatus(`Tentative ${attempt}/${retries}...`,'loading');
-            const res=await fetch(`${url}/object_info`,{signal:AbortSignal.timeout(30000)});
-            if(!res.ok)throw new Error('HTTP '+res.status);
-        const data=await res.json();
-        availableModels=data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]||[];
-        availableLoras =data?.LoraLoader?.input?.required?.lora_name?.[0]||[];
-        availableVAEs  =data?.VAELoader?.input?.required?.vae_name?.[0]||[];
-        availableUnets =data?.UNETLoader?.input?.required?.unet_name?.[0]||[];
+            // Use lightweight model endpoints instead of heavy /object_info
+            const [ckptRes, loraRes, vaeRes, unetRes] = await Promise.all([
+                fetch(`${url}/api/models/checkpoints`, {signal:AbortSignal.timeout(30000)}).then(r=>r.json()).catch(()=>[]),
+                fetch(`${url}/api/models/loras`, {signal:AbortSignal.timeout(30000)}).then(r=>r.json()).catch(()=>[]),
+                fetch(`${url}/api/models/vae`, {signal:AbortSignal.timeout(30000)}).then(r=>r.json()).catch(()=>[]),
+                fetch(`${url}/api/models/unet`, {signal:AbortSignal.timeout(30000)}).then(r=>r.json()).catch(()=>[]),
+            ]);
+        availableModels = ckptRes;
+        availableLoras  = loraRes;
+        availableVAEs   = vaeRes;
+        availableUnets  = unetRes;
         // Apply pending models from workflow
         const pm=localStorage.getItem('pending_models');
         if(pm) {
