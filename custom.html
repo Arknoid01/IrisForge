@@ -499,7 +499,9 @@ async function connectAndLoad() {
 async function translateToEnglish(text) {
     if(!text||!text.trim())return null;
     try {
-        const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`);
+        const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`, {
+            signal: AbortSignal.timeout(3000)
+        });
         const data=await res.json();
         return data.responseStatus===200?data.responseData?.translatedText||null:null;
     } catch(e){return null;}
@@ -692,6 +694,15 @@ renderPasses();
 loadPendingWorkflow();
 const savedUrl=localStorage.getItem('comfyUrl');
 if(savedUrl){document.getElementById('comfyUrl').value=savedUrl;connectAndLoad();}
+
+// HEARTBEAT — ping ComfyUI every 30s to keep connection alive
+setInterval(async () => {
+    const url = document.getElementById('comfyUrl').value.trim();
+    if (!url) return;
+    try {
+        await fetch(`${url}/system_stats`, { signal: AbortSignal.timeout(3000) });
+    } catch(e) {}
+}, 30000);
 </script>
 </body>
 </html>
