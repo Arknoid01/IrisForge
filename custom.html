@@ -464,14 +464,16 @@ function setSize(w,h,btn) {
     document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
 }
 
-async function connectAndLoad() {
+async function connectAndLoad(retries=3) {
     const url=document.getElementById('comfyUrl').value.trim(); if(!url)return;
     localStorage.setItem('comfyUrl',url);
     document.getElementById('urlStatus').className='url-status';
     showStatus('Connexion...','loading');
-    try {
-        const res=await fetch(`${url}/object_info`,{signal:AbortSignal.timeout(8000)});
-        if(!res.ok)throw new Error('HTTP '+res.status);
+    for(let attempt=1; attempt<=retries; attempt++) {
+        try {
+            if(attempt>1) showStatus(`Tentative ${attempt}/${retries}...`,'loading');
+            const res=await fetch(`${url}/object_info`,{signal:AbortSignal.timeout(30000)});
+            if(!res.ok)throw new Error('HTTP '+res.status);
         const data=await res.json();
         availableModels=data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]||[];
         availableLoras =data?.LoraLoader?.input?.required?.lora_name?.[0]||[];
@@ -493,14 +495,24 @@ async function connectAndLoad() {
         loadArchData(url);
         showStatus(`✅ ${availableModels.length} checkpoints, ${availableUnets.length} UNET, ${availableLoras.length} LoRA`,'success');
         setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
-    } catch(e) { document.getElementById('urlStatus').className='url-status'; showStatus('❌ '+e.message,'error'); }
+            // Success — break out of retry loop
+            return;
+        } catch(e) {
+            if(attempt===retries) {
+                document.getElementById('urlStatus').className='url-status';
+                showStatus(`❌ Connexion impossible après ${retries} tentatives — ${e.message}`,'error');
+            } else {
+                await new Promise(r=>setTimeout(r,2000));
+            }
+        }
+    }
 }
 
 async function translateToEnglish(text) {
     if(!text||!text.trim())return null;
     try {
         const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`, {
-            signal: AbortSignal.timeout(3000)
+            signal: AbortSignal.timeout(30000)
         });
         const data=await res.json();
         return data.responseStatus===200?data.responseData?.translatedText||null:null;
@@ -695,14 +707,6 @@ loadPendingWorkflow();
 const savedUrl=localStorage.getItem('comfyUrl');
 if(savedUrl){document.getElementById('comfyUrl').value=savedUrl;connectAndLoad();}
 
-// HEARTBEAT — ping ComfyUI every 30s to keep connection alive
-setInterval(async () => {
-    const url = document.getElementById('comfyUrl').value.trim();
-    if (!url) return;
-    try {
-        await fetch(`${url}/system_stats`, { signal: AbortSignal.timeout(3000) });
-    } catch(e) {}
-}, 30000);
 </script>
 </body>
 </html>
