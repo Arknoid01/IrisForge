@@ -585,10 +585,10 @@ async function connectAndLoad(retries=3) {
                 fetch(`${url}/api/models/vae`, {signal:AbortSignal.timeout(30000)}).then(r=>r.json()).catch(()=>[]),
                 fetch(`${url}/api/models/diffusion_models`, {signal:AbortSignal.timeout(30000)}).then(r=>r.json()).catch(()=>[]),
             ]);
-        availableModels = ckptRes;
-        availableLoras  = loraRes;
-        availableVAEs   = vaeRes;
-        availableUnets  = unetRes;
+            availableModels = ckptRes;
+            availableLoras  = loraRes;
+            availableVAEs   = vaeRes;
+            availableUnets  = unetRes;
         // Re-render passes so UNET select gets populated
         renderPasses();
         // Apply pending models from workflow
