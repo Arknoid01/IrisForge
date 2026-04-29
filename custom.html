@@ -661,7 +661,7 @@ async function generateImage() {
     let prevLat=[latNode,0], lastVae=null;
 
     if (useImg2Img) {
-        showStatus('Upload de l'image...','loading');
+        showStatus('Upload image...','loading');
         const imgName = await uploadImageToComfy(apiUrl, startImageData);
         const loadImgNode = alloc();
         wf[loadImgNode] = {inputs:{image:imgName, upload:'image'}, class_type:'LoadImage'};
