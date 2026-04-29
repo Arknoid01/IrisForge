@@ -798,7 +798,7 @@
         setLoadStatus('Connexion à ComfyUI...');
         try {
             const [unetData, loraData] = await Promise.all([
-                fetch(`${apiUrl}/api/models/unet`).then(r=>r.json()).catch(()=>[]),
+                fetch(`${apiUrl}/api/models/diffusion_models`).then(r=>r.json()).catch(()=>[]),
                 fetch(`${apiUrl}/api/models/loras`).then(r=>r.json()).catch(()=>[])
             ]);
             if (!unetData || !loraData) throw new Error('ComfyUI inaccessible');
