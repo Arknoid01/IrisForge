@@ -1,0 +1,57 @@
+{
+  "app_version": "1.0.0",
+  "banner": {
+    "text": "¡Fableris ya está disponible en Android!",
+    "icon": "🎉",
+    "active": true
+  },
+  "news": [
+    {
+      "id": "test_phase",
+      "title": "Fableris está en fase de prueba durante 14 días",
+      "text": "¡Corrección de errores y actualizaciones!",
+      "icon": "📖",
+      "date": "2025-06-31",
+      "tag": "contenido",
+      "tag_color": "#c8a96e"
+    },
+    {
+      "id": "launch",
+      "title": "Bienvenido a Fableris",
+      "text": "¡Fableris se lanza oficialmente! Historias gratuitas te esperan, con universos únicos y decenas de finales diferentes. ¡Buena aventura!",
+      "icon": "✦",
+      "date": "2025-07-22",
+      "tag": "lanzamiento",
+      "tag_color": "#6dfabc"
+    },
+    {
+      "id": "stories_free",
+      "title": "Muchas historias gratuitas disponibles",
+      "text": "Project Lazarus, El Teatro de Carcosa, El Carnicero de los Sueños, Los Últimos Minutos, El Último Round y La Estación de los Lamentos, ¡y más! — todas gratuitas, jugables ahora mismo.",
+      "icon": "📖",
+      "date": "2025-07-01",
+      "tag": "contenido",
+      "tag_color": "#c8a96e"
+    },
+    {
+      "id": "editor",
+      "title": "StoryForge — Crea tus historias",
+      "text": "El editor visual StoryForge está disponible para todos. Crea tu propia historia interactiva, pruébala y envíala para publicación oficial.",
+      "icon": "✏",
+      "date": "2025-07-01",
+      "tag": "editor",
+      "tag_color": "#7c6dfa"
+    },
+    {
+      "id": "dlc_new",
+      "title": "Nuevas historias gratuitas y un nuevo DLC disponibles",
+      "text": "¡Un nuevo DLC acompañado de historias gratuitas!",
+      "icon": "📖",
+      "date": "2025-07-01",
+      "tag": "DLC",
+      "tag_color": "#c8a96e"
+    }
+  ],
+  "last_updated": "2025-09-01",
+  "lang": "es"
+}

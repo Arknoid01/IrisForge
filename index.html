@@ -1,515 +1,2149 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="IrisForge">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IrisForge — Accueil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --blue:   #667eea;
-            --violet: #a78bfa;
-            --pink:   #ec4899;
-            --dark:   #0f0f1e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--dark);
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: #fff;
-        }
-        .bg {
-            position: fixed; inset: 0; z-index: 0;
-            background:
-                radial-gradient(ellipse 60% 55% at 50% 55%, rgba(102,126,234,0.20) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 40% at 15% 20%, rgba(118,75,162,0.14) 0%, transparent 60%),
-                radial-gradient(ellipse 45% 40% at 88% 80%, rgba(236,72,153,0.10) 0%, transparent 60%),
-                #0f0f1e;
-        }
-        .bg-grid {
-            position: fixed; inset: 0; z-index: 0;
-            background-image:
-                linear-gradient(rgba(102,126,234,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(102,126,234,0.04) 1px, transparent 1px);
-            background-size: 60px 60px;
-        }
-        .page {
-            position: relative; z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 0 40px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Choisis ton Destin</title>
+<script src="capacitor.js"></script>
+<!-- Preconnect pour accélérer Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Chargement non-bloquant des polices -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap"></noscript>
+<style>
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; overflow:hidden; }
+body {
+  min-height:100%; height:100%;
+  font-family:'Cormorant Garamond', serif;
+  background:#0d0d0f;
+  color:#e8e0d0;
+  overflow:hidden;
+}
 
-        /* ── TOP BAR ── */
-        .topbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 26px 0 20px;
-            flex-shrink: 0;
-        }
-        .brand { display: flex; align-items: center; gap: 10px; }
-        .brand-icon {
-            width: 38px; height: 38px; border-radius: 10px;
-            background: linear-gradient(135deg, var(--blue), var(--pink));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; box-shadow: 0 0 20px rgba(102,126,234,0.4);
-        }
-        .brand-name {
-            font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, var(--violet) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .brand-sub {
-            font-size: 10px; color: var(--pink); font-weight: 600;
-            letter-spacing: 2px; text-transform: uppercase;
-            display: block; margin-top: -4px;
-        }
-        .studio-badge {
-            display: flex; align-items: center; gap: 8px;
-            color: rgba(255,255,255,0.2); font-size: 11px;
-            letter-spacing: 3px; text-transform: uppercase;
-            font-family: 'Syne', sans-serif;
-        }
-        .studio-num { font-size: 24px; font-weight: 800; color: rgba(255,255,255,0.35); }
+/* ── CSS VARS ── */
+:root {
+  --gold:    #c8a96e;
+  --gold2:   #e8d4a0;
+  --gold3:   #8a6a30;
+  --cream:   #e8e0d0;
+  --dim:     #9a8a70;
+  --dimmer:  #5a5040;
+  --bg:      #0d0d0f;
+  --bg2:     #13110e;
+  --bg3:     #1a1710;
+  --border:  #2a2418;
+  --glow:    rgba(200,169,110,0.15);
+}
 
-        /* ── MAIN 3-COL ── */
-        .hero {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 36px;
-            align-items: center;
-            position: relative;
-            padding: 10px 0;
-        }
-        .dashed-line {
-            position: absolute; top: 0; left: 50%;
-            width: 1px; height: 100%; pointer-events: none;
-            background: repeating-linear-gradient(
-                180deg,
-                rgba(102,126,234,0.22) 0px, rgba(102,126,234,0.22) 6px,
-                transparent 6px, transparent 14px
-            );
-        }
+/* ── BACKGROUND ── */
+#bg-canvas {
+  position:fixed; inset:0; z-index:0;
+  pointer-events:none;
+}
 
-        /* ── COLUMN PANELS ── */
-        .col-left, .col-right {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            height: 100%;
-            justify-content: center;
-        }
+.bg-gradient {
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,169,110,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 100%, rgba(100,80,40,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(60,40,20,0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #0d0d0f 0%, #13110e 50%, #0d0d0f 100%);
+}
 
-        /* URL block */
-        .url-block {
-            background: rgba(102,126,234,0.07);
-            border: 1px solid rgba(102,126,234,0.22);
-            border-radius: 16px; padding: 18px 20px;
-            backdrop-filter: blur(12px);
-            margin-bottom: 28px;
-        }
-        .url-label { color: var(--violet); font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-        .url-row { display: flex; gap: 8px; }
-        .url-row input {
-            flex: 1;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; padding: 10px 13px;
-            color: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif;
-            transition: all 0.3s;
-        }
-        .url-row input:focus {
-            outline: none; border-color: var(--blue);
-            background: rgba(255,255,255,0.08);
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
-        }
-        .url-row input::placeholder { color: rgba(255,255,255,0.22); }
-        .btn-val {
-            background: linear-gradient(135deg, var(--blue), #764ba2);
-            color: #fff; border: none; border-radius: 10px;
-            padding: 10px 14px; font-size: 12px; font-weight: 700;
-            cursor: pointer; white-space: nowrap;
-            font-family: 'Syne', sans-serif; transition: all 0.3s;
-        }
-        .btn-val:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
-        .url-status { margin-top: 8px; font-size: 11px; min-height: 16px; }
-        .url-status.success  { color: #4ade80; }
-        .url-status.error    { color: #f87171; }
-        .url-status.checking { color: #fbbf24; }
+/* ── PARTICLES ── */
+.particle {
+  position:fixed; border-radius:50%;
+  background:var(--gold);
+  pointer-events:none; z-index:1;
+  animation: float-up linear infinite;
+  opacity:0;
+}
+@keyframes float-up {
+  0%   { transform:translateY(0) translateX(0) scale(1); opacity:0; }
+  10%  { opacity:0.6; }
+  90%  { opacity:0.2; }
+  100% { transform:translateY(-100vh) translateX(var(--drift)) scale(0.3); opacity:0; }
+}
 
-        /* Nav section: title then tiles */
-        .nav-section { display: flex; flex-direction: column; gap: 0; }
-        .section-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 10px; font-weight: 700;
-            letter-spacing: 3px; text-transform: uppercase;
-            color: rgba(255,255,255,0.28);
-            padding: 0 4px 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            margin-bottom: 10px;
-        }
-        .tiles-col { display: flex; flex-direction: column; gap: 7px; }
+/* ── LAYOUT ── */
+#shell {
+  position:relative; z-index:10;
+  height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:0 20px;
+  overflow:hidden;
+}
+#content-block {
+  display:flex; flex-direction:column;
+  align-items:center;
+  transform:translateY(-20%);
+  width:100%; max-width:380px;
+}
 
-        /* ── TILES ── */
-        .page-tile {
-            display: flex; align-items: center; gap: 11px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 13px; padding: 12px 14px;
-            text-decoration: none; transition: all 0.28s;
-            position: relative; overflow: hidden;
-        }
-        .page-tile::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-            background: linear-gradient(180deg, var(--blue), var(--pink));
-            opacity: 0; transition: opacity 0.28s;
-        }
-        .page-tile:hover {
-            background: rgba(102,126,234,0.10);
-            border-color: rgba(102,126,234,0.28);
-            transform: translateX(-3px);
-        }
-        .page-tile:hover::before { opacity: 1; }
-        .page-tile.disabled { opacity: 0.28; cursor: not-allowed; pointer-events: none; }
+/* ── PAYSAGE TABLETTE ET MOBILE ── */
+@media (orientation:landscape) and (min-height:400px) {
+  #shell {
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:40px;
+    padding:0 40px;
+    overflow:hidden;
+  }
+  #content-block {
+    transform:none;
+    margin:0;
+    max-width:none;
+    flex-direction:row;
+    align-items:center;
+    gap:40px;
+    width:100%;
+    max-width:800px;
+  }
+  #logo-block { flex:1; text-align:center; flex-shrink:0;
+    opacity:0; animation:fade-up .6s ease forwards; animation-delay:.2s; }
+  #logo-title { font-size:clamp(32px,5vw,56px); }
+  #logo-sub   { font-size:11px; }
+  #buttons-block {
+    flex:1;
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    max-width:420px;
+    opacity:0; animation:fade-up .6s ease forwards; animation-delay:.5s;
+  }
+  .btn-main {
+    margin-bottom:0 !important;
+    padding:14px 16px;
+    font-size:11px;
+    max-width:none;
+    width:100%;
+  }
+}
 
-        .col-right .page-tile:hover { transform: translateX(3px); }
-        .col-right .page-tile::before { left: auto; right: 0; }
+/* ── PAYSAGE MOBILE PETIT (hauteur < 400px) ── */
+@media (orientation:landscape) and (max-height:399px) {
+  #shell {
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    padding:0 20px;
+    overflow:hidden;
+  }
+  #content-block {
+    transform:none;
+    margin:0;
+    flex-direction:row;
+    align-items:center;
+    gap:20px;
+    width:100%;
+    max-width:700px;
+  }
+  #logo-block { flex:1; text-align:center; }
+  .ornament, .divider { display:none; }
+  .eyebrow { font-size:9px; margin-bottom:2px; }
+  #logo-title { font-size:clamp(20px,5vw,32px); margin-bottom:2px; }
+  #logo-sub   { font-size:9px; }
+  #buttons-block {
+    flex:1;
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    max-width:380px;
+  }
+  .btn-main {
+    margin-bottom:0 !important;
+    padding:10px 12px;
+    font-size:10px;
+    max-width:none;
+    width:100%;
+  }
+}
 
-        .tile-icon {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; flex-shrink: 0; transition: all 0.28s;
-        }
-        .page-tile:hover .tile-icon { background: rgba(102,126,234,0.2); border-color: rgba(102,126,234,0.35); }
-        .tile-info { flex: 1; min-width: 0; }
-        .tile-name { color: #fff; font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; line-height: 1.2; }
-        .tile-desc { color: rgba(255,255,255,0.32); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-        .tile-arrow { color: rgba(255,255,255,0.18); font-size: 16px; flex-shrink: 0; transition: all 0.28s; }
-        .page-tile:hover .tile-arrow { color: var(--violet); transform: translateX(2px); }
-        .col-right .page-tile:hover .tile-arrow { transform: translateX(-2px); }
+/* ── LANG SWITCH ── */
+#lang-switch {
+  position:fixed; top:20px; right:20px; z-index:100;
+  display:flex; gap:2px;
+  background:rgba(13,13,15,0.8);
+  border:1px solid var(--border);
+  border-radius:30px; padding:3px;
+  backdrop-filter:blur(12px);
+}
+.lang-btn {
+  padding:5px 14px; border-radius:24px; border:none;
+  background:none; color:var(--dim);
+  font-family:'Lato',sans-serif; font-size:12px;
+  font-weight:400; letter-spacing:1px; cursor:pointer;
+  transition:all .25s;
+}
+.lang-btn.active {
+  background:var(--gold3);
+  color:var(--gold2);
+}
+.lang-btn:hover:not(.active) { color:var(--cream); }
 
-        /* ── CENTER COLUMN ── */
-        .col-center {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 18px;
-        }
-        .center-label {
-            font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: 3px;
-            text-transform: uppercase; color: rgba(255,255,255,0.28); text-align: center;
-        }
+/* ── ORNAMENT ── */
+.ornament {
+  text-align:center; margin-bottom:8px;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.0s;
+}
+.ornament svg { width:120px; height:20px; opacity:0.4; }
 
-        /* Portrait */
-        .portrait-wrap {
-            position: relative;
-            width: clamp(320px, 38vw, 500px);
-            height: clamp(420px, 50vw, 640px);
-        }
-        .portrait-glow {
-            position: absolute; inset: -40px;
-            background: radial-gradient(ellipse at 50% 50%,
-                rgba(139,92,246,0.40) 0%, rgba(167,139,250,0.22) 40%, transparent 70%);
-            border-radius: 50%; filter: blur(24px);
-            animation: glowPulse 4s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%,100% { opacity: 0.65; transform: scale(1); }
-            50%      { opacity: 1;   transform: scale(1.10); }
-        }
-        .portrait-svg {
-            position: relative; z-index: 2; width: 100%; height: 100%;
-            object-fit: contain; object-position: center center;
-            mix-blend-mode: screen;
-            filter: drop-shadow(0 0 40px rgba(139,92,246,0.80)) drop-shadow(0 0 16px rgba(103,232,249,0.55));
-        }
-        .scan-line {
-            position: absolute; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent 5%, rgba(167,139,250,0.9) 50%, transparent 95%);
-            z-index: 3; border-radius: 2px;
-            animation: scan 3.5s linear infinite;
-        }
-        @keyframes scan { 0% { top: 2%; opacity: 1; } 88% { opacity: 0.7; } 100% { top: 98%; opacity: 0; } }
-        .corner { position: absolute; width: 18px; height: 18px; z-index: 4; }
-        .c-tl { top: 12px;    left: 12px;  border-top: 2px solid var(--violet); border-left:  2px solid var(--violet); }
-        .c-tr { top: 12px;    right: 12px; border-top: 2px solid var(--violet); border-right: 2px solid var(--violet); }
-        .c-bl { bottom: 12px; left: 12px;  border-bottom: 2px solid var(--violet); border-left:  2px solid var(--violet); }
-        .c-br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--violet); border-right: 2px solid var(--violet); }
-        .data-tag {
-            position: absolute; z-index: 5;
-            background: rgba(15,15,30,0.88); backdrop-filter: blur(10px);
-            border: 1px solid rgba(167,139,250,0.3); border-radius: 8px;
-            padding: 5px 10px; font-size: 10px; font-family: 'Syne', sans-serif;
-            color: var(--violet); letter-spacing: 1px; white-space: nowrap;
-        }
-        .data-tag.t1 { top: 14%; right: -50px; animation: tagFloat 3s ease-in-out infinite 0s; }
-        .data-tag.t2 { bottom: 22%; left: -56px; animation: tagFloat 3s ease-in-out infinite 1.5s; }
-        @keyframes tagFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+/* ── EYEBROW ── */
+.eyebrow {
+  font-family:'Lato',sans-serif; font-size:11px;
+  font-weight:300; letter-spacing:5px;
+  text-transform:uppercase; color:var(--gold);
+  text-align:center; margin-bottom:12px;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.05s;
+}
 
-        /* Big title */
-        .hero-title {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(38px, 5vw, 64px);
-            font-weight: 800; letter-spacing: -2px; line-height: 1;
-            color: #fff; text-align: center;
-        }
-        .hero-dot {
-            display: inline-block; width: 11px; height: 11px; border-radius: 50%;
-            background: var(--pink); margin-right: 3px; vertical-align: middle;
-            box-shadow: 0 0 14px var(--pink);
-        }
+/* ── MAIN TITLE ── */
+.main-title {
+  font-family:'Cinzel', serif;
+  font-size:clamp(32px, 9vw, 72px);
+  font-weight:700; text-align:center;
+  color:var(--cream); letter-spacing:3px;
+  line-height:1.1;
+  text-shadow:0 0 60px rgba(200,169,110,0.2), 0 2px 4px rgba(0,0,0,0.8);
+  margin-bottom:6px;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.1s;
+}
+.main-title em {
+  font-style:italic; color:var(--gold);
+  font-weight:400;
+}
 
-        /* ── BOTTOM ── */
-        .bottombar {
-            display: flex; align-items: center; justify-content: space-between;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            padding: 18px 0 26px;
-            flex-shrink: 0;
-        }
-        .bottom-side {
-            display: flex; align-items: center; gap: 10px;
-            color: rgba(255,255,255,0.20); font-size: 11px;
-            letter-spacing: 2px; text-transform: uppercase;
-            font-family: 'Syne', sans-serif;
-        }
-        .bottom-sep { width: 28px; height: 1px; background: rgba(255,255,255,0.16); }
-        .btn-explore {
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 40px; padding: 12px 30px;
-            color: #fff; font-size: 13px; font-weight: 600;
-            font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.35s;
-        }
-        .btn-explore:hover {
-            background: linear-gradient(135deg, var(--blue), var(--violet));
-            border-color: transparent;
-            box-shadow: 0 0 28px rgba(102,126,234,0.45);
-            transform: scale(1.04);
-        }
+/* ── SUBTITLE ── */
+.subtitle {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(15px, 3vw, 20px);
+  font-weight:300; font-style:italic;
+  color:var(--dim); text-align:center;
+  margin-bottom:24px; letter-spacing:1px;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.15s;
+}
 
-        /* Animations */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .topbar    { animation: fadeUp 0.5s ease 0.0s both; }
-        .col-center{ animation: fadeUp 0.6s ease 0.05s both; }
-        .col-left  { animation: fadeUp 0.6s ease 0.12s both; }
-        .col-right { animation: fadeUp 0.6s ease 0.18s both; }
-        .bottombar { animation: fadeUp 0.5s ease 0.28s both; }
+/* ── DIVIDER ── */
+.divider {
+  display:flex; align-items:center; gap:16px;
+  margin-bottom:24px; width:100%; max-width:340px;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.2s;
+}
+.divider::before, .divider::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg, transparent, var(--border), transparent);
+}
+.divider-gem {
+  width:6px; height:6px; background:var(--gold3);
+  transform:rotate(45deg); flex-shrink:0;
+}
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .page { padding: 0 16px; }
-            .hero { grid-template-columns: 1fr; padding: 0; gap: 24px; }
-            .col-center { order: -1; }
-            .dashed-line, .data-tag { display: none; }
-            .studio-badge { display: none; }
-            .tiles-col { flex-direction: row; flex-wrap: wrap; }
-            .page-tile { flex: 1; min-width: 140px; }
-            .col-right .page-tile:hover { transform: translateX(-3px); }
-        }
-    </style>
-    <link rel="stylesheet" href="iris-shared.css">
+/* ── MAIN BUTTONS ── */
+.btn-group {
+  display:flex; flex-direction:column;
+  align-items:center; gap:14px;
+  width:100%; max-width:320px;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.25s;
+}
+
+.btn-main {
+  width:100%; padding:16px 32px;
+  border-radius:4px; border:1px solid var(--gold3);
+  background:transparent;
+  color:var(--gold2); font-family:'Cinzel',serif;
+  font-size:13px; font-weight:600; letter-spacing:3px;
+  text-transform:uppercase; cursor:pointer;
+  position:relative; overflow:hidden;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  opacity:0;
+  animation:fade-up .5s ease forwards;
+}
+#btn-start    { animation-delay:.8s; }
+#btn-options  { animation-delay:1.0s; }
+#btn-progress { animation-delay:1.2s; }
+#btn-news     { animation-delay:1.4s; }
+#btn-submit   { animation-delay:1.6s; }
+#btn-contact  { animation-delay:1.8s; }
+.btn-main::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(200,169,110,0.1), transparent);
+  opacity:0; transition:opacity .3s;
+}
+.btn-main::after {
+  content:''; position:absolute;
+  bottom:0; left:50%; right:50%;
+  height:1px; background:var(--gold);
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px var(--gold);
+}
+.btn-main:hover {
+  border-color:var(--gold);
+  color:var(--gold2);
+  box-shadow:0 0 30px rgba(200,169,110,0.1), inset 0 0 30px rgba(200,169,110,0.05);
+  transform:translateY(-1px);
+}
+.btn-main:hover::before { opacity:1; }
+.btn-main:hover::after { left:10%; right:10%; }
+.btn-main:active { transform:translateY(0); }
+
+.btn-main.primary {
+  background:linear-gradient(135deg, rgba(200,169,110,0.15), rgba(138,106,48,0.1));
+  border-color:var(--gold);
+  box-shadow:0 0 20px rgba(200,169,110,0.08);
+}
+.btn-main.primary:hover {
+  box-shadow:0 0 40px rgba(200,169,110,0.2), inset 0 0 40px rgba(200,169,110,0.08);
+}
+
+.btn-small {
+  background:none; border:none;
+  color:var(--dimmer); font-family:'Lato',sans-serif;
+  font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  cursor:pointer; padding:8px 16px;
+  transition:color .2s; text-decoration:none;
+  display:inline-block;
+}
+.btn-small:hover { color:var(--dim); }
+
+/* ── GAME SELECTOR PANEL ── */
+#game-panel {
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:flex-end;
+  background:rgba(10,8,5,0); pointer-events:none;
+  transition:background .35s;
+}
+#game-panel.open {
+  background:rgba(10,8,5,0.85);
+  pointer-events:all;
+  backdrop-filter:blur(6px);
+}
+#game-sheet {
+  width:100%; max-width:500px; margin:0 auto;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-bottom:none;
+  border-radius:20px 20px 0 0;
+  padding:0 0 40px;
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  max-height:80vh; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+#game-panel.open #game-sheet { transform:translateY(0); }
+
+.sheet-handle {
+  width:40px; height:4px; border-radius:2px;
+  background:var(--border); margin:14px auto 0;
+  flex-shrink:0;
+}
+.sheet-header {
+  padding:16px 24px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.sheet-title {
+  font-family:'Cinzel',serif; font-size:15px;
+  font-weight:600; color:var(--cream); letter-spacing:2px;
+}
+.sheet-subtitle {
+  font-size:13px; color:var(--dim);
+  font-style:italic; margin-top:3px;
+}
+.sheet-body { flex:1; overflow-y:auto; padding:16px 20px; }
+.sheet-body::-webkit-scrollbar { width:3px; }
+.sheet-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+/* GAME CARDS */
+.game-card {
+  display:flex; align-items:center; gap:16px;
+  padding:14px 16px; border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--bg3); margin-bottom:6px;
+  cursor:pointer; transition:all .2s;
+  text-decoration:none;
+}
+.game-card:hover {
+  border-color:var(--gold3);
+  background:rgba(200,169,110,0.04);
+  transform:translateX(4px);
+}
+.game-card-icon {
+  font-size:28px; width:44px; height:44px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg2); border-radius:10px;
+  flex-shrink:0; border:1px solid var(--border);
+}
+.game-card-info { flex:1; min-width:0; }
+.game-card-title {
+  font-family:'Cinzel',serif; font-size:14px;
+  font-weight:600; color:var(--cream); margin-bottom:3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.game-card-desc {
+  font-size:12px; color:var(--dim);
+  font-style:italic; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.game-card-lang {
+  font-family:'Lato',sans-serif; font-size:10px;
+  letter-spacing:1px; color:var(--dimmer);
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:20px; padding:3px 8px; flex-shrink:0;
+}
+.game-card-arrow {
+  color:var(--gold3); font-size:16px; flex-shrink:0;
+}
+
+.no-games {
+  text-align:center; padding:32px 20px;
+  color:var(--dimmer); font-style:italic; font-size:14px;
+}
+
+/* ── LANGUE POPUP ── */
+#lang-overlay {
+  position:fixed; inset:0; z-index:950;
+  background:rgba(0,0,0,0.85);
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(8px);
+  animation:fade-in .4s ease;
+}
+#lang-box {
+  background:#13110e; border:1px solid var(--gold3);
+  border-radius:20px; padding:36px 28px;
+  max-width:340px; width:90%; text-align:center;
+  animation:scale-in .4s ease;
+}
+@keyframes scale-in {
+  from { transform:scale(0.9); opacity:0; }
+  to   { transform:scale(1);   opacity:1; }
+}
+@keyframes fade-up {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fade-out {
+  from { opacity:1; }
+  to   { opacity:0; }
+}
+.lang-box-icon { font-size:36px; margin-bottom:16px; }
+.lang-box-title {
+  font-family:'Cinzel',serif; font-size:18px; font-weight:600;
+  color:var(--cream); letter-spacing:2px; margin-bottom:8px;
+}
+.lang-box-sub {
+  font-size:13px; color:var(--dim); font-style:italic;
+  margin-bottom:28px; line-height:1.6;
+}
+.lang-choices {
+  display:flex; flex-direction:column; gap:10px;
+}
+.lang-choice-btn {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 18px; border-radius:12px;
+  border:1px solid var(--border2); background:var(--bg2);
+  cursor:pointer; transition:all .2s; text-align:left;
+  width:100%;
+}
+.lang-choice-btn:hover {
+  border-color:var(--gold3);
+  background:rgba(200,169,110,0.06);
+}
+.lang-choice-btn.selected {
+  border-color:var(--gold);
+  background:rgba(200,169,110,0.1);
+}
+.lang-flag { font-size:26px; flex-shrink:0; }
+.lang-info { flex:1; }
+.lang-name {
+  font-family:'Cinzel',serif; font-size:14px; font-weight:600;
+  color:var(--cream); display:block;
+}
+.lang-native { font-size:12px; color:var(--dim); }
+.lang-check {
+  width:20px; height:20px; border-radius:50%;
+  border:2px solid var(--border2); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; transition:all .2s;
+}
+.lang-choice-btn.selected .lang-check {
+  background:var(--gold); border-color:var(--gold); color:#000;
+}
+.lang-confirm-btn {
+  margin-top:20px; width:100%;
+  padding:13px; border-radius:10px;
+  border:1px solid var(--gold3);
+  background:linear-gradient(135deg,rgba(200,169,110,0.15),rgba(200,169,110,0.05));
+  color:var(--gold); font-family:'Cinzel',serif;
+  font-size:12px; letter-spacing:2px; cursor:pointer;
+  transition:all .2s;
+}
+.lang-confirm-btn:hover { background:rgba(200,169,110,0.2); }
+#options-panel {
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(10,8,5,0); pointer-events:none;
+  transition:background .35s;
+}
+#options-panel.open {
+  background:rgba(10,8,5,0.9);
+  pointer-events:all;
+  backdrop-filter:blur(8px);
+}
+#options-box {
+  width:100%; max-width:420px; margin:20px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:32px;
+  transform:scale(0.95) translateY(10px);
+  opacity:0;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+#options-panel.open #options-box { transform:scale(1) translateY(0); opacity:1; }
+
+.options-title {
+  font-family:'Cinzel',serif; font-size:16px;
+  font-weight:600; color:var(--cream); letter-spacing:3px;
+  text-align:center; margin-bottom:28px;
+}
+
+.option-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 0; border-bottom:1px solid var(--border);
+  gap:16px;
+}
+.option-row:last-of-type { border-bottom:none; }
+.option-label {
+  font-size:14px; color:var(--cream); font-weight:400;
+}
+.option-desc {
+  font-size:12px; color:var(--dim); font-style:italic; margin-top:2px;
+}
+
+/* TOGGLE */
+.toggle {
+  position:relative; width:44px; height:24px; flex-shrink:0;
+}
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-track {
+  position:absolute; inset:0; border-radius:12px;
+  background:var(--bg3); border:1px solid var(--border);
+  cursor:pointer; transition:background .2s;
+}
+.toggle input:checked + .toggle-track { background:var(--gold3); border-color:var(--gold3); }
+.toggle-track::after {
+  content:''; position:absolute;
+  top:3px; left:3px; width:16px; height:16px;
+  border-radius:50%; background:var(--dim);
+  transition:transform .2s, background .2s;
+}
+.toggle input:checked + .toggle-track::after {
+  transform:translateX(20px); background:var(--gold2);
+}
+
+/* SELECT */
+.opt-select {
+  background:var(--bg3); border:1px solid var(--border);
+  color:var(--cream); font-family:'Cormorant Garamond',serif;
+  font-size:14px; padding:6px 12px; border-radius:6px;
+  outline:none; cursor:pointer;
+}
+.opt-select:focus { border-color:var(--gold3); }
+
+.options-close {
+  margin-top:24px; width:100%; padding:12px;
+  border:1px solid var(--border); border-radius:6px;
+  background:none; color:var(--dim);
+  font-family:'Cinzel',serif; font-size:12px;
+  letter-spacing:2px; cursor:pointer; transition:all .2s;
+}
+.options-close:hover { border-color:var(--gold3); color:var(--cream); }
+
+/* ── BOTTOM FOOTER ── */
+.footer { display:none; }
+
+/* ── VERSION BADGE ── */
+.version {
+  position:fixed; bottom:16px; right:16px; z-index:10;
+  font-family:'Lato',sans-serif; font-size:10px;
+  color:var(--dimmer); letter-spacing:1px;
+}
+
+/* ── LOGO PEGASUS ── */
+#pegasus-logo {
+  position:fixed; bottom:12px; left:16px; z-index:10;
+  opacity:0; animation:fade-up .4s ease forwards;
+  animation-delay:.4s;
+  display:flex; align-items:center; gap:6px;
+}
+#pegasus-logo img {
+  width:18px; height:18px;
+  filter:brightness(0) invert(1);
+  opacity:0.2;
+}
+#pegasus-logo span {
+  font-family:'Lato',sans-serif; font-size:9px;
+  letter-spacing:2px; color:var(--dimmer);
+  text-transform:uppercase; opacity:0.6;
+}
+
+/* ── NAME POPUP ── */
+#idx-name-overlay {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(10,8,5,0);
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none; transition:background .3s;
+}
+#idx-name-overlay.open {
+  background:rgba(10,8,5,0.92);
+  pointer-events:all; backdrop-filter:blur(10px);
+}
+#idx-name-box {
+  width:100%; max-width:340px; margin:24px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:32px 28px; text-align:center;
+  transform:scale(0.95) translateY(12px); opacity:0;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+#idx-name-overlay.open #idx-name-box { transform:scale(1) translateY(0); opacity:1; }
+#idx-name-title {
+  font-family:'Cinzel',serif; font-size:16px; font-weight:600;
+  color:var(--cream); letter-spacing:2px; margin-bottom:6px;
+}
+#idx-name-sub {
+  font-size:13px; color:var(--dim);
+  font-style:italic; margin-bottom:20px;
+}
+#idx-name-input {
+  width:100%; background:var(--bg3); border:1px solid var(--border);
+  border-radius:8px; color:var(--cream);
+  font-family:'Cormorant Garamond',serif; font-size:18px;
+  padding:12px 16px; outline:none; text-align:center;
+  letter-spacing:1px; transition:border-color .2s; margin-bottom:16px;
+}
+#idx-name-input:focus { border-color:var(--gold); }
+#idx-name-confirm {
+  width:100%; padding:13px; border:1px solid var(--gold3);
+  background:linear-gradient(135deg,rgba(200,169,110,0.12),rgba(138,106,48,0.06));
+  color:var(--gold2); font-family:'Cinzel',serif;
+  font-size:12px; font-weight:600; letter-spacing:3px;
+  border-radius:8px; cursor:pointer; transition:all .2s;
+}
+#idx-name-confirm:hover { border-color:var(--gold); box-shadow:0 0 20px rgba(200,169,110,0.15); }
+#idx-name-skip {
+  background:none; border:none; color:var(--dimmer);
+  font-family:'Lato',sans-serif; font-size:11px;
+  letter-spacing:1px; cursor:pointer; margin-top:10px;
+  display:block; width:100%; transition:color .2s;
+}
+#idx-name-skip:hover { color:var(--dim); }
+
+/* ── SUBMIT POPUP ── */
+#submit-overlay {
+  position:fixed; inset:0; z-index:300;
+  background:rgba(10,8,5,0);
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+  transition:background .35s;
+}
+#submit-overlay.open {
+  background:rgba(10,8,5,0.92);
+  pointer-events:all;
+  backdrop-filter:blur(10px);
+}
+#submit-box {
+  width:100%; max-width:460px; margin:20px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:20px; padding:36px 32px;
+  transform:scale(0.95) translateY(12px); opacity:0;
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+#submit-overlay.open #submit-box {
+  transform:scale(1) translateY(0); opacity:1;
+}
+.submit-close {
+  position:absolute; top:16px; right:16px;
+  width:30px; height:30px; border-radius:8px;
+  background:none; border:1px solid var(--border);
+  color:var(--dimmer); cursor:pointer; font-size:16px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s;
+}
+.submit-close:hover { border-color:var(--gold3); color:var(--cream); }
+
+.submit-icon {
+  font-size:36px; text-align:center; margin-bottom:16px;
+}
+.submit-title {
+  font-family:'Cinzel',serif; font-size:18px; font-weight:600;
+  color:var(--cream); letter-spacing:2px;
+  text-align:center; margin-bottom:8px;
+}
+.submit-subtitle {
+  font-family:'Cormorant Garamond',serif; font-size:15px;
+  color:var(--gold); font-style:italic;
+  text-align:center; margin-bottom:20px;
+}
+.submit-body {
+  font-size:14px; color:var(--dim); line-height:1.75;
+  margin-bottom:20px; text-align:center;
+}
+.submit-perks {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:12px; padding:16px 18px; margin-bottom:12px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.submit-perk {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:13px; color:var(--cream); line-height:1.5;
+}
+.submit-perk-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+.submit-perk-text { color:var(--dim); }
+.submit-perk-text strong { color:var(--cream); }
+
+.submit-actions {
+  display:flex; flex-direction:column; gap:10px;
+}
+.submit-btn {
+  width:100%; padding:14px 24px; border-radius:8px;
+  border:1px solid var(--gold3);
+  background:linear-gradient(135deg, rgba(200,169,110,0.12), rgba(138,106,48,0.06));
+  color:var(--gold2); font-family:'Cinzel',serif;
+  font-size:12px; font-weight:600; letter-spacing:3px;
+  cursor:pointer; transition:all .2s; text-transform:uppercase;
+}
+.submit-btn:hover {
+  border-color:var(--gold); box-shadow:0 0 20px rgba(200,169,110,0.15);
+  transform:translateY(-1px);
+}
+.submit-btn.ai-btn {
+  background: linear-gradient(135deg, rgba(124,109,250,0.15), rgba(109,250,188,0.15));
+  border-color: rgba(124,109,250,0.5);
+  color: #a090ff;
+  letter-spacing: 2px;
+}
+.submit-btn.ai-btn:hover {
+  background: linear-gradient(135deg, rgba(124,109,250,0.3), rgba(109,250,188,0.2));
+  border-color: #7c6dfa;
+  color: #c0b0ff;
+}
+  background:none; border-color:var(--border);
+  color:var(--dim); letter-spacing:2px;
+}
+.submit-btn.secondary:hover {
+  border-color:var(--gold3); color:var(--cream);
+  box-shadow:none;
+}
+.submit-note {
+  font-family:'Lato',sans-serif; font-size:11px;
+  color:var(--dimmer); text-align:center; margin-top:12px;
+  letter-spacing:.5px; line-height:1.5;
+}
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── MOBILE ── */
+@media (max-width:480px) {
+  #content-block { transform:translateY(-32%); }
+  .main-title { letter-spacing:1px; }
+  .btn-main { font-size:12px; padding:15px 24px; letter-spacing:2px; }
+  #options-box { margin:12px; padding:24px; }
+}
+</style>
+
+<script>
+  // Cache les barres systeme sur Android (Capacitor)
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      var StatusBar = window.Capacitor.Plugins.StatusBar;
+      var NavigationBar = window.Capacitor.Plugins.NavigationBar;
+      if (StatusBar) StatusBar.hide().catch(function(){});
+      if (NavigationBar) NavigationBar.hide().catch(function(){});
+    }
+  });
+</script>
 </head>
 <body>
-<div class="bg"></div>
-<div class="bg-grid"></div>
 
-<div class="page">
+<!-- PIN POPUP — désactiver mode enfant -->
+<div id="pin-overlay" style="display:none;position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.9);align-items:center;justify-content:center;
+  backdrop-filter:blur(8px)">
+  <div style="background:#13110e;border:1px solid var(--gold3);border-radius:20px;
+    padding:32px 24px;max-width:300px;width:90%;text-align:center">
+    <div style="font-size:28px;margin-bottom:12px">🔒</div>
+    <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--cream);
+      letter-spacing:2px;margin-bottom:8px" id="pin-title">Code Parental</div>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:20px;line-height:1.6"
+      id="pin-question"></p>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="4"
+      placeholder="••••"
+      style="width:100%;background:var(--bg2);border:1px solid var(--border);
+        border-radius:8px;color:var(--cream);font-family:'DM Mono',monospace;
+        font-size:24px;padding:12px;outline:none;text-align:center;
+        letter-spacing:8px;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter')submitPin()">
+    <div id="pin-error" style="display:none;margin-top:8px;font-size:11px;
+      color:#fa6d8f;font-family:'DM Mono',monospace"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="cancelPin()" style="flex:1;padding:10px;border-radius:8px;
+        border:1px solid var(--border);background:none;color:var(--dim);
+        font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">
+        Annuler</button>
+      <button onclick="submitPin()" style="flex:1;padding:10px;border-radius:8px;
+        border:1px solid var(--gold3);
+        background:linear-gradient(135deg,rgba(200,169,110,0.15),rgba(200,169,110,0.05));
+        color:var(--gold);font-family:'Cinzel',serif;font-size:11px;
+        letter-spacing:1px;cursor:pointer">
+        Confirmer</button>
+    </div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <button onclick="showChangePinMode()"
+        style="background:none;border:none;color:var(--dimmer);font-size:10px;
+        letter-spacing:1px;cursor:pointer;font-family:'DM Mono',monospace">
+        ✦ Changer le code
+      </button>
+    </div>
+  </div>
+</div>
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-        <div class="brand">
-            <div class="brand-icon">🔥</div>
-            <div>
-                <span class="brand-name">IrisForge</span>
-                <span class="brand-sub">Graphics</span>
-            </div>
+<!-- CODE CRÉATEUR POPUP -->
+<div id="code-overlay" style="display:none;position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px)">
+  <div style="background:#13110e;border:1px solid var(--gold3);border-radius:20px;
+    padding:32px 24px;max-width:320px;width:90%;text-align:center">
+    <div style="font-size:28px;margin-bottom:12px">✦</div>
+    <div style="font-family:'Cinzel',serif;font-size:16px;color:var(--cream);
+      letter-spacing:2px;margin-bottom:6px" id="txt-code-title">Code Créateur</div>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:20px;line-height:1.6"
+      id="txt-code-sub">
+      Entre ton code pour débloquer du contenu ou des fonctionnalités
+    </p>
+    <input id="code-input" type="text" placeholder="EX: AUTEUR-XXXX"
+      onkeydown="if(event.key==='Enter')submitCode()"
+      style="width:100%;background:var(--bg2);border:1px solid var(--border);
+        border-radius:8px;color:var(--cream);font-family:'DM Mono',monospace;
+        font-size:13px;padding:10px 14px;outline:none;text-align:center;
+        letter-spacing:2px;text-transform:uppercase;box-sizing:border-box">
+    <div id="code-result" style="display:none;margin-top:10px;padding:8px 12px;
+      border-radius:8px;border:1px solid;font-size:12px;font-family:'DM Mono',monospace"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="closeCodePopup()" style="flex:1;padding:10px;border-radius:8px;
+        border:1px solid var(--border);background:none;color:var(--dim);
+        font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer"
+        id="txt-code-cancel">Annuler</button>
+      <button onclick="submitCode()" style="flex:1;padding:10px;border-radius:8px;
+        border:1px solid var(--gold3);
+        background:linear-gradient(135deg,rgba(200,169,110,0.15),rgba(200,169,110,0.05));
+        color:var(--gold);font-family:'Cinzel',serif;font-size:11px;
+        letter-spacing:1px;cursor:pointer"
+        id="txt-code-submit">Activer</button>
+    </div>
+  </div>
+</div>
+<div id="lang-overlay" style="display:none">
+  <div id="lang-box">
+    <div class="lang-box-icon">✦</div>
+    <div class="lang-box-title">Choisissez votre langue</div>
+    <p class="lang-box-sub">Choose your language · Elige tu idioma</p>
+    <div class="lang-choices">
+      <button class="lang-choice-btn selected" id="lp-fr" onclick="selectLangPopup('fr',this)">
+        <span class="lang-flag">🇫🇷</span>
+        <div class="lang-info">
+          <span class="lang-name">Français</span>
+          <span class="lang-native">French</span>
         </div>
-        <div class="studio-badge">
-            <span>Studio</span>
-            <span class="studio-num">2.0</span>
+        <div class="lang-check">✓</div>
+      </button>
+      <button class="lang-choice-btn" id="lp-en" onclick="selectLangPopup('en',this)">
+        <span class="lang-flag">🇬🇧</span>
+        <div class="lang-info">
+          <span class="lang-name">English</span>
+          <span class="lang-native">Anglais</span>
         </div>
+        <div class="lang-check"></div>
+      </button>
+      <button class="lang-choice-btn" id="lp-es" onclick="selectLangPopup('es',this)">
+        <span class="lang-flag">🇪🇸</span>
+        <div class="lang-info">
+          <span class="lang-name">Español</span>
+          <span class="lang-native">Espagnol</span>
+        </div>
+        <div class="lang-check"></div>
+      </button>
+    </div>
+    <button class="lang-confirm-btn" onclick="confirmLang()">CONTINUER</button>
+  </div>
+</div>
+
+<div class="bg-gradient"></div>
+<canvas id="bg-canvas"></canvas>
+
+<!-- MAIN SHELL -->
+<div id="shell">
+<div id="content-block">
+
+  <!-- LOGO BLOCK -->
+  <div id="logo-block">
+    <div class="ornament">
+      <svg viewBox="0 0 120 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="10" x2="48" y2="10" stroke="#c8a96e" stroke-width="0.5"/>
+        <polygon points="52,10 56,6 60,10 56,14" fill="#c8a96e" opacity="0.6"/>
+        <polygon points="60,10 64,6 68,10 64,14" fill="#c8a96e" opacity="0.3"/>
+        <line x1="72" y1="10" x2="120" y2="10" stroke="#c8a96e" stroke-width="0.5"/>
+      </svg>
+    </div>
+    <p class="eyebrow" id="txt-eyebrow">Une aventure vous attend</p>
+    <h1 class="main-title" id="txt-title">
+      Choisis<br><em>ton Destin</em>
+    </h1>
+    <p class="subtitle" id="txt-subtitle">Chaque choix façonne votre histoire</p>
+    <div class="divider">
+      <div class="divider-gem"></div>
+      <div class="divider-gem" style="opacity:0.4;transform:rotate(45deg) scale(0.6)"></div>
+      <div class="divider-gem"></div>
+    </div>
+  </div>
+
+  <!-- BUTTONS BLOCK -->
+  <div id="buttons-block">
+    <button class="btn-main primary" id="btn-start" onclick="window.location.href='stories.html'">
+      ✦ <span id="txt-btn-start">Le début de votre aventure</span>
+    </button>
+    <button class="btn-main" id="btn-options" onclick="openOptions()">
+      <span id="txt-btn-options">Options</span>
+    </button>
+    <button class="btn-main" id="btn-progress" onclick="window.location.href='progress.html'">
+      <span id="txt-btn-progress">✦ Ma progression</span>
+    </button>
+    <button class="btn-main" id="btn-news" onclick="window.location.href='news.html'">
+      <span id="txt-btn-news">📰 Actualités</span>
+    </button>
+    <button class="btn-main" id="btn-submit" onclick="openSubmitPopup()">
+      <span id="txt-btn-submit">✍ Soumettre une histoire</span>
+    </button>
+    <button class="btn-main" id="btn-contact" onclick="contactUs()">
+      <span id="txt-btn-contact">✉ Nous contacter</span>
+    </button>
+  </div>
+
+</div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p class="footer-text" id="txt-footer">StoryForge • Romans interactifs</p>
+</div>
+<div class="version">v0.1</div>
+
+<!-- PEGASUS LOGO -->
+<div id="pegasus-logo">
+  <img src="Logo.png" alt="PegasusCorp" onerror="this.parentElement.style.display='none'">
+  <span>PegasusCorp</span>
+</div>
+
+<!-- ── NAME POPUP ── -->
+<div id="idx-name-overlay">
+  <div id="idx-name-box">
+    <div style="font-size:32px;margin-bottom:12px">✦</div>
+    <div id="idx-name-title">Qui êtes-vous ?</div>
+    <div id="idx-name-sub">Entrez votre prénom pour personnaliser l'aventure</div>
+    <input type="text" id="idx-name-input" maxlength="20"
+      placeholder="Votre prénom..."
+      onkeydown="if(event.key==='Enter')confirmNameIndex(false)">
+    <button id="idx-name-confirm" onclick="confirmNameIndex(false)">COMMENCER</button>
+    <button id="idx-name-skip" onclick="confirmNameIndex(true)">Passer</button>
+  </div>
+</div>
+
+<!-- ── SUBMIT POPUP ── -->
+<div id="submit-overlay" onclick="handleSubmitClick(event)">
+  <div id="submit-box">
+    <button class="submit-close" onclick="closeSubmitPopup()">✕</button>
+    <div class="submit-icon">✍</div>
+    <div class="submit-title" id="txt-submit-title">Soumettre une histoire</div>
+    <div class="submit-subtitle" id="txt-submit-subtitle">Devenez auteur de Choisis ton Destin</div>
+    <div class="submit-body" id="txt-submit-body">
+      Vous avez une idée d'aventure ? Écrivez votre scénario dans l'éditeur et envoyez-le nous. Les meilleures histoires seront publiées dans l'application.
+    </div>
+    <div class="submit-perks">
+      <div class="submit-perk">
+        <span class="submit-perk-icon">🏆</span>
+        <div class="submit-perk-text" id="txt-perk-1"><strong>Publication officielle</strong> — Votre histoire jouée par des milliers de joueurs</div>
+      </div>
+      <div class="submit-perk">
+        <span class="submit-perk-icon">🎁</span>
+        <div class="submit-perk-text" id="txt-perk-2"><strong>Avantages exclusifs</strong> — Accès à du contenu premium et crédits auteur</div>
+      </div>
+      <div class="submit-perk">
+        <span class="submit-perk-icon">✦</span>
+        <div class="submit-perk-text" id="txt-perk-3"><strong>Badge Auteur</strong> — Votre nom associé à votre création dans l'app</div>
+      </div>
+    </div>
+    <div class="submit-actions">
+      <button class="submit-btn" onclick="goToEditor()">
+        <span id="txt-submit-editor">Ouvrir l'éditeur</span>
+      </button>
+      <button class="submit-btn ai-btn" onclick="window.open('ai-guide.html','_blank')">
+        <span id="txt-submit-ai">✦ Créer avec l'IA</span>
+      </button>
+      <button class="submit-btn secondary" onclick="closeSubmitPopup()">
+        <span id="txt-submit-cancel">Annuler</span>
+      </button>
+    </div>
+    <p class="submit-note" id="txt-submit-note">
+      Une fois votre histoire écrite, exportez le JSON et envoyez-le directement depuis l'éditeur.
+    </p>
+  </div>
+</div>
+
+<!-- ── TUTORIAL POPUP ── -->
+<div id="tuto-overlay" style="display:none;position:fixed;inset:0;z-index:960;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;backdrop-filter:blur(8px);animation:fade-in .4s ease;">
+  <div id="tuto-box" style="background:#13110e;border:1px solid var(--gold3);border-radius:20px;padding:36px 28px;max-width:340px;width:90%;text-align:center;animation:scale-in .4s ease;">
+    <div style="font-size:36px;margin-bottom:16px;">💡</div>
+    <div id="txt-tuto-title" style="font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--cream);letter-spacing:2px;margin-bottom:16px;">Astuces de navigation</div>
+    <div style="display:flex;flex-direction:column;gap:16px;text-align:left;margin-bottom:28px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:18px;background:var(--bg3);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);">●</span>
+        <p id="txt-tuto-menu" style="font-size:13px;color:var(--dim);line-height:1.5;"><strong>Le point bleu</strong> en haut de l'écran permet d'ouvrir le menu pendant une histoire.</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:18px;background:var(--bg3);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);">+</span>
+        <p id="txt-tuto-save" style="font-size:13px;color:var(--dim);line-height:1.5;"><strong>Le bouton +</strong> en bas à droite permet de poser un marque-page pour sauvegarder votre progression.</p>
+      </div>
+    </div>
+    <button id="txt-tuto-btn" class="lang-confirm-btn" onclick="closeTuto()">J'AI COMPRIS</button>
+  </div>
+</div>
+
+<!-- PIN SETUP POPUP — configuration du code parental au premier démarrage -->
+<div id="pin-setup-overlay" style="display:none;position:fixed;inset:0;z-index:970;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;backdrop-filter:blur(8px);animation:fade-in .4s ease;">
+  <div id="pin-setup-box" style="background:#13110e;border:1px solid var(--gold3);border-radius:20px;padding:36px 28px;max-width:340px;width:90%;text-align:center;animation:scale-in .4s ease;">
+    <div style="font-size:36px;margin-bottom:16px;">🔒</div>
+    <div id="txt-pinsetup-title" style="font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--cream);letter-spacing:2px;margin-bottom:12px;">Code Parental</div>
+    <p id="txt-pinsetup-body" style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:20px;">Créez un code à 4 chiffres pour protéger le mode enfant. Il vous sera demandé pour le désactiver.</p>
+    <div id="txt-pinsetup-enter" style="text-align:left;margin-bottom:6px;font-size:11px;color:var(--dimmer);font-family:'DM Mono',monospace;letter-spacing:1px">Code à 4 chiffres</div>
+    <input id="pin-setup-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••"
+      style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-family:'DM Mono',monospace;font-size:24px;padding:12px;outline:none;text-align:center;letter-spacing:8px;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter')document.getElementById('pin-setup-input2').focus()">
+    <div id="txt-pinsetup-confirm" style="text-align:left;margin:14px 0 6px;font-size:11px;color:var(--dimmer);font-family:'DM Mono',monospace;letter-spacing:1px">Confirme le code</div>
+    <input id="pin-setup-input2" type="password" inputmode="numeric" maxlength="4" placeholder="••••"
+      style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-family:'DM Mono',monospace;font-size:24px;padding:12px;outline:none;text-align:center;letter-spacing:8px;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter')submitPinSetup()">
+    <div id="pin-setup-error" style="display:none;margin-top:8px;font-size:11px;color:#fa6d8f;font-family:'DM Mono',monospace"></div>
+    <label style="display:flex;align-items:center;gap:10px;margin-top:18px;text-align:left;cursor:pointer">
+      <input type="checkbox" id="pin-setup-kids" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0;cursor:pointer">
+      <span id="txt-pinsetup-kids" style="font-size:12px;color:var(--dim);line-height:1.4">Activer le mode enfant maintenant</span>
+    </label>
+    <button id="txt-pinsetup-create" class="lang-confirm-btn" style="margin-top:20px" onclick="submitPinSetup()">CRÉER LE CODE</button>
+    <button id="txt-pinsetup-skip" onclick="skipPinSetup()" style="margin-top:12px;background:none;border:none;color:var(--dimmer);font-size:12px;letter-spacing:1px;cursor:pointer;font-family:'DM Mono',monospace">Plus tard</button>
+  </div>
+</div>
+
+<!-- ── GAME SELECTOR PANEL ── -->
+<div id="game-panel" onclick="handlePanelClick(event)">
+  <div id="game-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="txt-sheet-title">Vos aventures</div>
+      <div class="sheet-subtitle" id="txt-sheet-sub">Choisissez une histoire à vivre</div>
+    </div>
+    <div class="sheet-body" id="game-list">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ── OPTIONS PANEL ── -->
+<div id="options-panel" onclick="handleOptionsClick(event)">
+  <div id="options-box">
+    <div class="options-title" id="txt-options-title">OPTIONS</div>
+
+    <div class="option-row">
+      <div>
+        <div class="option-label" id="txt-opt-kids">Mode enfant</div>
+        <div class="option-desc" id="txt-opt-kids-desc">Histoires adaptées aux enfants uniquement</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="opt-kids" onchange="handleKidsToggle(this)">
+        <div class="toggle-track"></div>
+      </label>
     </div>
 
-    <!-- HERO -->
-    <div class="hero">
-        <div class="dashed-line"></div>
 
-        <!-- LEFT COLUMN -->
-        <div class="col-left">
-            <div class="url-block">
-                <div class="url-label">🔌 URL ComfyUI (RunPod)</div>
-                <div class="url-row">
-                    <input type="text" id="comfyUrl" placeholder="https://xxx-8188.proxy.runpod.net">
-                    <button class="btn-val" onclick="validateUrl()">✓ Valider</button>
-                </div>
-                <div class="url-status" id="urlStatus"></div>
-            </div>
-
-            <div class="nav-section">
-                <div class="section-title">Navigation</div>
-                <div class="tiles-col">
-                    <a class="page-tile disabled" id="card-custom" href="custom.html">
-                        <div class="tile-icon">🛠️</div>
-                        <div class="tile-info"><div class="tile-name">Custom</div><div class="tile-desc">Génération multi-passes</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                    <a class="page-tile disabled" id="card-workflows" href="workflows.html">
-                        <div class="tile-icon">⚙️</div>
-                        <div class="tile-info"><div class="tile-name">Workflows</div><div class="tile-desc">Bibliothèque de workflows</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                    <a class="page-tile disabled" id="card-editor" href="editor.html">
-                        <div class="tile-icon">✏️</div>
-                        <div class="tile-info"><div class="tile-name">Éditeur</div><div class="tile-desc">Retouche & inpainting</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- CENTER COLUMN -->
-        <div class="col-center">
-            <div class="center-label">Plateforme IA · Génération d'images</div>
-
-            <div class="portrait-wrap">
-                <div class="portrait-glow"></div>
-                <div class="scan-line"></div>
-                <div class="corner c-tl"></div><div class="corner c-tr"></div>
-                <div class="corner c-bl"></div><div class="corner c-br"></div>
-
-                <!-- Holographic anime figure -->
-                <img class="portrait-svg" src="brain.png" alt="IrisForge AI Brain">
-
-                <div class="data-tag t1">● NEURAL ACTIVE</div>
-                <div class="data-tag t2">⬡ HOLO.v2</div>
-            </div>
-
-            <div class="hero-title"><span class="hero-dot"></span>IrisForge</div>
-        </div>
-
-        <!-- RIGHT COLUMN -->
-        <div class="col-right">
-            <div class="nav-section">
-                <div class="section-title" style="text-align:right">Outils</div>
-                <div class="tiles-col">
-                    <a class="page-tile disabled" id="card-video" href="video.html">
-                        <div class="tile-icon">🎬</div>
-                        <div class="tile-info"><div class="tile-name">Vidéo</div><div class="tile-desc">Image to video</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                    <a class="page-tile disabled" id="card-assemblage" href="assemblage.html">
-                        <div class="tile-icon">🎞️</div>
-                        <div class="tile-info"><div class="tile-name">Assemblage</div><div class="tile-desc">Montage de clips</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                    <a class="page-tile disabled" id="card-historique" href="historique.html">
-                        <div class="tile-icon">📜</div>
-                        <div class="tile-info"><div class="tile-name">Historique</div><div class="tile-desc">Toutes les générations</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                    <a class="page-tile disabled" id="card-studio" href="studio.html">
-                        <div class="tile-icon">📦</div>
-                        <div class="tile-info"><div class="tile-name">Modèles</div><div class="tile-desc">Télécharger & gérer</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                    <a class="page-tile disabled" id="card-prompt" href="prompt.html">
-                        <div class="tile-icon">💬</div>
-                        <div class="tile-info"><div class="tile-name">Prompts</div><div class="tile-desc">Bibliothèque de prompts</div></div>
-                        <span class="tile-arrow">›</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
+    <div class="option-row">
+      <div>
+        <div class="option-label" id="txt-opt-anim">Animations</div>
+        <div class="option-desc" id="txt-opt-anim-desc">Effets visuels</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="opt-anim" checked onchange="saveOptions()">
+        <div class="toggle-track"></div>
+      </label>
     </div>
 
-    <!-- BOTTOM BAR -->
-    <div class="bottombar">
-        <div class="bottom-side">
-            <div class="bottom-sep"></div>
-            <span>Create Art</span>
-        </div>
-        <button class="btn-explore" onclick="document.getElementById('comfyUrl').focus()">
-            Connecter ComfyUI
-        </button>
-        <div class="bottom-side">
-            <span>Gallery</span>
-            <div class="bottom-sep"></div>
-        </div>
+    <div class="option-row">
+      <div>
+        <div class="option-label" id="txt-opt-textspeed">Vitesse du texte</div>
+      </div>
+      <select class="opt-select" id="opt-textspeed" onchange="saveOptions()">
+        <option value="fast" id="txt-speed-fast">Rapide</option>
+        <option value="normal" selected id="txt-speed-normal">Normal</option>
+        <option value="slow" id="txt-speed-slow">Lent</option>
+      </select>
     </div>
 
+    <div class="option-row">
+      <div>
+        <div class="option-label" id="txt-opt-locked">Choix conditionnels</div>
+        <div class="option-desc" id="txt-opt-locked-desc">Choix nécessitant certaines stats</div>
+      </div>
+      <select class="opt-select" id="opt-locked" onchange="saveOptions()">
+        <option value="hidden"  id="txt-locked-hidden">Masqués</option>
+        <option value="grayed"  id="txt-locked-grayed">Grisés</option>
+      </select>
+    </div>
+
+    <div class="option-row">
+      <div>
+        <div class="option-label" id="txt-opt-lang">Langue</div>
+      </div>
+      <select class="opt-select" id="opt-lang" onchange="setLang(this.value)">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+
+    <button class="options-close" onclick="closeOptions()" id="txt-close-options">Fermer</button>
+    <button onclick="closeOptions();openCodePopup()" style="
+      background:none;border:none;color:var(--dimmer);font-family:'DM Mono',monospace;
+      font-size:10px;letter-spacing:2px;cursor:pointer;padding:8px;
+      text-transform:uppercase;display:block;margin:4px auto 0">
+      ✦ Code créateur
+    </button>
+  </div>
 </div>
 
 <script>
-    const PAGES = ['card-custom','card-workflows','card-editor','card-video','card-assemblage','card-historique','card-prompt','card-studio'];
+// ══════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════
+const LANG = {
+  fr: {
+    eyebrow:        'Une aventure vous attend',
+    title:          'Choisis<br><em>ton Destin</em>',
+    subtitle:       'Chaque choix façonne votre histoire',
+    btnStart:       'Le début de votre aventure',
+    btnOptions:     'Options',
+    btnNews:        '📰 Actualités',
+    btnProgress:    '✦ Ma progression',
+    btnSubmit:      '✍ Soumettre une histoire',
+    btnContact:     '✉ Nous contacter',
+    footer:         'StoryForge • Romans interactifs',
+    sheetTitle:     'Vos aventures',
+    sheetSub:       'Choisissez une histoire à vivre',
+    noGames:        'Aucune aventure disponible dans cette langue.',
+    noGamesHint:    'Ajoutez des fichiers JSON dans stories/fr/',
+    optionsTitle:   'OPTIONS',
+    optKids:        'Mode enfant',
+    optKidsDesc:    'Histoires adaptées aux enfants uniquement',
+    optSound:       'Musique d\'ambiance',
+    optSoundDesc:   'Sons atmosphériques',
+    optAnim:        'Animations',
+    optAnimDesc:    'Effets visuels',
+    optTextspeed:   'Vitesse du texte',
+    optLocked:      'Choix conditionnels',
+    optLockedDesc:  'Choix nécessitant certaines stats',
+    optLockedHidden:'Masqués',
+    optLockedGrayed:'Grisés',
+    optLang:        'Langue',
+    speedFast:      'Rapide',
+    speedNormal:    'Normal',
+    speedSlow:      'Lent',
+    closeOptions:   'Fermer',
+    codeBtn:        '✦ Code créateur',
+    codeTitle:      'Code Créateur',
+    codeSub:        'Entre ton code pour débloquer du contenu ou des fonctionnalités',
+    codeCancel:     'Annuler',
+    codeSubmit:     'Activer',
+    codeInvalid:    'Code invalide ou expiré',
+    codeUsed:       'Code déjà utilisé',
+    codeEmpty:      'Code vide',
+    codeUnlocked:   'Débloqué : ',
+    kidsBadge:      '🧒 Mode enfant actif',
+    docTitle:       'Choisis ton Destin',
+    nameTitle:      'Qui êtes-vous ?',
+    nameSub:        'Entrez votre prénom pour personnaliser l\'aventure',
+    nameConfirm:    'COMMENCER',
+    nameSkip:       'Passer',
+    submitTitle:    'Soumettre une histoire',
+    submitSubtitle: 'Devenez auteur de Choisis ton Destin',
+    submitBody:     'Vous avez une idée d\'aventure ? Écrivez votre scénario dans l\'éditeur et envoyez-le nous. Les meilleures histoires seront publiées dans l\'application.',
+    perk1:          '<strong>Publication officielle</strong> — Votre histoire jouée par des milliers de joueurs',
+    perk2:          '<strong>Avantages exclusifs</strong> — Accès à du contenu premium et crédits auteur',
+    perk3:          '<strong>Badge Auteur</strong> — Votre nom associé à votre création dans l\'app',
+    submitEditor:   'Ouvrir l\'éditeur',
+    submitCancel:   'Annuler',
+    submitAi:       '✦ Aide Éditeur & IA',
+    submitNote:     'Une fois votre histoire écrite, exportez le JSON et envoyez-le directement depuis l\'éditeur.',
+    tutoTitle:      'Astuces de navigation',
+    tutoMenu:       '<strong>Le point bleu</strong> en haut de l\'écran permet d\'ouvrir le menu pendant une histoire.',
+    tutoSave:       '<strong>Le bouton +</strong> en bas à droite permet de poser un marque-page pour sauvegarder votre progression.',
+    tutoBtn:        'J\'AI COMPRIS',
+    pinSetupTitle:  'Code Parental',
+    pinSetupBody:   'Créez un code à 4 chiffres pour protéger le mode enfant. Il vous sera demandé pour le désactiver.',
+    pinSetupCreate: 'CRÉER LE CODE',
+    pinSetupSkip:   'Plus tard',
+    pinSetupError:  '4 chiffres requis',
+    pinSetupDone:   '✓ Code parental enregistré !',
+    pinSetupEnter:    'Code à 4 chiffres',
+    pinSetupConfirm:  'Confirme le code',
+    pinSetupMismatch: 'Les codes ne correspondent pas',
+    pinSetupKids:     'Activer le mode enfant maintenant',
+  },
+  en: {
+    eyebrow:        'An adventure awaits',
+    title:          'Choose<br><em>Your Fate</em>',
+    subtitle:       'Every choice shapes your story',
+    btnStart:       'Begin your adventure',
+    btnOptions:     'Options',
+    btnNews:        '📰 News',
+    btnProgress:    '✦ My Progress',
+    btnSubmit:      '✍ Submit a story',
+    btnContact:     '✉ Contact us',
+    footer:         'StoryForge • Interactive Fiction',
+    sheetTitle:     'Your Adventures',
+    sheetSub:       'Choose a story to experience',
+    noGames:        'No adventures available in this language.',
+    noGamesHint:    'Add JSON files to stories/en/',
+    optionsTitle:   'OPTIONS',
+    optKids:        'Kids Mode',
+    optKidsDesc:    'Only show stories suitable for children',
+    optSound:       'Ambient Music',
+    optSoundDesc:   'Atmospheric sounds',
+    optAnim:        'Animations',
+    optAnimDesc:    'Visual effects',
+    optTextspeed:   'Text Speed',
+    optLocked:      'Conditional Choices',
+    optLockedDesc:  'Choices requiring specific stats',
+    optLockedHidden:'Hidden',
+    optLockedGrayed:'Grayed out',
+    optLang:        'Language',
+    speedFast:      'Fast',
+    speedNormal:    'Normal',
+    speedSlow:      'Slow',
+    closeOptions:   'Close',
+    codeBtn:        '✦ Creator code',
+    codeTitle:      'Creator Code',
+    codeSub:        'Enter your code to unlock content or features',
+    codeCancel:     'Cancel',
+    codeSubmit:     'Activate',
+    codeInvalid:    'Invalid or expired code',
+    codeUsed:       'Code already used',
+    codeEmpty:      'Empty code',
+    codeUnlocked:   'Unlocked: ',
+    kidsBadge:      '🧒 Kids mode on',
+    docTitle:       'Choose Your Fate',
+    nameTitle:      'Who are you?',
+    nameSub:        'Enter your name to personalise the adventure',
+    nameConfirm:    'START',
+    nameSkip:       'Skip',
+    submitTitle:    'Submit a Story',
+    submitSubtitle: 'Become an author of Choose Your Fate',
+    submitBody:     'Got a story idea? Write your scenario in the editor and send it to us. The best stories will be published in the app.',
+    perk1:          '<strong>Official publication</strong> — Your story played by thousands of players',
+    perk2:          '<strong>Exclusive perks</strong> — Access to premium content and author credits',
+    perk3:          '<strong>Author Badge</strong> — Your name linked to your creation in the app',
+    submitEditor:   'Open the editor',
+    submitCancel:   'Cancel',
+    submitAi:       '✦ Editor & AI Help',
+    submitNote:     'Once your story is written, export the JSON and send it directly from the editor.',
+    tutoTitle:      'Navigation Tips',
+    tutoMenu:       'The <strong>blue dot</strong> at the top of the screen opens the menu during a story.',
+    tutoSave:       'The <strong>+ button</strong> at the bottom right allows you to place a bookmark and save your progress.',
+    tutoBtn:        'GOT IT',
+    pinSetupTitle:  'Parental Code',
+    pinSetupBody:   'Create a 4-digit code to protect Kids Mode. It will be required to turn it off.',
+    pinSetupCreate: 'CREATE CODE',
+    pinSetupSkip:   'Later',
+    pinSetupError:  '4 digits required',
+    pinSetupDone:   '✓ Parental code saved!',
+    pinSetupEnter:    '4-digit code',
+    pinSetupConfirm:  'Confirm the code',
+    pinSetupMismatch: 'Codes do not match',
+    pinSetupKids:     'Enable Kids Mode now',
+  },
+  es: {
+    eyebrow:        'Una aventura te espera',
+    title:          'Elige<br><em>tu Destino</em>',
+    subtitle:       'Cada elección da forma a tu historia',
+    btnStart:       'El comienzo de tu aventura',
+    btnOptions:     'Opciones',
+    btnNews:        '📰 Noticias',
+    btnProgress:    '✦ Mi progreso',
+    btnSubmit:      '✍ Enviar una historia',
+    btnContact:     '✉ Contacto',
+    footer:         'StoryForge • Ficción interactiva',
+    sheetTitle:     'Tus aventuras',
+    sheetSub:       'Elige una historia para vivir',
+    noGames:        'No hay aventuras disponibles en este idioma.',
+    noGamesHint:    'Añade archivos JSON en stories/es/',
+    optionsTitle:   'OPCIONES',
+    optKids:        'Modo infantil',
+    optKidsDesc:    'Solo historias aptas para niños',
+    optSound:       'Música ambiental',
+    optSoundDesc:   'Sonidos atmosféricos',
+    optAnim:        'Animaciones',
+    optAnimDesc:    'Efectos visuales',
+    optTextspeed:   'Velocidad del texto',
+    optLocked:      'Elecciones condicionales',
+    optLockedDesc:  'Elecciones que requieren ciertas stats',
+    optLockedHidden:'Ocultas',
+    optLockedGrayed:'Atenuadas',
+    optLang:        'Idioma',
+    speedFast:      'Rápido',
+    speedNormal:    'Normal',
+    speedSlow:      'Lento',
+    closeOptions:   'Cerrar',
+    codeBtn:        '✦ Código creador',
+    codeTitle:      'Código Creador',
+    codeSub:        'Introduce tu código para desbloquear contenido o funciones',
+    codeCancel:     'Cancelar',
+    codeSubmit:     'Activar',
+    codeInvalid:    'Código inválido o caducado',
+    codeUsed:       'Código ya utilizado',
+    codeEmpty:      'Código vacío',
+    codeUnlocked:   'Desbloqueado: ',
+    kidsBadge:      '🧒 Modo infantil activo',
+    docTitle:       'Elige tu Destino',
+    nameTitle:      '¿Quién eres?',
+    nameSub:        'Escribe tu nombre para personalizar la aventura',
+    nameConfirm:    'EMPEZAR',
+    nameSkip:       'Omitir',
+    submitTitle:    'Enviar una historia',
+    submitSubtitle: 'Conviértete en autor de Elige tu Destino',
+    submitBody:     '¿Tienes una idea de aventura? Escribe tu guión en el editor y envíanoslo. Las mejores historias se publicarán en la aplicación.',
+    perk1:          '<strong>Publicación oficial</strong> — Tu historia jugada por miles de jugadores',
+    perk2:          '<strong>Ventajas exclusivas</strong> — Acceso a contenido premium y créditos de autor',
+    perk3:          '<strong>Insignia de Autor</strong> — Tu nombre vinculado a tu creación en la app',
+    submitEditor:   'Abrir el editor',
+    submitCancel:   'Cancelar',
+    submitAi:       '✦ Crear con IA',
+    submitNote:     'Una vez escrita tu historia, exporta el JSON y envíalo directamente desde el editor.',
+    tutoTitle:      'Consejos de navegación',
+    tutoMenu:       'El <strong>punto azul</strong> en la parte superior de la pantalla abre el menú durante una historia.',
+    tutoSave:       'El <strong>botón +</strong> en la parte inferior derecha te permite colocar un marcador para guardar tu progreso.',
+    tutoBtn:        'ENTENDIDO',
+    pinSetupTitle:  'Código Parental',
+    pinSetupBody:   'Crea un código de 4 dígitos para proteger el modo infantil. Se solicitará para desactivarlo.',
+    pinSetupCreate: 'CREAR CÓDIGO',
+    pinSetupSkip:   'Más tarde',
+    pinSetupError:  'Se requieren 4 dígitos',
+    pinSetupDone:   '✓ ¡Código parental guardado!',
+    pinSetupEnter:    'Código de 4 dígitos',
+    pinSetupConfirm:  'Confirma el código',
+    pinSetupMismatch: 'Los códigos no coinciden',
+    pinSetupKids:     'Activar el modo infantil ahora',
+  }
+};
 
-    function setCardsEnabled(enabled) {
-        PAGES.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                if (enabled) el.classList.remove('disabled');
-                else el.classList.add('disabled');
-            }
-        });
-    }
+let currentLang = localStorage.getItem('sf_lang') || 'fr';
 
-    async function validateUrl() {
-        const raw = document.getElementById('comfyUrl').value.trim();
-        const status = document.getElementById('urlStatus');
-        if (!raw) { status.textContent = '⚠️ Veuillez entrer une URL'; status.className = 'url-status error'; return; }
-        const url = raw.replace(/\/$/, '');
-        document.getElementById('comfyUrl').value = url;
-        status.textContent = '⏳ Connexion à ComfyUI...';
-        status.className = 'url-status checking';
-        setCardsEnabled(false);
-        try {
-            const res = await fetch(`${url}/system_stats`, { signal: AbortSignal.timeout(5000) });
-            if (!res.ok) throw new Error();
-            localStorage.setItem('comfyUrl', url);
-            status.textContent = '✅ Connecté — toutes les pages sont accessibles';
-            status.className = 'url-status success';
-            setCardsEnabled(true);
-        } catch {
-            status.textContent = '❌ Impossible de joindre ComfyUI — vérifie l\'URL';
-            status.className = 'url-status error';
-            if (localStorage.getItem('comfyUrl')) setCardsEnabled(true);
-        }
-    }
+function setLang(lang) {
+  currentLang = lang;
+  window._i18n = LANG; // alias pour redeemCode
+  localStorage.setItem('sf_lang', lang);
+  applyLang();
+  document.getElementById('opt-lang').value = lang;
+  if (document.getElementById('game-panel').classList.contains('open')) renderGameList();
+}
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('comfyUrl');
-        if (saved) {
-            document.getElementById('comfyUrl').value = saved;
-            document.getElementById('urlStatus').textContent = '✅ URL chargée — clique Valider pour tester';
-            document.getElementById('urlStatus').className = 'url-status success';
-            setCardsEnabled(true);
-        }
+function applyLang() {
+  const t = LANG[currentLang];
+  const set = (id, val, html=false) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (html) el.innerHTML = val; else el.textContent = val;
+  };
+  set('txt-eyebrow',        t.eyebrow);
+  set('txt-title',          t.title, true);
+  set('txt-subtitle',       t.subtitle);
+  set('txt-btn-start',      t.btnStart);
+  set('txt-btn-options',    t.btnOptions);
+  set('txt-btn-news',       t.btnNews);
+  set('txt-btn-progress',   t.btnProgress);
+  set('txt-btn-submit',     t.btnSubmit);
+  set('txt-btn-contact',    t.btnContact);
+  set('txt-footer',         t.footer);
+  set('txt-sheet-title',    t.sheetTitle);
+  set('txt-sheet-sub',      t.sheetSub);
+  set('txt-options-title',  t.optionsTitle);
+  set('txt-opt-kids',       t.optKids);
+  set('txt-opt-kids-desc',  t.optKidsDesc);
+  set('txt-opt-sound',      t.optSound);
+  set('txt-opt-sound-desc', t.optSoundDesc);
+  set('txt-opt-anim',         t.optAnim);
+  set('txt-opt-anim-desc',    t.optAnimDesc);
+  set('txt-opt-locked',       t.optLocked);
+  set('txt-opt-locked-desc',  t.optLockedDesc);
+  set('txt-locked-hidden',    t.optLockedHidden);
+  set('txt-locked-grayed',    t.optLockedGrayed);
+  set('txt-opt-textspeed',  t.optTextspeed);
+  set('txt-opt-lang',       t.optLang);
+  set('txt-speed-fast',     t.speedFast);
+  set('txt-speed-normal',   t.speedNormal);
+  set('txt-speed-slow',     t.speedSlow);
+  set('txt-close-options',  t.closeOptions);
+  // Bouton code créateur
+  const codeBtn = document.querySelector('#options-panel button[onclick*="openCodePopup"]');
+  if (codeBtn) codeBtn.textContent = t.codeBtn;
+  set('txt-code-title',   t.codeTitle);
+  set('txt-code-sub',     t.codeSub);
+  set('txt-code-cancel',  t.codeCancel);
+  set('txt-code-submit',  t.codeSubmit);
+  set('txt-submit-title',    t.submitTitle);
+  set('txt-submit-subtitle', t.submitSubtitle);
+  set('txt-submit-body',     t.submitBody);
+  set('txt-perk-1',          t.perk1, true);
+  set('txt-perk-2',          t.perk2, true);
+  set('txt-perk-3',          t.perk3, true);
+  set('txt-submit-editor',   t.submitEditor);
+  set('txt-submit-cancel',   t.submitCancel);
+  set('txt-submit-ai',       t.submitAi);
+  set('txt-submit-note',     t.submitNote);
+  set('txt-tuto-title',      t.tutoTitle);
+  set('txt-tuto-menu',       t.tutoMenu, true);
+  set('txt-tuto-save',       t.tutoSave, true);
+  set('txt-tuto-btn',        t.tutoBtn);
+  set('txt-pinsetup-title',  t.pinSetupTitle);
+  set('txt-pinsetup-body',   t.pinSetupBody);
+  set('txt-pinsetup-create', t.pinSetupCreate);
+  set('txt-pinsetup-skip',   t.pinSetupSkip);
+  set('txt-pinsetup-enter',  t.pinSetupEnter);
+  set('txt-pinsetup-confirm',t.pinSetupConfirm);
+  set('txt-pinsetup-kids',   t.pinSetupKids);
+  document.title = t.docTitle;
+  document.documentElement.lang = currentLang;
+}
+
+function contactUs() {
+  const email = 'team.pegasuscorp@gmail.com';
+  const subject = encodeURIComponent('Contact — Fableris');
+  const body = encodeURIComponent('Bonjour l\'équipe PegasusCorp,\n\n');
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+// ── SUBMIT POPUP ──
+function openSubmitPopup() {
+  document.getElementById('submit-overlay').classList.add('open');
+}
+function closeSubmitPopup() {
+  document.getElementById('submit-overlay').classList.remove('open');
+}
+
+function handleSubmitClick(e) {
+  if (e.target === document.getElementById('submit-overlay')) closeSubmitPopup();
+}
+function goToEditor() {
+  closeSubmitPopup();
+  window.location.href = 'story-editor.html';
+}
+
+// ══════════════════════════════════════════════
+// GAMES REGISTRY
+// Convention : games.json list à la racine, ou fallback démo
+// games.json format:
+// [
+//   { "file":"neon_ghost_fr.json", "title":"Neon Ghost", "desc":"Cyberpunk", "icon":"⚡", "lang":"fr" },
+//   { "file":"neon_ghost_en.json", "title":"Neon Ghost", "desc":"Cyberpunk", "icon":"⚡", "lang":"en" }
+// ]
+// ══════════════════════════════════════════════
+// Structure des fichiers :
+// stories/fr/nom_histoire.json
+// stories/en/nom_histoire.json
+// stories/es/nom_histoire.json
+// games.json à la racine liste tout
+
+const DEMO_GAMES = [
+  { file:'stories/fr/neon_ghost.json',   title:'Neon Ghost',       desc:'Dystopie cyberpunk',       icon:'⚡', lang:'fr' },
+  { file:'stories/fr/pirates.json',      title:'Les Pirates',      desc:'Haute mer et aventure',    icon:'⚓', lang:'fr', kids:true },
+  { file:'stories/fr/fantasy.json',      title:'Le Royaume Perdu', desc:'Épopée fantastique',       icon:'⚔️', lang:'fr' },
+  { file:'stories/en/neon_ghost.json',   title:'Neon Ghost',       desc:'Cyberpunk dystopia',       icon:'⚡', lang:'en' },
+  { file:'stories/en/pirates.json',      title:'The Pirates',      desc:'High seas adventure',      icon:'⚓', lang:'en', kids:true },
+  { file:'stories/en/fantasy.json',      title:'The Lost Kingdom', desc:'Epic fantasy quest',       icon:'⚔️', lang:'en' },
+  { file:'stories/es/neon_ghost.json',   title:'Neon Ghost',       desc:'Distopía cyberpunk',       icon:'⚡', lang:'es' },
+  { file:'stories/es/piratas.json',      title:'Los Piratas',      desc:'Aventura en alta mar',     icon:'⚓', lang:'es', kids:true },
+  { file:'stories/es/fantasia.json',     title:'El Reino Perdido', desc:'Épica de fantasía',        icon:'⚔️', lang:'es' },
+];
+
+let allGames = [];
+
+async function loadGameRegistry() {
+  try {
+    const r = await fetch('games.json');
+    if (r.ok) { allGames = await r.json(); return; }
+  } catch(e) {}
+  // fallback to demo list
+  allGames = DEMO_GAMES;
+}
+
+function renderGameList() {
+  const t = LANG[currentLang];
+  const kidsMode = document.getElementById('opt-kids')?.checked;
+  const container = document.getElementById('game-list');
+  let filtered = allGames.filter(g => g.lang === currentLang);
+  if (kidsMode) filtered = filtered.filter(g => g.kids === true || g.kids === 'true');
+
+  // Kids badge in sheet subtitle
+  const sub = document.getElementById('txt-sheet-sub');
+  if (kidsMode) {
+    sub.innerHTML = `${t.sheetSub} <span style="display:inline-block;background:#ffd70022;border:1px solid #ffd70044;border-radius:20px;padding:1px 8px;font-size:11px;color:#ffd700;margin-left:6px">${t.kidsBadge}</span>`;
+  } else {
+    sub.textContent = t.sheetSub;
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="no-games">
+      <p>${t.noGames}</p>
+      <p style="font-size:11px;margin-top:8px;opacity:0.6">${t.noGamesHint}</p>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(g => `
+    <div class="game-card" onclick="launchGame('${g.file}')">
+      <div class="game-card-icon">${g.kids ? '🧒' : (g.icon || '📖')}</div>
+      <div class="game-card-info">
+        <div class="game-card-title">${g.title}</div>
+        <div class="game-card-desc">${g.desc || ''}</div>
+      </div>
+      <div class="game-card-lang">${g.lang.toUpperCase()}</div>
+      <div class="game-card-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+function launchGame(file) {
+  localStorage.setItem('sf_game_file', file);
+  // Demander le nom si pas encore saisi
+  const savedName = localStorage.getItem('sf_player_name');
+  if (!savedName) {
+    showNamePopupIndex(file);
+  } else {
+    window.location.href = 'game.html?story=' + encodeURIComponent(file);
+  }
+}
+
+function showNamePopupIndex(file) {
+  const t = LANG[currentLang];
+  document.getElementById('idx-name-title').textContent   = t.nameTitle   || 'Qui êtes-vous ?';
+  document.getElementById('idx-name-sub').textContent     = t.nameSub     || 'Entrez votre nom pour personnaliser l\'aventure';
+  document.getElementById('idx-name-confirm').textContent = t.nameConfirm || 'COMMENCER';
+  document.getElementById('idx-name-skip').textContent    = t.nameSkip    || 'Passer';
+  document.getElementById('idx-name-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('idx-name-input').focus(), 350);
+  // Stocker le fichier à lancer
+  document.getElementById('idx-name-overlay').dataset.file = file;
+}
+
+function confirmNameIndex(skip) {
+  const input = document.getElementById('idx-name-input');
+  if (!skip && input.value.trim()) {
+    localStorage.setItem('sf_player_name', input.value.trim());
+  }
+  const overlay = document.getElementById('idx-name-overlay');
+  overlay.classList.remove('open');
+  const file = overlay.dataset.file;
+  setTimeout(() => {
+    window.location.href = 'game.html?story=' + encodeURIComponent(file);
+  }, 300);
+}
+
+// ══════════════════════════════════════════════
+// PANELS
+// ══════════════════════════════════════════════
+function openGamePanel() {
+  renderGameList();
+  document.getElementById('game-panel').classList.add('open');
+}
+function closeGamePanel() {
+  document.getElementById('game-panel').classList.remove('open');
+}
+function handlePanelClick(e) {
+  if (e.target === document.getElementById('game-panel')) closeGamePanel();
+}
+
+function openOptions() {
+  document.getElementById('options-panel').classList.add('open');
+}
+function closeOptions() {
+  document.getElementById('options-panel').classList.remove('open');
+}
+function handleOptionsClick(e) {
+  if (e.target === document.getElementById('options-panel')) closeOptions();
+}
+
+// ══════════════════════════════════════════════
+// OPTIONS PERSISTENCE
+// ══════════════════════════════════════════════
+function saveOptions() {
+  const opts = {
+    anim:      document.getElementById('opt-anim')?.checked ?? true,
+    textspeed: document.getElementById('opt-textspeed')?.value ?? 'normal',
+    kids:      document.getElementById('opt-kids')?.checked ?? false,
+    locked:    document.getElementById('opt-locked')?.value ?? 'hide',
+  };
+  localStorage.setItem('sf_options', JSON.stringify(opts));
+}
+function loadOptions() {
+  try {
+    const opts = JSON.parse(localStorage.getItem('sf_options') || '{}');
+    if (opts.anim      !== undefined) document.getElementById('opt-anim').checked      = opts.anim;
+    if (opts.textspeed !== undefined) document.getElementById('opt-textspeed').value   = opts.textspeed;
+    if (opts.kids      !== undefined) document.getElementById('opt-kids').checked      = opts.kids;
+    if (opts.locked    !== undefined) document.getElementById('opt-locked').value      = opts.locked;
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════════
+function createParticles() {
+  const count = window.innerWidth < 480 ? 12 : 20;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 2 + 1;
+    const delay = Math.random() * 12;
+    const duration = 10 + Math.random() * 15;
+    const left = Math.random() * 100;
+    const drift = (Math.random() - 0.5) * 80;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${left}vw; bottom:-10px;
+      --drift:${drift}px;
+      animation-duration:${duration}s;
+      animation-delay:${delay}s;
+      opacity:0;
+    `;
+    document.body.appendChild(p);
+  }
+}
+
+// ══════════════════════════════════════════════
+// CANVAS — subtle star field
+// ══════════════════════════════════════════════
+function initCanvas() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const stars = Array.from({length:80}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.2,
+    a: Math.random() * 0.3 + 0.05,
+    speed: Math.random() * 0.3 + 0.1,
+    phase: Math.random() * Math.PI * 2
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      const twinkle = s.a * (0.6 + 0.4 * Math.sin(frame * s.speed * 0.05 + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,169,110,${twinkle})`;
+      ctx.fill();
     });
+    frame++;
+    requestAnimationFrame(draw);
+  }
+  draw();
 
-    document.getElementById('comfyUrl').addEventListener('keydown', e => { if (e.key === 'Enter') validateUrl(); });
+  window.addEventListener('resize', () => {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+}
+
+// ── ANIMATION FALLBACK ──
+// Si les animations CSS ne se déclenchent pas (navigateur, polices lentes)
+// on force l'affichage après 1.5s
+setTimeout(() => {
+  document.querySelectorAll('.ornament,.eyebrow,.main-title,.subtitle,.divider,.btn-group,.footer,#pegasus-logo').forEach(el => {
+    if (getComputedStyle(el).opacity === '0') {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+      el.style.transition = 'opacity .5s ease, transform .5s ease';
+    }
+  });
+}, 600);
+// ── SYSTÈME PIN PARENTAL ─────────────────────────────────────
+const PIN_DEFAULT = '1234';
+let _pinMode = 'verify';
+
+function getStoredPin() {
+  return localStorage.getItem('sf_parent_pin') || _sha256sync(PIN_DEFAULT);
+}
+
+function handleKidsToggle(checkbox) {
+  if (!checkbox.checked) {
+    // Tentative de désactiver → demander PIN
+    checkbox.checked = true;
+    openPinPopup('verify');
+  } else {
+    // Activer — vérifier si un PIN a déjà été défini
+    const pinAlreadySet = localStorage.getItem('sf_parent_pin') !== null;
+    if (!pinAlreadySet) {
+      // Premier lancement — demander de créer un PIN
+      checkbox.checked = false; // en attendant la création
+      openPinPopup('create_new');
+    } else {
+      // PIN déjà défini — activer directement
+      saveOptions();
+      if (typeof renderGameList === 'function') renderGameList();
+    }
+  }
+}
+
+function openPinPopup(mode) {
+  _pinMode = mode;
+  const overlay = document.getElementById('pin-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').style.display = 'none';
+  const titles = {
+    verify     : 'Code Parental',
+    change_old : 'Changer le code',
+    change_new : 'Nouveau code',
+    create_new : 'Créer un code PIN'
+  };
+  const questions = {
+    verify     : 'Entre le code à 4 chiffres pour désactiver le mode enfant.',
+    change_old : 'Entre ton code actuel.',
+    change_new : 'Choisis un nouveau code à 4 chiffres.',
+    create_new : 'Choisis un code à 4 chiffres.\nTu en auras besoin pour désactiver le mode enfant.'
+  };
+  document.getElementById('pin-title').textContent    = titles[mode];
+  document.getElementById('pin-question').textContent = questions[mode];
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+function cancelPin() {
+  document.getElementById('pin-overlay').style.display = 'none';
+  if (_pinMode === 'verify') {
+    // Remettre la checkbox à true si annulation de la désactivation
+    document.getElementById('opt-kids').checked = true;
+  } else if (_pinMode === 'create_new') {
+    // Annuler la création → décocher le mode enfant
+    document.getElementById('opt-kids').checked = false;
+  }
+}
+
+function submitPin() {
+  const input  = document.getElementById('pin-input').value.trim();
+  const err    = document.getElementById('pin-error');
+
+  // Validation selon le mode
+  if (_pinMode === 'calc_verify') {
+    if (!input) {
+      err.textContent = 'Entre ta réponse'; err.style.display = 'block'; return;
+    }
+    if (parseInt(input) === _pinCalcAnswer) {
+      document.getElementById('pin-input').type = 'password';
+      openPinPopup('change_new');
+    } else {
+      err.textContent = 'Réponse incorrecte'; err.style.display = 'block';
+      document.getElementById('pin-input').value = '';
+    }
+    return;
+  }
+
+  if (input.length < 4) {
+    err.textContent = '4 chiffres requis'; err.style.display = 'block'; return;
+  }
+
+  if (_pinMode === 'verify') {
+    if (_sha256sync(input) === getStoredPin()) {
+      document.getElementById('pin-overlay').style.display = 'none';
+      document.getElementById('opt-kids').checked = false;
+      saveOptions();
+      if (typeof renderGameList === 'function') renderGameList();
+    } else {
+      err.textContent = 'Code incorrect'; err.style.display = 'block';
+      document.getElementById('pin-input').value = '';
+    }
+  } else if (_pinMode === 'create_new') {
+    // Première création — sauvegarder et activer
+    localStorage.setItem('sf_parent_pin', _sha256sync(input));
+    document.getElementById('pin-overlay').style.display = 'none';
+    document.getElementById('opt-kids').checked = true;
+    saveOptions();
+    if (typeof renderGameList === 'function') renderGameList();
+    // Confirmation
+    const msg = document.createElement('div');
+    msg.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+      background:#13110e;border:1px solid rgba(109,250,188,0.4);border-radius:10px;
+      padding:10px 20px;font-family:'DM Mono',monospace;font-size:11px;
+      color:#6dfabc;z-index:999;white-space:nowrap`;
+    msg.textContent = '✓ Mode enfant activé !';
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 2500);
+  } else if (_pinMode === 'change_old') {
+    if (_sha256sync(input) === getStoredPin()) {
+      openPinPopup('change_new');
+    } else {
+      err.textContent = 'Code actuel incorrect'; err.style.display = 'block';
+      document.getElementById('pin-input').value = '';
+    }
+  } else if (_pinMode === 'change_new') {
+    localStorage.setItem('sf_parent_pin', _sha256sync(input));
+    document.getElementById('pin-overlay').style.display = 'none';
+    const msg = document.createElement('div');
+    msg.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+      background:#13110e;border:1px solid rgba(109,250,188,0.4);border-radius:10px;
+      padding:10px 20px;font-family:'DM Mono',monospace;font-size:11px;
+      color:#6dfabc;z-index:999`;
+    msg.textContent = '✓ Code mis à jour !';
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 2500);
+  }
+}
+
+// ── CONFIGURATION DU PIN AU PREMIER DÉMARRAGE ───────────────
+function maybeShowPinSetup() {
+  // Affiche la popup uniquement si aucun PIN n'a encore été créé
+  // et que l'étape n'a pas déjà été passée/ignorée
+  if (localStorage.getItem('sf_pin_setup_done')) return;
+  if (localStorage.getItem('sf_parent_pin') !== null) return;
+  showPinSetup();
+}
+
+function showPinSetup() {
+  const overlay = document.getElementById('pin-setup-overlay');
+  document.getElementById('pin-setup-input').value = '';
+  document.getElementById('pin-setup-input2').value = '';
+  document.getElementById('pin-setup-kids').checked = false;
+  document.getElementById('pin-setup-error').style.display = 'none';
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('pin-setup-input').focus(), 100);
+}
+
+function closePinSetup() {
+  localStorage.setItem('sf_pin_setup_done', '1');
+  const overlay = document.getElementById('pin-setup-overlay');
+  overlay.style.animation = 'fade-out .3s ease forwards';
+  setTimeout(() => { overlay.style.display = 'none'; overlay.style.animation = ''; }, 300);
+}
+
+function skipPinSetup() {
+  closePinSetup();
+}
+
+function submitPinSetup() {
+  const input  = document.getElementById('pin-setup-input').value.trim();
+  const input2 = document.getElementById('pin-setup-input2').value.trim();
+  const err    = document.getElementById('pin-setup-error');
+  const t      = LANG[currentLang] || LANG.fr;
+  if (!/^\d{4}$/.test(input)) {
+    err.textContent = t.pinSetupError;
+    err.style.display = 'block';
+    document.getElementById('pin-setup-input').focus();
+    return;
+  }
+  if (input !== input2) {
+    err.textContent = t.pinSetupMismatch;
+    err.style.display = 'block';
+    document.getElementById('pin-setup-input2').value = '';
+    document.getElementById('pin-setup-input2').focus();
+    return;
+  }
+  localStorage.setItem('sf_parent_pin', _sha256sync(input));
+  // Option : activer le mode enfant immédiatement
+  if (document.getElementById('pin-setup-kids').checked) {
+    const kidsToggle = document.getElementById('opt-kids');
+    if (kidsToggle) kidsToggle.checked = true;
+    if (typeof saveOptions === 'function') saveOptions();
+    if (typeof renderGameList === 'function') renderGameList();
+  }
+  closePinSetup();
+  const msg = document.createElement('div');
+  msg.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:#13110e;border:1px solid rgba(109,250,188,0.4);border-radius:10px;
+    padding:10px 20px;font-family:'DM Mono',monospace;font-size:11px;
+    color:#6dfabc;z-index:999;white-space:nowrap`;
+  msg.textContent = t.pinSetupDone;
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 2500);
+}
+
+let _pinCalcAnswer = 0;
+
+function generateCalcQuestion() {
+  // Génère une question de calcul simple mais pas triviale
+  const types = [
+    () => { const a = 10+Math.floor(Math.random()*80), b = 10+Math.floor(Math.random()*80); return {q:`${a} + ${b}`, a:a+b}; },
+    () => { const a = 20+Math.floor(Math.random()*70), b = 10+Math.floor(Math.random()*20); return {q:`${a+b} - ${b}`, a:a}; },
+    () => { const a = 3+Math.floor(Math.random()*9),   b = 3+Math.floor(Math.random()*9);   return {q:`${a} × ${b}`, a:a*b}; },
+  ];
+  const type = types[Math.floor(Math.random()*types.length)]();
+  return type;
+}
+
+function showChangePinMode() {
+  // Générer une question de calcul au lieu de demander l'ancien PIN
+  const calc = generateCalcQuestion();
+  _pinCalcAnswer = calc.a;
+  _pinMode = 'calc_verify';
+
+  const overlay = document.getElementById('pin-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-input').type = 'number';
+  document.getElementById('pin-error').style.display = 'none';
+  document.getElementById('pin-title').textContent = 'Vérification Parentale';
+  document.getElementById('pin-question').textContent =
+    `Pour changer le code, réponds : combien font ${calc.q} ?`;
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+// ── SYSTÈME DE CODES CRÉATEUR ───────────────────────────────
+// Généré par generate_codes.py — remplacer ce bloc après chaque génération
+const FABLERIS_CODES = {
+  "a4d62a1f34378c7ed6cb718ba54c9521a209ce86ce5506a08d43cd45d4088c5c": {"unlocks": ["cinq_lames"], "label": "DLC Les Cinq Lames 🗡️"},
+  "6a3426c553a8eaaf1930374e26a1ab26b5e5842dd35ea48969d41f303c587ed5": {"unlocks": ["creator"], "label": "Accès Créateur complet ✦"},
+  "1db8a13a5f9658c1531e32d8b0c04806feaa2426e389fb71228e750b9e7e576a": {"unlocks": ["portals"], "label": "Portails inter-histoires 🔗"}
+};
+
+function redeemCode(code) {
+  const t = window._i18n?.[currentLang] || window._i18n?.fr || {};
+  if (!code || !code.trim()) return { ok: false, msg: t.codeEmpty || 'Code vide' };
+  const cleaned = code.trim().toLowerCase().replace(/\s/g,'');
+  const hash = sha256(cleaned);
+  if (!FABLERIS_CODES[hash] || !FABLERIS_CODES[hash].unlocks) {
+    return { ok: false, msg: t.codeInvalid || 'Code invalide ou expiré' };
+  }
+  const entry = FABLERIS_CODES[hash];
+  const used = JSON.parse(localStorage.getItem('sf_used_codes') || '[]');
+  if (used.includes(hash)) {
+    return { ok: false, msg: t.codeUsed || 'Code déjà utilisé' };
+  }
+  const unlocked = JSON.parse(localStorage.getItem('sf_unlocked_packs') || '["free","kids"]');
+  entry.unlocks.forEach(u => {
+    if (u === 'all') {
+      ['portals','pack_boxe','pack_horreur','pack_kids','creator'].forEach(p => {
+        if (!unlocked.includes(p)) unlocked.push(p);
+      });
+    } else if (!unlocked.includes(u)) {
+      unlocked.push(u);
+    }
+  });
+  localStorage.setItem('sf_unlocked_packs', JSON.stringify(unlocked));
+  used.push(hash);
+  localStorage.setItem('sf_used_codes', JSON.stringify(used));
+  return { ok: true, msg: (t.codeUnlocked || 'Débloqué : ') + entry.label, unlocks: entry.unlocks };
+}
+
+// SHA256 simple en JS (sans dépendance)
+async function sha256Async(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function sha256(str) {
+  // Version synchrone simplifiée pour la vérification
+  // On utilise un hash pré-calculé stocké
+  return _sha256sync(str);
+}
+
+// Implémentation SHA256 pure JS
+function _sha256sync(ascii) {
+  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii.length * 8;
+  let hash = [];
+  const k = [];
+  let primeCounter = 0;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  ascii += '\x80';
+  while (ascii.length % 64 - 56) ascii += '\x00';
+  for (let i = 0; i < ascii.length; i++) {
+    const j = ascii.charCodeAt(i);
+    if (j >> 8) return '';
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words.length] = ((asciiBitLength / maxWord) | 0);
+  words[words.length] = (asciiBitLength | 0);
+  for (let j = 0; j < words.length;) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash.slice(0);
+    for (let i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+      const temp1 = hash[7] + (rightRotate(e,6) ^ rightRotate(e,11) ^ rightRotate(e,25))
+        + ((e & hash[5]) ^ (~e & hash[6])) + k[i]
+        + (w[i] = (i < 16) ? w[i] : (w[i-16] + (rightRotate(w15,7)^rightRotate(w15,18)^(w15>>>3))
+          + w[i-7] + (rightRotate(w2,17)^rightRotate(w2,19)^(w2>>>10))) | 0);
+      const temp2 = (rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1+temp2)|0].concat(hash);
+      hash[4] = (hash[4]+temp1)|0;
+      hash.length = 8;
+    }
+    hash = hash.map((x, i) => (x + oldHash[i]) | 0);
+  }
+  hash.forEach(x => { for (let j = 3; j + 1; j--) {
+    const hex = ((x >> (j*8)) & 255).toString(16);
+    result += (hex.length === 1 ? '0' : '') + hex;
+  }});
+  return result;
+}
+
+function hasUnlock(feature) {
+  const unlocked = JSON.parse(localStorage.getItem('sf_unlocked_packs') || '["free","kids"]');
+  if (unlocked.includes(feature)) return true;
+  if (unlocked.includes('creator') || unlocked.includes('all')) return true;
+  if (feature === 'portals') {
+    const freePacks = ['free','kids'];
+    return unlocked.some(p => !freePacks.includes(p));
+  }
+  return false;
+}
+
+// ── POPUP CODE CRÉATEUR ─────────────────────────────────────
+function openCodePopup() {
+  document.getElementById('code-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('code-input').focus(), 100);
+}
+
+function closeCodePopup() {
+  document.getElementById('code-overlay').style.display = 'none';
+  document.getElementById('code-input').value = '';
+  document.getElementById('code-result').style.display = 'none';
+}
+
+async function submitCode() {
+  const input = document.getElementById('code-input').value.trim();
+  const result = redeemCode(input);
+  const resultEl = document.getElementById('code-result');
+  resultEl.style.display = 'block';
+  if (result.ok) {
+    resultEl.style.color = 'var(--accent3)';
+    resultEl.style.borderColor = 'rgba(109,250,188,0.3)';
+    resultEl.style.background = 'rgba(109,250,188,0.06)';
+    resultEl.textContent = '✓ Débloqué : ' + result.msg;
+    setTimeout(closeCodePopup, 2000);
+  } else {
+    resultEl.style.color = '#fa6d8f';
+    resultEl.style.borderColor = 'rgba(250,109,143,0.3)';
+    resultEl.style.background = 'rgba(250,109,143,0.06)';
+    resultEl.textContent = '✕ ' + result.msg;
+  }
+}
+let _pendingLang = localStorage.getItem('sf_lang') || 'fr';
+
+function selectLangPopup(lang, btn) {
+  _pendingLang = lang;
+  document.querySelectorAll('.lang-choice-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.querySelector('.lang-check').textContent = '';
+  });
+  btn.classList.add('selected');
+  btn.querySelector('.lang-check').textContent = '✓';
+}
+
+function confirmLang() {
+  localStorage.setItem('sf_lang', _pendingLang);
+  localStorage.setItem('sf_lang_chosen', '1');
+  currentLang = _pendingLang;
+  setLang(currentLang);
+  const overlay = document.getElementById('lang-overlay');
+  if (overlay) {
+    overlay.style.animation = 'fade-out .3s ease forwards';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.style.animation = '';
+      setTimeout(startLaunchSequence, 500);
+    }, 300);
+  }
+}
+
+function startLaunchSequence() {
+  // Cacher tout d'abord
+  ['lang-overlay', 'tuto-overlay', 'pin-setup-overlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  if (!localStorage.getItem('sf_lang_chosen')) {
+    const overlay = document.getElementById('lang-overlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else if (!localStorage.getItem('sf_tuto_shown')) {
+    showTuto();
+  } else {
+    maybeShowPinSetup();
+  }
+}
+
+function showTuto() {
+  const overlay = document.getElementById('tuto-overlay');
+  overlay.style.display = 'flex';
+  const t = LANG[currentLang] || LANG.fr;
+  if (t.tutoTitle) document.getElementById('txt-tuto-title').textContent = t.tutoTitle;
+  if (t.tutoMenu)  document.getElementById('txt-tuto-menu').innerHTML  = t.tutoMenu;
+  if (t.tutoSave)  document.getElementById('txt-tuto-save').innerHTML  = t.tutoSave;
+  if (t.tutoBtn)   document.getElementById('txt-tuto-btn').textContent  = t.tutoBtn;
+}
+
+function closeTuto() {
+  localStorage.setItem('sf_tuto_shown', '1');
+  const overlay = document.getElementById('tuto-overlay');
+  if (overlay) {
+    overlay.style.animation = 'fade-out .3s ease forwards';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.style.animation = '';
+      setTimeout(startLaunchSequence, 500);
+    }, 300);
+  }
+}
+
+(async function init() {
+  loadOptions();
+  setLang(currentLang);
+  initCanvas();
+  createParticles();
+  await loadGameRegistry();
+  startLaunchSequence();
+})();
 </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(() => console.log('IrisForge PWA ready'))
-                    .catch(e => console.log('SW error:', e));
-            });
-        }
-    </script>
-
-<script src="iris-shared.js"></script>
 </body>
 </html>
