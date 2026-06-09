@@ -247,6 +247,7 @@
         </div>
     </div>
 </div>
+<script src="github-storage.js"></script>
 <script>
 const clientId = 'custom_' + Math.random().toString(36).substr(2,9);
 let isGenerating = false;
@@ -779,7 +780,9 @@ function syncPassesFromDOM() {
     });
 }
 
-function saveAsWorkflow() {
+let _wfSha = null;
+
+async function saveAsWorkflow() {
     syncPassesFromDOM();
     const name=prompt('Nom du workflow :'); if(!name)return;
     const wf={id:'wf_'+Date.now(),name:name.trim(),description:`${passes.length} passe${passes.length>1?'s':''} — Custom`,category:'Mes workflows',
@@ -789,6 +792,14 @@ function saveAsWorkflow() {
     existing.push(wf); localStorage.setItem('irisforge_workflows',JSON.stringify(existing));
     showStatus(`✅ Workflow "${name}" sauvegardé !`,'success');
     setTimeout(()=>document.getElementById('statusBar').classList.remove('show'),3000);
+    // Sync GitHub
+    if (typeof GH !== 'undefined' && GH.hasToken()) {
+        try {
+            _wfSha = await GH.write('workflows.json', existing, _wfSha);
+        } catch(e) {
+            console.warn('Sync GitHub workflows échoué:', e.message);
+        }
+    }
 }
 
 function loadPendingWorkflow() {
