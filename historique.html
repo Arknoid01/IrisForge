@@ -291,7 +291,7 @@ async function loadGallery() {
     document.getElementById('galleryWrap').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
 
     try {
-        const res = await fetch(listBase, { signal: AbortSignal.timeout(5000) });
+        const res = await fetch(listBase, { signal: AbortSignal.timeout(30000) });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         allFiles = await res.json();
         document.getElementById('urlDot').className = 'url-dot ok';
