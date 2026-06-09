@@ -90,6 +90,12 @@
         .item-btn:hover { opacity:0.8; }
         .video-badge { position:absolute; top:6px; right:6px; background:rgba(236,72,153,0.8); color:#fff; font-size:9px; font-weight:700; padding:2px 6px; border-radius:10px; }
 
+        /* LOAD MORE */
+        .load-more-wrap { text-align:center; padding:24px 0 8px; }
+        .btn-load-more { padding:10px 28px; border-radius:12px; background:rgba(102,126,234,0.12); border:1px solid rgba(102,126,234,0.3); color:var(--blue); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+        .btn-load-more:hover { background:rgba(102,126,234,0.22); }
+        .load-more-info { font-size:11px; color:rgba(255,255,255,0.25); margin-top:8px; }
+
         /* EMPTY / LOADING */
         .empty-state { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.3); }
         .empty-state .icon { font-size:48px; margin-bottom:12px; }
@@ -265,6 +271,9 @@ let currentFilter = 'all';
 let currentFile = null;
 let comfyBase = '';
 let listBase = '';
+let currentPage = 0;
+let filteredCache = [];
+const PAGE_SIZE = 30;
 
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
@@ -344,19 +353,54 @@ function getFiltered() {
 }
 
 function renderGallery() {
-    const files = getFiltered();
+    filteredCache = getFiltered();
+    currentPage = 0;
     const wrap = document.getElementById('galleryWrap');
-    if (!files.length) {
+    if (!filteredCache.length) {
         wrap.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Aucun fichier trouvé</p></div>';
         return;
     }
-    wrap.innerHTML = `<div class="gallery">${files.map(f => galleryCard(f)).join('')}</div>`;
+    wrap.innerHTML = '<div class="gallery" id="galleryGrid"></div><div class="load-more-wrap" id="loadMoreWrap"></div>';
+    renderBatch();
+}
+
+function renderBatch() {
+    const grid = document.getElementById('galleryGrid');
+    const moreWrap = document.getElementById('loadMoreWrap');
+    if (!grid) return;
+
+    const start = currentPage * PAGE_SIZE;
+    const chunk = filteredCache.slice(start, start + PAGE_SIZE);
+
+    chunk.forEach(f => {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = galleryCard(f);
+        grid.appendChild(tmp.firstElementChild);
+    });
+
+    currentPage++;
+    const loaded = currentPage * PAGE_SIZE;
+    const remaining = filteredCache.length - loaded;
+
+    if (remaining > 0) {
+        moreWrap.innerHTML = `
+            <button class="btn-load-more" onclick="renderBatch()">
+                ⬇️ Charger ${Math.min(remaining, PAGE_SIZE)} de plus
+            </button>
+            <div class="load-more-info">${loaded} / ${filteredCache.length} fichiers affichés</div>`;
+    } else {
+        moreWrap.innerHTML = filteredCache.length > PAGE_SIZE
+            ? `<div class="load-more-info">✅ Tous les ${filteredCache.length} fichiers affichés</div>`
+            : '';
+    }
 }
 
 function galleryCard(f) {
     const subfolder = f.subfolder && f.subfolder !== '.' ? f.subfolder : '';
     const url = `${comfyBase}/view?filename=${encodeURIComponent(f.name)}&type=output&subfolder=${encodeURIComponent(subfolder)}`;
     const isVid = isVideo(f.name);
+    const escapedUrl = url.replace(/'/g, "\\'");
+    const escapedName = f.name.replace(/'/g, "\\'");
     const media = isVid
         ? `<div style="aspect-ratio:9/16;background:linear-gradient(135deg,#1a0a2e,#0f0f1e);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px 12px 0 0;">
             <div style="font-size:32px;">▶️</div>
@@ -364,12 +408,12 @@ function galleryCard(f) {
            </div><div class="video-badge">🎬 MP4</div>`
         : `<img src="${url}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23111%22 width=%22100%25%22 height=%22100%25%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23555%22 text-anchor=%22middle%22 dy=%22.3em%22>⚠️</text></svg>'">`;
     const actions = isVid
-        ? `<button class="item-btn item-btn-dl" onclick="event.stopPropagation();dlFile('${url}','${f.name}')">⬇️</button>`
-        : `<button class="item-btn item-btn-dl" onclick="event.stopPropagation();dlFile('${url}','${f.name}')">⬇️</button>
-           <button class="item-btn item-btn-edit" onclick="event.stopPropagation();openEditor('${url}')">✏️</button>
-           <button class="item-btn item-btn-vid" onclick="event.stopPropagation();openVideo('${url}')">🎬</button>`;
+        ? `<button class="item-btn item-btn-dl" onclick="event.stopPropagation();dlFile('${escapedUrl}','${escapedName}')">⬇️</button>`
+        : `<button class="item-btn item-btn-dl" onclick="event.stopPropagation();dlFile('${escapedUrl}','${escapedName}')">⬇️</button>
+           <button class="item-btn item-btn-edit" onclick="event.stopPropagation();openEditor('${escapedUrl}')">✏️</button>
+           <button class="item-btn item-btn-vid" onclick="event.stopPropagation();openVideo('${escapedUrl}')">🎬</button>`;
     return `
-        <div class="gallery-item" onclick="openLightbox('${url}','${f.name}',${isVid})">
+        <div class="gallery-item" onclick="openLightbox('${escapedUrl}','${escapedName}',${isVid})">
             ${media}
             <div class="gallery-item-info">
                 <div class="gallery-item-name">${f.name}</div>
