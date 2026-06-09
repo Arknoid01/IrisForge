@@ -156,7 +156,10 @@
             <div><span class="brand-name">IrisForge</span><span class="brand-sub">Graphics</span></div>
         </a>
     </div>
-    <div class="page-badge">⚙️ Workflows</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <div class="page-badge">⚙️ Workflows</div>
+        <button onclick="initGitHub()" style="padding:6px 12px;border-radius:10px;background:rgba(102,126,234,0.15);border:1px solid rgba(102,126,234,0.3);color:#a78bfa;font-size:12px;font-weight:600;cursor:pointer;">☁️ Sync</button>
+    </div>
 </div>
 
 <!-- MAIN -->
@@ -367,12 +370,17 @@
     }
 
     // ── STORAGE ───────────────────────────────────────────────────────────────
+    let _wfSha = null;
+
     function loadCustom() {
         try { customWorkflows = JSON.parse(localStorage.getItem('irisforge_workflows') || '[]'); } catch { customWorkflows = []; }
     }
 
     function saveCustom() {
         localStorage.setItem('irisforge_workflows', JSON.stringify(customWorkflows));
+        GH.write('workflows.json', customWorkflows, _wfSha)
+            .then(sha => { _wfSha = sha; })
+            .catch(() => console.warn('Sync workflows GitHub échoué'));
     }
 
     // ── TABS ──────────────────────────────────────────────────────────────────
@@ -604,12 +612,17 @@
 
     let videoWorkflows = [];
 
+    let _vidWfSha = null;
+
     function loadVideoWorkflows() {
         try { videoWorkflows = JSON.parse(localStorage.getItem('irisforge_video_workflows') || '[]'); } catch { videoWorkflows = []; }
     }
 
     function saveVideoWorkflows() {
         localStorage.setItem('irisforge_video_workflows', JSON.stringify(videoWorkflows));
+        GH.write('video_workflows.json', videoWorkflows, _vidWfSha)
+            .then(sha => { _vidWfSha = sha; })
+            .catch(() => console.warn('Sync video workflows GitHub échoué'));
     }
 
     function renderVideoWorkflows() {
@@ -683,6 +696,27 @@
     loadCustom();
     loadVideoWorkflows();
     renderBuiltin();
+
+    // Sync GitHub au démarrage
+    async function initGitHub() {
+        const [wf, vid] = await Promise.all([
+            GH.read('workflows.json'),
+            GH.read('video_workflows.json')
+        ]);
+        if (wf.data !== null) {
+            _wfSha = wf.sha;
+            customWorkflows = wf.data;
+            localStorage.setItem('irisforge_workflows', JSON.stringify(customWorkflows));
+            renderCustom();
+        }
+        if (vid.data !== null) {
+            _vidWfSha = vid.sha;
+            videoWorkflows = vid.data;
+            localStorage.setItem('irisforge_video_workflows', JSON.stringify(videoWorkflows));
+            renderVideoWorkflows();
+        }
+    }
+    initGitHub();
 </script>
 </body>
 </html>

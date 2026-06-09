@@ -353,6 +353,7 @@
                 <h1>💬 Bibliothèque de Prompts</h1>
                 <p class="subtitle">Enregistrez, organisez et réutilisez vos prompts favoris</p>
             </div>
+            <button onclick="syncFromGitHub()" title="Recharger depuis GitHub" style="padding:10px 16px;border-radius:10px;background:rgba(102,126,234,0.15);border:1px solid rgba(102,126,234,0.3);color:#a78bfa;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">☁️ Sync GitHub</button>
         </header>
 
         <!-- MAIN GRID -->
@@ -429,9 +430,11 @@
         </div>
     </div>
 
+<script src="github-storage.js"></script>
 <script>
     // ── DATA ────────────────────────────────────────────────────────────────
     const STORAGE_KEY = 'irisforge_prompts';
+    let _promptsSha = null;
 
     function loadPrompts() {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -440,6 +443,30 @@
 
     function savePrompts(arr) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+        syncToGitHub(arr).catch(() => showToast('⚠️ Sync GitHub échoué', 'error'));
+    }
+
+    async function syncToGitHub(arr) {
+        _promptsSha = await GH.write('prompts.json', arr, _promptsSha);
+    }
+
+    async function syncFromGitHub() {
+        showToast('🔄 Chargement depuis GitHub...', 'info');
+        const { data, sha } = await GH.read('prompts.json');
+        if (data === null) { showToast('☁️ Aucune donnée GitHub encore', 'info'); return; }
+        _promptsSha = sha;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        renderList();
+        showToast('✅ ' + data.length + ' prompt(s) chargé(s) !', 'success');
+    }
+
+    async function initStorage() {
+        const { data, sha } = await GH.read('prompts.json');
+        if (data !== null) {
+            _promptsSha = sha;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            renderList();
+        }
     }
 
     // ── SIDEBAR ──────────────────────────────────────────────────────────────
@@ -663,6 +690,7 @@
         if (action === 'expand') btn.classList.toggle('expanded');
     });
 
+    initStorage();
     renderList();
 </script>
 
