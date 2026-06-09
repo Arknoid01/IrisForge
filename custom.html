@@ -795,6 +795,10 @@ async function saveAsWorkflow() {
     // Sync GitHub
     if (typeof GH !== 'undefined' && GH.hasToken()) {
         try {
+            if (!_wfSha) {
+                const { sha } = await GH.read('workflows.json');
+                _wfSha = sha;
+            }
             _wfSha = await GH.write('workflows.json', existing, _wfSha);
         } catch(e) {
             console.warn('Sync GitHub workflows échoué:', e.message);

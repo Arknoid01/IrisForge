@@ -46,9 +46,15 @@ const GH = {
         }
     },
 
+    // Écrire — lit d'abord le SHA si non fourni
     async write(filename, data, sha) {
         if (!this.getToken()) throw new Error('Token GitHub manquant — configure-le dans Paramètres');
         try {
+            // Si pas de SHA, on tente de lire le fichier existant pour récupérer son SHA
+            if (!sha) {
+                const existing = await this.read(filename);
+                sha = existing.sha; // null si fichier n'existe pas encore = création
+            }
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
             const body = { message: `update ${filename}`, content, branch: this.branch };
             if (sha) body.sha = sha;
